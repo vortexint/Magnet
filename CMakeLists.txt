@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.27)
 project(EtherealReach LANGUAGES C CXX)
 
-add_subdirectory(submodules/bullet3 SYSTEM)
-add_subdirectory(submodules/SDL)
+add_subdirectory(submodules/bullet3)
 add_subdirectory(submodules/Lua)
 
 #
