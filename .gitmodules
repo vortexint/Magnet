@@ -4,6 +4,3 @@
 [submodule "submodules/bullet3"]
 	path = submodules/bullet3
 	url = https://github.com/bulletphysics/bullet3.git
-[submodule "submodules/SDL"]
-	path = submodules/SDL
-	url = https://github.com/libsdl-org/SDL.git
