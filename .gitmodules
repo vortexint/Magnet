@@ -7,3 +7,12 @@
 [submodule "submodules/flecs"]
 	path = submodules/flecs
 	url = https://github.com/SanderMertens/flecs.git
+[submodule "submodules/glfw"]
+	path = submodules/glfw
+	url = https://github.com/glfw/glfw.git
+[submodule "tweeny"]
+	path = tweeny
+	url = https://github.com/mobius3/tweeny.git
+[submodule "submodules/tweeny"]
+	path = submodules/tweeny
+	url = https://github.com/mobius3/tweeny.git
