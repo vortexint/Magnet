@@ -2,10 +2,11 @@ cmake_minimum_required(VERSION 3.27)
 project(EtherealReach LANGUAGES C CXX)
 
 add_subdirectory(submodules/bullet3)
+add_subdirectory(submodules/flecs)
 add_subdirectory(submodules/Lua)
 
 #
 
 set(CMAKE_CXX_STANDARD 23)
 
-add_subdirectory(game)
+add_subdirectory(src)
