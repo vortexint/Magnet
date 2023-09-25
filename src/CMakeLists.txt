@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.27)
 
-find_package(SDL2 REQUIRED)
 find_package(OpenGL REQUIRED)
 
 add_executable(${PROJECT_NAME} main.cpp)
@@ -8,13 +7,14 @@ add_executable(${PROJECT_NAME} main.cpp)
 target_sources(${PROJECT_NAME} PRIVATE glad.c)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
-                      ${SDL2_LIBRARIES}
                       ${OpenGL_LIBRARIES}
+                      glfw
                       lua::static
+                      tweeny
                       )
                       
 target_include_directories(${PROJECT_NAME} PRIVATE
                            ${CMAKE_SOURCE_DIR}/include
-                           ${SDL2_INCLUDE_DIRS}
+                           PUBLIC
                            ${OPENGL_INCLUDE_DIR}
                            )

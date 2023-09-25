@@ -3,7 +3,9 @@ project(EtherealReach LANGUAGES C CXX)
 
 add_subdirectory(submodules/bullet3)
 add_subdirectory(submodules/flecs)
+add_subdirectory(submodules/glfw)
 add_subdirectory(submodules/Lua)
+add_subdirectory(submodules/tweeny)
 
 #
 

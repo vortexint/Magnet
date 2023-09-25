@@ -1,35 +1,47 @@
-#include <SDL2/SDL.h>
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 
-#include <iostream>
+#include "app.hpp"
 
-int main(int argc, char* argv[]) {
-  if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-    std::cout << "Error : " << SDL_GetError() << std::endl;
+void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+  glViewport(0, 0, width, height);
+}
+
+int main(void) {
+  GLFWwindow* window;
+
+  if (!glfwInit()) return -1;
+
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+  window = glfwCreateWindow(INIT_WIDTH, INIT_HEIGHT, "Game", NULL, NULL);
+  if (!window) {
+
     return -1;
   }
 
-  SDL_Window* win =
-      SDL_CreateWindow("SDL2 Example", SDL_WINDOWPOS_UNDEFINED,
-                       SDL_WINDOWPOS_UNDEFINED, 800, 600, SDL_WINDOW_SHOWN);
+  /* Make the window's context current */
+  glfwMakeContextCurrent(window);
 
-  SDL_Renderer* renderer =
-      SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED);
+  gladLoadGL();
 
-  SDL_Event e;
+  glViewport(0, 0, INIT_WIDTH, INIT_HEIGHT);
+  glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-  while (1) {
-    SDL_PollEvent(&e);
-    if (e.type == SDL_QUIT) break;
+  /* Loop until the user closes the window */
+  while (!glfwWindowShouldClose(window)) {
+    /* Render here */
+    glClear(GL_COLOR_BUFFER_BIT);
 
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    SDL_RenderClear(renderer);
+    /* Swap front and back buffers */
+    glfwSwapBuffers(window);
 
-    SDL_RenderPresent(renderer);
+    /* Poll for and process events */
+    glfwPollEvents();
   }
 
-  SDL_DestroyRenderer(renderer);
-  SDL_DestroyWindow(win);
-  SDL_Quit();
-  
+  glfwTerminate();
   return 0;
 }
