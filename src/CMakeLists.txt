@@ -4,7 +4,10 @@ find_package(OpenGL REQUIRED)
 
 add_executable(${PROJECT_NAME} main.cpp)
 
-target_sources(${PROJECT_NAME} PRIVATE glad.c)
+target_sources(${PROJECT_NAME} PRIVATE
+  io/input.cpp
+  glad.c
+)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
                       ${OpenGL_LIBRARIES}
