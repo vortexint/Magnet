@@ -5,6 +5,7 @@ find_package(OpenGL REQUIRED)
 add_executable(${PROJECT_NAME} main.cpp)
 
 target_sources(${PROJECT_NAME} PRIVATE
+  gfx/shader.cpp
   io/input.cpp
   glad.c
 )
