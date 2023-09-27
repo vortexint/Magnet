@@ -16,3 +16,6 @@
 [submodule "submodules/tweeny"]
 	path = submodules/tweeny
 	url = https://github.com/mobius3/tweeny.git
+[submodule "submodules/tiny-AES-c"]
+	path = submodules/tiny-AES-c
+	url = https://github.com/kokke/tiny-AES-c.git
