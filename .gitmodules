@@ -19,3 +19,6 @@
 [submodule "submodules/tiny-AES-c"]
 	path = submodules/tiny-AES-c
 	url = https://github.com/kokke/tiny-AES-c.git
+[submodule "submodules/miniz"]
+	path = submodules/miniz
+	url = https://github.com/richgel999/miniz.git
