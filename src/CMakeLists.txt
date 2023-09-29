@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.27)
 
+set(ASSETS_DIR ${CMAKE_SOURCE_DIR}/assets)
+
 find_package(OpenGL REQUIRED)
 
 add_executable(${PROJECT_NAME} main.cpp)
@@ -10,10 +12,14 @@ target_sources(${PROJECT_NAME} PRIVATE
   glad.c
 )
 
+target_precompile_headers(${PROJECT_NAME} PRIVATE app.hpp)
+
 target_link_libraries(${PROJECT_NAME} PRIVATE
                       ${OpenGL_LIBRARIES}
                       glfw
                       lua::static
+                      miniz
+                      tiny-aes
                       tweeny
 )
 
@@ -33,22 +39,38 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 )
 
 target_compile_options(${PROJECT_NAME} PRIVATE
-    # Optimization Level
     -O2
-
     # Optimize for Size
     -Os
-
     # Strip Debug Information
     -s
-
     # Dead Code Elimination
     -fdata-sections
     -Wl,--gc-sections
-
-    # Minimize Code Generation
     -fomit-frame-pointer
-
-    # Reduce Code Model
     -mcmodel=small
 )
+
+# Copy assets to the output directory
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different ${ASSETS_DIR}/resources $<TARGET_FILE_DIR:${PROJECT_NAME}>
+)
+
+# Generate a random hexadecimal string using OpenSSL
+# NOTE: This isn't ideal, AFAIK this only runs every time the CMake is configured
+# But it's a fair number of times
+execute_process(
+  COMMAND openssl rand -hex 16
+  OUTPUT_VARIABLE AES_ASSETS_KEY
+  RESULT_VARIABLE RAND_RESULT
+  ERROR_VARIABLE RAND_ERROR
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+if(NOT RAND_RESULT EQUAL 0)
+  message(FATAL_ERROR "Failed to generate a random key: ${RAND_ERROR}")
+endif()
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE CMAKE_ASSETS_AES_KEY="${AES_ASSETS_KEY}")
+
+message("AES Assets Key: ${AES_ASSETS_KEY}")
