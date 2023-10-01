@@ -8,4 +8,4 @@ We recognize that reverse engineering itself is not illegal and in some cases ma
 
 Our commitment to protecting intellectual property rights is unwavering. We have a team of expert lawyers who actively pursue legal remedies against those who violate these laws. This includes, but is not limited to, pursuing civil claims, seeking compensation, and reporting criminal activities to the appropriate law enforcement authorities.
 
-We strongly encourage you to respect Vortex Interactive's intellectual property rights. We believe in building a community of creativity, collaboration and innovation in the gaming industry, and we encourage people to support us through legal means, such as purchasing our games and participating in our community.
+We strongly encourage you to respect intellectual property rights. We believe in building a community of creativity, collaboration and innovation in the gaming industry, and we encourage people to support us through legal means, such as purchasing our games and participating in our community.

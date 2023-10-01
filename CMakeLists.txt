@@ -5,7 +5,6 @@ add_subdirectory(submodules/bullet3 SYSTEM)
 add_subdirectory(submodules/flecs   SYSTEM)
 add_subdirectory(submodules/glfw)
 add_subdirectory(submodules/Lua)
-add_subdirectory(submodules/miniz)
 add_subdirectory(submodules/tiny-AES-c)
 add_subdirectory(submodules/tweeny)
 

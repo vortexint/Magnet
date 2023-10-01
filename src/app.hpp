@@ -14,12 +14,10 @@ extern "C" {
   #include "lualib.h"
   #include "lauxlib.h"
 
-  #include "miniz.h"
-
   #include "aes.h"
 }
 
 const int INIT_WIDTH = 800;
 const int INIT_HEIGHT = 600;
 
-const char* AES_ASSETS_KEY = CMAKE_ASSETS_AES_KEY;
+//const char* AES_ASSETS_KEY = CMAKE_ASSETS_AES_KEY;
