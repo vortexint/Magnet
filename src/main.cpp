@@ -8,6 +8,7 @@ void resize_callback(GLFWwindow* window, int width, int height) {
 }
 
 int main(void) {
+  GameState game_state;
   GLFWwindow* window;
 
   if (!glfwInit()) {
@@ -56,8 +57,7 @@ int main(void) {
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
   // color attribute
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
-                        (void*)(3 * sizeof(float)));
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
   //
 
