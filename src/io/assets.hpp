@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../app.hpp"
+
 class AssetManager {
   struct archive *a;
   struct archive_entry *entry;

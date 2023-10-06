@@ -1,4 +1,3 @@
-#include "../app.hpp"
 #include "assets.hpp"
 
 AssetManager::AssetManager() {

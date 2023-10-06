@@ -1,7 +1,8 @@
 #pragma once
 
+#include "../app.hpp"
+
 class WindowManager {
-private:
   GLFWwindow *window_;
 
 public:
@@ -12,11 +13,7 @@ public:
     glViewport(0, 0, width, height);
   }
 
+  void update();
+
   bool shouldClose() const { return glfwWindowShouldClose(window_); }
-
-  void swapBuffers() const { glfwSwapBuffers(window_); }
-
-  void pollEvents() const { glfwPollEvents(); }
-
-  GLFWwindow *getWindow() const { return window_; }
 };

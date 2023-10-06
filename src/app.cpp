@@ -24,7 +24,7 @@ int main(void) {
 
   /* Loop until the user closes the window */
   while (!window_manager.shouldClose()) {
-
+    
   }
 
   return 0;

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../app.hpp"
+
 class Shader {
   // Utility function for checking shader compilation/linking errors.
   void checkCompileErrors(unsigned int shader, std::string type);
