@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.27)
-project(EtherealReach LANGUAGES C CXX)
+project(Uniforge LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 23)
 set(ASSETS_DIR ${CMAKE_SOURCE_DIR}/assets)
 

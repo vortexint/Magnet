@@ -2,14 +2,16 @@ cmake_minimum_required(VERSION 3.27)
 
 find_package(OpenGL REQUIRED)
 
-add_executable(${PROJECT_NAME} main.cpp)
+add_executable(${PROJECT_NAME} app.cpp)
 
 target_sources(${PROJECT_NAME} PRIVATE
+# GFX
   gfx/glad.c
   gfx/shader.cpp
+  gfx/window.cpp
+# I/O
+  io/assets.cpp
   io/input.cpp
-  asset_manager.cpp
-  game_state.cpp
 )
 
 #target_precompile_headers(${PROJECT_NAME} PRIVATE app.hpp)
@@ -18,7 +20,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
                       ${OpenGL_LIBRARIES}
                       glfw
                       archive_static
-                      lua::static
+                      flecs_static
+                      lua_static
                       tiny-aes
                       tweeny
 )
@@ -43,8 +46,6 @@ target_compile_options(${PROJECT_NAME} PRIVATE
     -O2
     # Optimize for Size
     -Os
-    # Strip Debug Information
-    -s
     # Dead Code Elimination
     -fdata-sections
     -Wl,--gc-sections

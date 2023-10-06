@@ -1,3 +1,4 @@
+#include "../app.hpp"
 #include "shader.hpp"
 
 void Shader::checkCompileErrors(unsigned int shader, std::string type) {

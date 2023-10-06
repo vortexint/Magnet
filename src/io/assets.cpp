@@ -1,4 +1,5 @@
-#include "app.hpp"
+#include "../app.hpp"
+#include "assets.hpp"
 
 AssetManager::AssetManager() {
   a = archive_read_new();
@@ -14,11 +15,10 @@ AssetManager::AssetManager() {
   }
 }
 
-AssetManager::~AssetManager() {
-  r = archive_read_free(a);
-}
+AssetManager::~AssetManager() { r = archive_read_free(a); }
 
-std::unique_ptr<unsigned char[]> AssetManager::LoadAsset(const std::string &assetPath, size_t &dataSize) {
+std::unique_ptr<unsigned char[]>
+AssetManager::LoadAsset(const std::string &assetPath, size_t &dataSize) {
   while (archive_read_next_header(a, &entry) == ARCHIVE_OK) {
     const char *entryName = archive_entry_pathname(entry);
 
@@ -33,8 +33,13 @@ std::unique_ptr<unsigned char[]> AssetManager::LoadAsset(const std::string &asse
   }
 
   dataSize = 0;
-  
+
   // could not find the asset
 
   return nullptr;
+}
+
+AssetManager &getAssetManager() {
+  static AssetManager assetManager;
+  return assetManager;
 }

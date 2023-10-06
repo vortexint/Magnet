@@ -1,4 +1,4 @@
-#include "../app.hpp"
+#include "input.hpp"
 
 void processInput(GLFWwindow *window) {
   glfwPollEvents();
