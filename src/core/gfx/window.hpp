@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../app.hpp"
+#include "app.hpp"
 
 class WindowManager {
   GLFWwindow *window_;
@@ -9,11 +9,11 @@ public:
   WindowManager();
   ~WindowManager();
 
-  static void resize_callback(GLFWwindow *window, int width, int height) {
-    glViewport(0, 0, width, height);
-  }
+  static void resize_callback(GLFWwindow *window, int width, int height);
 
-  void update();
+  void draw() const;
+
+  void pollEvents() const {glfwPollEvents();}
 
   bool shouldClose() const { return glfwWindowShouldClose(window_); }
 };

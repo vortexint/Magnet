@@ -65,3 +65,15 @@ WindowManager::~WindowManager() {
   glfwDestroyWindow(window_);
   glfwTerminate();
 }
+
+void WindowManager::resize_callback(GLFWwindow *window, int width, int height) {
+  glViewport(0, 0, width, height);
+}
+
+void WindowManager::draw() const {
+  /* Render here */
+  glClear(GL_COLOR_BUFFER_BIT);
+
+  /* Swap front and back buffers */
+  glfwSwapBuffers(window_);
+}

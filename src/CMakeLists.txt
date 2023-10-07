@@ -4,15 +4,7 @@ find_package(OpenGL REQUIRED)
 
 add_executable(${PROJECT_NAME} app.cpp)
 
-target_sources(${PROJECT_NAME} PRIVATE
-# GFX
-  gfx/glad.c
-  gfx/shader.cpp
-  gfx/window.cpp
-# I/O
-  io/assets.cpp
-  io/input.cpp
-)
+add_subdirectory(core)
 
 #target_precompile_headers(${PROJECT_NAME} PRIVATE app.hpp)
 
@@ -37,7 +29,9 @@ else()
 endif()
                       
 target_include_directories(${PROJECT_NAME} PRIVATE
+                           ${CMAKE_CURRENT_SOURCE_DIR} # mostly for app.hpp
                            ${CMAKE_SOURCE_DIR}/include
+                           # include directories for libraries
                            ${CMAKE_SOURCE_DIR}/submodules/libarchive/libarchive
                            ${OPENGL_INCLUDE_DIR}
 )

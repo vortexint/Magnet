@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../app.hpp"
+#include "app.hpp"
 
 void processInput(GLFWwindow *window);
 

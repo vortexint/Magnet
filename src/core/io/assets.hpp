@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../app.hpp"
+#include "app.hpp"
 
 class AssetManager {
   struct archive *a;

@@ -1,9 +1,9 @@
 #include "app.hpp"
 
-#include "io/assets.hpp"
-#include "io/input.hpp"
-#include "gfx/shader.hpp"
-#include "gfx/window.hpp"
+#include "core/io/assets.hpp"
+#include "core/io/input.hpp"
+#include "core/gfx/shader.hpp"
+#include "core/gfx/window.hpp"
 
 class GameContext {
   AssetManager assetMgr_;
@@ -24,7 +24,10 @@ int main(void) {
 
   /* Loop until the user closes the window */
   while (!window_manager.shouldClose()) {
-    
+
+    window_manager.draw();
+
+    window_manager.pollEvents();
   }
 
   return 0;
