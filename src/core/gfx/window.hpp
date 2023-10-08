@@ -1,9 +1,11 @@
 #pragma once
 
-#include "app.hpp"
+#include "renderer.hpp"
 
 class WindowManager {
+  
   GLFWwindow *window_;
+  std::unique_ptr<Renderer> renderer_;
 
 public:
   WindowManager();

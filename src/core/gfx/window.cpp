@@ -17,7 +17,7 @@ WindowManager::WindowManager() {
 
   /* Icon loading code
   size_t dataSize;
-  //auto imageData = assetMgr.LoadAsset("textures/your_image.png", dataSize);
+  //auto imageData = assetMgr.LoadAsset("icon.png", dataSize);
 
   GLFWimage icons[1];
   icon[0].pixels = stbi_load_from_memory(const stbi_uc *buffer, int len, int *x, int *y, int *comp, int req_comp) glfwSetWindowIcon(window, 1, icons);

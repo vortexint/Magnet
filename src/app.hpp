@@ -15,6 +15,8 @@
 
 #include "qoi.h"
 
+#include "aes.hpp"
+
 extern "C" {
 #include "lauxlib.h"
 #include "lua.h"
@@ -22,8 +24,6 @@ extern "C" {
 
 #include "archive.h"
 #include "archive_entry.h"
-
-#include "aes.h"
 }
 
 const int INIT_WIDTH = 800;
