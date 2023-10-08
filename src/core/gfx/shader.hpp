@@ -1,6 +1,6 @@
 #pragma once
 
-#include "app.hpp"
+#include "core/io/assets.hpp"
 
 class Shader {
   // Utility function for checking shader compilation/linking errors.

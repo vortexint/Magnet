@@ -15,50 +15,25 @@ WindowManager::WindowManager() {
     throw std::runtime_error("Failed to create a GLFW window");
   }
 
-  /* Icon loading code
+  /* Set window icon
   size_t dataSize;
   //auto imageData = assetMgr.LoadAsset("icon.png", dataSize);
 
   GLFWimage icons[1];
-  icon[0].pixels = stbi_load_from_memory(const stbi_uc *buffer, int len, int *x, int *y, int *comp, int req_comp) glfwSetWindowIcon(window, 1, icons);
+  icons[0].pixels = stbi_load_from_memory(const stbi_uc *buffer, int len, int *x, int *y, int *comp, int req_comp) glfwSetWindowIcon(window, 1, icons);
+  
+  glfwSetWindowIcon(window, 1, icons);
+  free(icons[0].pixels);
   */
 
   glfwMakeContextCurrent(window_);
   glfwSetFramebufferSizeCallback(window_, resize_callback);
 
-  /* GLAD manages function pointers for OpenGL so we want to initialize GLAD
-   * before we call any OpenGL function */
+  /* GLAD manages function pointers for OpenGL so we initialize GLAD
+   * before any OpenGL function is called */
   gladLoadGL();
 
-  /* Sample triangle shader code
-
-  Shader ourShader("vert.glsl", "frag.glsl");
-
-  float vertices[] = {
-      // positions         // colors
-      0.5f,  -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom right
-      -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom left
-      0.0f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f  // top
-  };
-
-  unsigned int VBO, VAO;
-  glGenVertexArrays(1, &VAO);
-  glGenBuffers(1, &VBO);
-  // bind the Vertex Array Object first, then bind and set vertex buffer(s), and
-  // then configure vertex attributes(s).
-  glBindVertexArray(VAO);
-
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-  // position attribute
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
-  glEnableVertexAttribArray(0);
-  // color attribute
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
-                        (void *)(3 * sizeof(float)));
-  glEnableVertexAttribArray(1);
-  /*/
+  renderer_ = std::make_unique<Renderer>();
 }
 
 WindowManager::~WindowManager() {
@@ -71,8 +46,9 @@ void WindowManager::resize_callback(GLFWwindow *window, int width, int height) {
 }
 
 void WindowManager::draw() const {
-  /* Render here */
-  glClear(GL_COLOR_BUFFER_BIT);
+  renderer_->Clear();
+
+  renderer_->Render();
 
   /* Swap front and back buffers */
   glfwSwapBuffers(window_);

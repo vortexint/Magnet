@@ -14,8 +14,5 @@ public:
   AssetManager();
   ~AssetManager();
 
-  std::unique_ptr<unsigned char[]> LoadAsset(const std::string &assetPath,
-                                             size_t &dataSize);
+  unsigned char* LoadAsset(const std::string &assetPath, size_t &dataSize);
 };
-
-AssetManager &getAssetManager();
