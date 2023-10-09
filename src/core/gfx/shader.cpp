@@ -29,27 +29,21 @@ void Shader::checkCompileErrors(unsigned int shader, std::string type) {
   }
 }
 
-Shader::Shader(const char* vertexPath, const char* fragmentPath) {
-  // 1. Retrieve the vertex/fragment source code from filePath
-  std::ifstream vShaderFile(vertexPath);
-  std::ifstream fShaderFile(fragmentPath);
+Shader::Shader(AssetManager &assetManager_, const std::string &vertexPath,
+               const std::string &fragmentPath)
+    : assetManager(assetManager_) {
 
-  if (!vShaderFile.is_open() || !fShaderFile.is_open()) {
+  // 1. Retrieve the vertex/fragment source code from filePath via AssetManager
+  size_t dataSize;
+  const char *vShaderCode = reinterpret_cast<const char *>(
+      assetManager.getAsset(vertexPath, dataSize));
+  const char *fShaderCode = reinterpret_cast<const char *>(
+      assetManager.getAsset(fragmentPath, dataSize));
+
+  if (!vShaderCode || !fShaderCode) {
     std::cout << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ" << std::endl;
     return;
   }
-
-  std::stringstream vShaderStream, fShaderStream;
-  vShaderStream << vShaderFile.rdbuf();
-  fShaderStream << fShaderFile.rdbuf();
-  vShaderFile.close();
-  fShaderFile.close();
-
-  std::string vertexCode = vShaderStream.str();
-  std::string fragmentCode = fShaderStream.str();
-
-  const char* vShaderCode = vertexCode.c_str();
-  const char* fShaderCode = fragmentCode.c_str();
 
   // 2. Compile shaders
   unsigned int vertex, fragment;
