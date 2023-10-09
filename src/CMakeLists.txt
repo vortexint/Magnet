@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.27)
 
 find_package(OpenGL REQUIRED)
 
-add_executable(${PROJECT_NAME} app.cpp)
+add_executable(${PROJECT_NAME} main.cpp)
 
 add_subdirectory(core)
 
@@ -50,7 +50,7 @@ target_compile_options(${PROJECT_NAME} PRIVATE
 # Copy assets to the output directory
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different ${ASSETS_DIR}/resources $<TARGET_FILE_DIR:${PROJECT_NAME}>
-  COMMAND tar -cvf - ${ASSETS_DIR}/secure | lz4 > $<TARGET_FILE_DIR:${PROJECT_NAME}>/data
+  COMMAND tar -C ${SECURE_DIR} -cvf - . | lz4 > $<TARGET_FILE_DIR:${PROJECT_NAME}>/data
 )
 
 # decompress example:

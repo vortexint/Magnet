@@ -1,6 +1,6 @@
 #pragma once
 
-#include "app.hpp"
+#include "stdafx.hpp"
 
 class AssetManager {
   struct archive *a;
@@ -11,8 +11,13 @@ class AssetManager {
   std::unordered_map<std::string, std::unique_ptr<unsigned char[]>> assetCache;
 
 public:
-  AssetManager();
-  ~AssetManager();
+  AssetManager() = default;
+  ~AssetManager() = default;
 
-  unsigned char* LoadAsset(const std::string &assetPath, size_t &dataSize);
+  void openArchive();
+  void closeArchive();
+
+  /* Assets */
+
+  unsigned char* getAsset(std::string assetPath, size_t &dataSize);
 };

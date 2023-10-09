@@ -1,4 +1,4 @@
-#include "app.hpp"
+#include "app/app.hpp"
 
 #include "core/io/assets.hpp"
 #include "core/io/input.hpp"
@@ -18,9 +18,9 @@ public:
 /* ENTRY POINT */
 
 int main(void) {
-
+  AssetManager asset_manager;
+  WindowManager window_manager(INIT_WIDTH, INIT_HEIGHT, GAME_TITLE, asset_manager);
   GameContext game_context;
-  WindowManager window_manager;
 
   /* Loop until the user closes the window */
   while (!window_manager.shouldClose()) {

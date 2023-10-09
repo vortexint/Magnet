@@ -1,8 +1,7 @@
 #include "assets.hpp"
 
-AssetManager::AssetManager() {
+void AssetManager::openArchive() {
   a = archive_read_new();
-
   archive_read_support_filter_lz4(a);
   archive_read_support_format_tar(a);
 
@@ -14,19 +13,22 @@ AssetManager::AssetManager() {
   }
 }
 
-AssetManager::~AssetManager() { r = archive_read_free(a); }
+void AssetManager::closeArchive() { archive_read_free(a); }
 
-unsigned char *AssetManager::LoadAsset(const std::string &assetPath,
-                                       size_t &dataSize) {
+unsigned char *AssetManager::getAsset(std::string assetPath, size_t &dataSize) {
+  assetPath = "./" + assetPath; // prepend "./" to the asset path due to how tar
+                                // structures file paths in archive entries
+
   auto it = assetCache.find(assetPath);
 
-  // If asset is already in cache
+  /* Check if asset is cached */
+
   if (it != assetCache.end()) {
     dataSize = sizeof(it->second.get());
     return it->second.get();
   }
 
-  // Else, asset should be read from the archive
+  /* Otherwise read from the archive */
   while (archive_read_next_header(a, &entry) == ARCHIVE_OK) {
     const char *currentFile = archive_entry_pathname(entry);
     if (currentFile == assetPath) {
@@ -41,7 +43,8 @@ unsigned char *AssetManager::LoadAsset(const std::string &assetPath,
     }
   }
 
-  // Fires if Asset Doesn't exist in the archive
+  /* Asset doesn't exist in the archive */
+
   dataSize = 0;
   return nullptr;
 }

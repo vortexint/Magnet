@@ -1,6 +1,11 @@
 #include "window.hpp"
 
-WindowManager::WindowManager() {
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
+WindowManager::WindowManager(int width, int height, const char *title,
+                             AssetManager &asset_manager)
+    : asset_manager_(asset_manager) {
   if (!glfwInit()) {
     throw std::runtime_error("Failed to initialize GLFW");
   }
@@ -9,22 +14,29 @@ WindowManager::WindowManager() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-  window_ = glfwCreateWindow(INIT_WIDTH, INIT_HEIGHT, GAME_TITLE, NULL, NULL);
+  window_ = glfwCreateWindow(width, height, title, NULL, NULL);
   if (!window_) {
     glfwTerminate();
     throw std::runtime_error("Failed to create a GLFW window");
   }
 
-  /* Set window icon
+  /* Setting the window's icon */
+  asset_manager_.openArchive();
   size_t dataSize;
-  //auto imageData = assetMgr.LoadAsset("icon.png", dataSize);
+  unsigned char* iconData = asset_manager.getAsset("icon.png", dataSize);
+  if (iconData != nullptr) {
+    int w, h, c;
 
-  GLFWimage icons[1];
-  icons[0].pixels = stbi_load_from_memory(const stbi_uc *buffer, int len, int *x, int *y, int *comp, int req_comp) glfwSetWindowIcon(window, 1, icons);
-  
-  glfwSetWindowIcon(window, 1, icons);
-  free(icons[0].pixels);
-  */
+    GLFWimage icons[1];
+    icons[0].pixels = stbi_load_from_memory(iconData, dataSize, &w, &h, &c, 0);
+
+    glfwSetWindowIcon(window_, 1, icons);
+    //free(icons[0].pixels);
+  }
+  else {
+    std::cerr << "Failed to load icon.png" << std::endl;
+  }
+  asset_manager_.closeArchive(); // Close the archive after we're done with it
 
   glfwMakeContextCurrent(window_);
   glfwSetFramebufferSizeCallback(window_, resize_callback);

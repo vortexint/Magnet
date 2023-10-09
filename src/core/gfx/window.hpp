@@ -3,12 +3,14 @@
 #include "renderer.hpp"
 
 class WindowManager {
-  
+
+  AssetManager &asset_manager_;
+
   GLFWwindow *window_;
   std::unique_ptr<Renderer> renderer_;
 
 public:
-  WindowManager();
+  WindowManager(int width, int height, const char *title, AssetManager &asset_manager);
   ~WindowManager();
 
   static void resize_callback(GLFWwindow *window, int width, int height);
