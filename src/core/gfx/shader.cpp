@@ -34,12 +34,13 @@ Shader::Shader(AssetManager &assetManager_, const std::string &vertexPath,
     : assetManager(assetManager_) {
 
   // 1. Retrieve the vertex/fragment source code from filePath via AssetManager
+  assetManager.openArchive();
   size_t dataSize;
   const char *vShaderCode = reinterpret_cast<const char *>(
       assetManager.getAsset(vertexPath, dataSize));
   const char *fShaderCode = reinterpret_cast<const char *>(
       assetManager.getAsset(fragmentPath, dataSize));
-
+  assetManager.closeArchive();
   if (!vShaderCode || !fShaderCode) {
     std::cout << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ" << std::endl;
     return;
