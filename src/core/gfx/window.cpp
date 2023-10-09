@@ -31,7 +31,7 @@ WindowManager::WindowManager(int width, int height, const char *title,
     icons[0].pixels = stbi_load_from_memory(iconData, dataSize, &w, &h, &c, 0);
 
     glfwSetWindowIcon(window_, 1, icons);
-    //free(icons[0].pixels);
+    free(icons[0].pixels);
   }
   else {
     std::cerr << "Failed to load icon.png" << std::endl;
