@@ -21,22 +21,23 @@ WindowManager::WindowManager(int width, int height, const char *title,
   }
 
   /* Setting the window's icon */
-  //asset_manager_.openArchive("data");
-  //size_t dataSize;
-  //unsigned char* iconData = asset_manager.getAsset("icon.png", dataSize);
-  //if (iconData != nullptr) {
-  //  int w, h, c;
-//
-  //  GLFWimage icons[1];
-  //  icons[0].pixels = stbi_load_from_memory(iconData, dataSize, &w, &h, &c, 0);
-//
-  //  glfwSetWindowIcon(window_, 1, icons);
-  //  free(icons[0].pixels);
-  //}
-  //else {
-  //  std::cerr << "Failed to load icon.png" << std::endl;
-  //}
-  //asset_manager_.closeArchive(); // Close the archive after we're done with it
+  {
+    asset_manager_.openArchive();
+
+    size_t dataSize;
+    unsigned char* iconData = asset_manager.getAsset("icon.png", dataSize);
+    int comp;
+
+    GLFWimage icons[1];
+    icons[0].pixels = stbi_load_from_memory(iconData, dataSize, &icons[0].width,
+                              &icons[0].height, &comp, STBI_rgb_alpha);
+
+    glfwSetWindowIcon(window_, 1, icons);
+
+    free(icons[0].pixels);
+
+    asset_manager_.closeArchive(); // Close the archive after we're done with it
+  }
 
   glfwMakeContextCurrent(window_);
   glfwSetFramebufferSizeCallback(window_, resize_callback);

@@ -3,23 +3,24 @@
 #include "stdafx.hpp"
 
 class AssetManager {
+private:
   const char *SECURE_ARCHIVE;
+  const size_t BLOCK_SIZE = 10240;
 
-  struct archive *a;
-  struct archive_entry *entry;
-  int r;
-
-  // Caching
+  struct archive *a = nullptr;
+  struct archive_entry *entry = nullptr;
   std::unordered_map<std::string, std::unique_ptr<unsigned char[]>> assetCache;
 
+  bool archiveOpened = false;
+
 public:
-  AssetManager(const char* secure_archive);
+  AssetManager(const char *secure_archive);
   ~AssetManager();
 
-  void openArchive();
+  // Return -1 if could not open
+  int openArchive();
   void closeArchive();
 
-  /* Assets */
-
-  unsigned char* getAsset(std::string assetPath, size_t &dataSize);
+  // If archive not opened yet, open it
+  unsigned char *getAsset(std::string assetPath, size_t &dataSize);
 };
