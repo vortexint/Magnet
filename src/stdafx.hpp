@@ -6,6 +6,8 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <optional>
+#include <utility>
 
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"

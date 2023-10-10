@@ -1,11 +1,18 @@
-#include "assets.hpp"
+#include "asset_manager.hpp"
+
+AssetManager::AssetManager(const char *secure_archive) : SECURE_ARCHIVE(secure_archive) {}
+
+AssetManager::~AssetManager() {
+  if (a)
+    archive_read_free(a);
+}
 
 void AssetManager::openArchive() {
   a = archive_read_new();
   archive_read_support_filter_lz4(a);
   archive_read_support_format_tar(a);
 
-  r = archive_read_open_filename(a, "data", 10240);
+  r = archive_read_open_filename(a, SECURE_ARCHIVE, 10240);
 
   if (r != ARCHIVE_OK) {
     // error opening archive, log archive_error_string(a)

@@ -4,6 +4,6 @@ target_sources(${PROJECT_NAME} PRIVATE
   gfx/shader_manager.cpp
   gfx/window.cpp
 # I/O
-  io/assets.cpp
+  io/asset_manager.cpp
   io/input.cpp
 )

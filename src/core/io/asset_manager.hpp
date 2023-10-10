@@ -3,6 +3,8 @@
 #include "stdafx.hpp"
 
 class AssetManager {
+  const char *SECURE_ARCHIVE;
+
   struct archive *a;
   struct archive_entry *entry;
   int r;
@@ -11,8 +13,8 @@ class AssetManager {
   std::unordered_map<std::string, std::unique_ptr<unsigned char[]>> assetCache;
 
 public:
-  AssetManager() = default;
-  ~AssetManager() = default;
+  AssetManager(const char* secure_archive);
+  ~AssetManager();
 
   void openArchive();
   void closeArchive();

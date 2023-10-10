@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/io/assets.hpp"
+#include "core/io/asset_manager.hpp"
 
 class ShaderManager {
   AssetManager &asset_manager_;
