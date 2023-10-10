@@ -45,7 +45,7 @@ WindowManager::WindowManager(int width, int height, const char *title,
    * before any OpenGL function is called */
   gladLoadGL();
 
-  renderer_ = std::make_unique<Renderer>();
+  renderer_ = std::make_unique<Renderer>(asset_manager);
 }
 
 WindowManager::~WindowManager() {

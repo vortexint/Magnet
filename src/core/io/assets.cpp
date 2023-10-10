@@ -31,7 +31,7 @@ unsigned char *AssetManager::getAsset(std::string assetPath, size_t &dataSize) {
   /* Otherwise read from the archive */
   while (archive_read_next_header(a, &entry) == ARCHIVE_OK) {
     const char *currentFile = archive_entry_pathname(entry);
-    if (currentFile == assetPath) {
+    if (strcmp(currentFile, assetPath.c_str()) == 0) {
       la_int64_t size = archive_entry_size(entry); // Get file size in bytes
       auto buffer = std::make_unique<unsigned char[]>(size);
       archive_read_data(a, buffer.get(), size); // Read the data into buffer

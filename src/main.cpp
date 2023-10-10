@@ -2,7 +2,6 @@
 
 #include "core/io/assets.hpp"
 #include "core/io/input.hpp"
-#include "core/gfx/shader.hpp"
 #include "core/gfx/window.hpp"
 
 class GameContext {
