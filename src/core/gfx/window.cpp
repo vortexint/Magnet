@@ -25,11 +25,12 @@ WindowManager::WindowManager(int width, int height, const char *title,
     asset_manager_.openArchive();
 
     size_t dataSize;
-    unsigned char* iconData = asset_manager.getAsset("icon.png", dataSize);
+    unsigned char *iconData = asset_manager.getAsset("icon.png", dataSize);
     int comp;
 
     GLFWimage icons[1];
-    icons[0].pixels = stbi_load_from_memory(iconData, dataSize, &icons[0].width,
+    icons[0].pixels =
+        stbi_load_from_memory(iconData, dataSize, &icons[0].width,
                               &icons[0].height, &comp, STBI_rgb_alpha);
 
     glfwSetWindowIcon(window_, 1, icons);
