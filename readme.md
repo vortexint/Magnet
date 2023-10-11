@@ -1,4 +1,4 @@
-# Uniforge
+# Magnetar
 
 ```sh
 git submodule update --init --recursive --progress
