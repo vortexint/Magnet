@@ -1,6 +1,6 @@
 #pragma once
 
-#include "renderer.hpp"
+#include "gfx/renderer.hpp"
 
 class WindowManager {
 

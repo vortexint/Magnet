@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/io/asset_manager.hpp"
+#include "io/asset_manager.hpp"
 
 const int INIT_WIDTH = 800;
 const int INIT_HEIGHT = 600;

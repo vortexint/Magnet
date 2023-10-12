@@ -1,6 +1,6 @@
-#include "app/app.hpp"
+#include "app.hpp"
 
-#include "core/gfx/window.hpp"
+#include "gfx/window.hpp"
 
 /* ENTRY POINT */
 
