@@ -41,6 +41,7 @@ target_include_directories(magnetar-core PUBLIC
 target_link_libraries(magnetar-core PUBLIC
                       ${OpenGL_LIBRARIES}
                       glfw
+                      glm
                       archive_static
                       flecs_static
                       lua_static
