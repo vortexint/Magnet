@@ -4,7 +4,10 @@
 git submodule update --init --recursive --progress
 ```
 
-### Content management
+## Projects
 
-Contents of `assets/` are files to be packaged with the game
+### Sandbox (Sample project)
+
+#### Content management
+The contents of `assets/` are files to be packaged with the game
 `assets/secure` becomes an AES encrypted archive, loaded in runtime
