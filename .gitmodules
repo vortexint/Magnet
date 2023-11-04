@@ -22,3 +22,6 @@
 [submodule "submodules/spdlog"]
 	path = submodules/spdlog
 	url = https://github.com/gabime/spdlog.git
+[submodule "submodules/cglm"]
+	path = submodules/cglm
+	url = https://github.com/recp/cglm.git
