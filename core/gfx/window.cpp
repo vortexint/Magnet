@@ -11,13 +11,15 @@ WindowManager::WindowManager(int width, int height, const char *title,
   }
 
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
   window_ = glfwCreateWindow(width, height, title, NULL, NULL);
   if (!window_) {
-    glfwTerminate();
-    throw std::runtime_error("Failed to create a GLFW window");
+    const char *description;
+    glfwGetError(&description);
+
+    throw std::runtime_error(description);
   }
 
   /* Setting the window's icon */

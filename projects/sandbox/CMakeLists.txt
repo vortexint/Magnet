@@ -11,6 +11,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE magnetar-core tweeny)
 # Copy assets to the output directory
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
   # COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different ${ASSETS_DIR}/resources $<TARGET_FILE_DIR:${PROJECT_NAME}>
+  COMMAND rm -f $<TARGET_FILE_DIR:${PROJECT_NAME}>/data
   COMMAND tar -C ${ASSETS_DIR} -cvf - . | lz4 > $<TARGET_FILE_DIR:${PROJECT_NAME}>/data
 )
 

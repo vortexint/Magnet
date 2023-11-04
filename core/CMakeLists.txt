@@ -19,9 +19,9 @@ target_sources(magnetar-core PRIVATE
 
 target_compile_options(magnetar-core PUBLIC
     -O2
-    # Optimize for Size
+    # optimize for Size
     -Os
-    # Dead Code Elimination
+    # dead code elimination
     -fdata-sections
     -Wl,--gc-sections
     -fomit-frame-pointer
@@ -41,7 +41,7 @@ target_include_directories(magnetar-core PUBLIC
 target_link_libraries(magnetar-core PUBLIC
                       ${OpenGL_LIBRARIES}
                       glfw
-                      glm
+                      cglm
                       archive_static
                       flecs_static
                       lua_static
