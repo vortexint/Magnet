@@ -1,4 +1,3 @@
-project(Magnetar LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 23)
 
 add_library(magnetar-core STATIC)
@@ -57,3 +56,26 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 else()
   message(FATAL_ERROR "Unknown platform: \"" ${CMAKE_SYSTEM_NAME} "\"")
 endif()
+
+### Utilities ###
+
+function(magnetar_package)
+  if(NOT DEFINED ASSETS_DIR)
+    message(FATAL_ERROR "Please define ASSETS_DIR it before calling magnetar_package()")
+  endif()
+
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    # it's best to remove tempdata to avoid shipping obsolete assets
+    COMMAND rm -r ${CMAKE_BINARY_DIR}/tempdata || true
+
+    COMMAND mkdir -p ${CMAKE_BINARY_DIR}/tempdata
+    # merge core and project assets to new temp. dir
+    COMMAND cp -a ${MAGNETAR_CORE_ASSETS}/. ${CMAKE_BINARY_DIR}/tempdata
+    COMMAND cp -a ${ASSETS_DIR}/. ${CMAKE_BINARY_DIR}/tempdata
+
+    COMMAND tar -C ${CMAKE_BINARY_DIR}/tempdata -cvf - . | lz4 > $<TARGET_FILE_DIR:${PROJECT_NAME}>/data
+  )
+
+  # decompress example:
+  # lz4 -d folderABC.tar.lz4 -c | tar xvf -
+endfunction()
