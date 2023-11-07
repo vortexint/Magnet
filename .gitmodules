@@ -4,9 +4,6 @@
 [submodule "submodules/bullet3"]
 	path = submodules/bullet3
 	url = https://github.com/bulletphysics/bullet3.git
-[submodule "submodules/flecs"]
-	path = submodules/flecs
-	url = https://github.com/SanderMertens/flecs.git
 [submodule "submodules/glfw"]
 	path = submodules/glfw
 	url = https://github.com/glfw/glfw.git
@@ -25,3 +22,6 @@
 [submodule "submodules/cglm"]
 	path = submodules/cglm
 	url = https://github.com/recp/cglm.git
+[submodule "submodules/mustache"]
+	path = submodules/mustache
+	url = https://github.com/kirillochnev/mustache.git
