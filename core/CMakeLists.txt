@@ -42,7 +42,7 @@ target_link_libraries(magnetar-core PUBLIC
                       glfw
                       cglm
                       archive_static
-                      flecs_static
+                      mustache
                       lua_static
                       tiny-aes
 )
@@ -65,7 +65,7 @@ function(magnetar_package)
   endif()
 
   add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    # it's best to remove tempdata to avoid shipping obsolete assets
+    # it's best to remove tempdata to avoid shipping old assets
     COMMAND rm -r ${CMAKE_BINARY_DIR}/tempdata || true
 
     COMMAND mkdir -p ${CMAKE_BINARY_DIR}/tempdata

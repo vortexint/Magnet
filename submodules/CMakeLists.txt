@@ -1,5 +1,5 @@
 add_subdirectory(bullet3 EXCLUDE_FROM_ALL)
-add_subdirectory(flecs   EXCLUDE_FROM_ALL)
+add_subdirectory(mustache   EXCLUDE_FROM_ALL)
 add_subdirectory(glfw    EXCLUDE_FROM_ALL)
 add_subdirectory(cglm     EXCLUDE_FROM_ALL)
 add_subdirectory(libarchive EXCLUDE_FROM_ALL)

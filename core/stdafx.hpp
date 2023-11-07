@@ -13,7 +13,7 @@
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 
-#include "flecs.h"
+#include "mustache/ecs/ecs.hpp"
 
 #include "qoi.h"
 

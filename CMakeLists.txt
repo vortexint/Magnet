@@ -9,9 +9,7 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 
 ### Magnetar Framework ###
 
-set(MAGNETAR_CORE_ASSETS ${CMAKE_SOURCE_DIR}/core/assets)
-
 add_subdirectory(core) # magnetar::core
+set(MAGNETAR_CORE_ASSETS ${CMAKE_SOURCE_DIR}/core/assets) # workaround
 
-# Projects using the Magnetar framework
 add_subdirectory(projects)
