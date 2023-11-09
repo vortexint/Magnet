@@ -13,7 +13,7 @@ target_sources(magnetar-core PRIVATE
   io/asset_mgr.cpp
   io/input.cpp
   #
-  scene.cpp
+  scene_mgr.cpp
 )
 
 #target_precompile_headers(${PROJECT_NAME} PRIVATE stdafx.hpp)

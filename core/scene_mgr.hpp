@@ -1,5 +1,11 @@
 #pragma once
 
+#include "flecs.h"
+
 class SceneManager {
-  // Assuming the implementation of SceneManager is already defined
+  flecs::world ecs;
+public:
+  SceneManager();
+
+  void Update();
 };

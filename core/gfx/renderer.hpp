@@ -6,8 +6,8 @@
 
 class Renderer {
 
-  AssetManager &asset_manager_;
-  ShaderManager shader_manager_;
+  AssetManager &assetMgr_;
+  ShaderManager shaderMgr_;
 
 public:
   Renderer(AssetManager &assetManager);

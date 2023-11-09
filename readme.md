@@ -15,5 +15,6 @@ By convention, the contents of `assets/` are files to be packaged with the game,
 This is a sample project to demonstrate basic capabilities of the engine
 
 <!-- 
- Headers only ever include what they need, whereas C++ files should use stdafx.hpp
+ headers only include what they need
+ source files should use stdafx.hpp before including headers
 -->

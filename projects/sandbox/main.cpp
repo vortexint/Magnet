@@ -12,6 +12,8 @@ int main(void) {
   /* Loop until the user closes the window */
   while (!window_manager.shouldClose()) {
 
+    game_context.Update();
+
     window_manager.draw();
 
     window_manager.pollEvents();

@@ -18,14 +18,14 @@ unsigned int ID, VBO, VAO;
 //
 
 Renderer::Renderer(AssetManager &assetManager)
-    : asset_manager_(assetManager), shader_manager_(assetManager) {
+    : assetMgr_(assetManager), shaderMgr_(assetManager) {
   /* OpenGL configuration */
   glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
   glEnable(GL_DEPTH_TEST);
   // Add other config like stencil, alpha blending etc. as needed
 
   // TESTING
-  ID = shader_manager_.genShader("myShader", "shaders/vert.glsl",
+  ID = shaderMgr_.genShader("myShader", "shaders/vert.glsl",
                                  "shaders/frag.glsl");
 
   glGenVertexArrays(1, &VAO);
