@@ -12,7 +12,8 @@ target_sources(magnetar-core PRIVATE
 # I/O
   io/asset_mgr.cpp
   io/input.cpp
-  #
+###
+  application.cpp
   scene_mgr.cpp
 )
 
@@ -42,7 +43,7 @@ target_include_directories(magnetar-core PUBLIC
 target_link_libraries(magnetar-core PUBLIC
                       ${OpenGL_LIBRARIES}
                       cglm
-                      flecs
+                      flecs_static
                       glfw
                       archive_static
                       lua_static
