@@ -1,10 +1,9 @@
+set(CMAKE_WARN_DEPRECATED FALSE)
+
 add_subdirectory(bullet3 EXCLUDE_FROM_ALL)
-add_subdirectory(mustache   EXCLUDE_FROM_ALL)
 add_subdirectory(glfw    EXCLUDE_FROM_ALL)
 add_subdirectory(cglm     EXCLUDE_FROM_ALL)
 add_subdirectory(libarchive EXCLUDE_FROM_ALL)
 add_subdirectory(Lua        EXCLUDE_FROM_ALL)
 add_subdirectory(tiny-AES-c EXCLUDE_FROM_ALL)
 add_subdirectory(tweeny     EXCLUDE_FROM_ALL)
-
-set(CMAKE_WARN_DEPRECATED FALSE)

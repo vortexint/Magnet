@@ -42,7 +42,6 @@ target_link_libraries(magnetar-core PUBLIC
                       glfw
                       cglm
                       archive_static
-                      mustache
                       lua_static
                       tiny-aes
 )
