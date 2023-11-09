@@ -25,3 +25,6 @@
 [submodule "submodules/mustache"]
 	path = submodules/mustache
 	url = https://github.com/kirillochnev/mustache.git
+[submodule "submodules/flecs"]
+	path = submodules/flecs
+	url = https://github.com/SanderMertens/flecs.git
