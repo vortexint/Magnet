@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gfx/shader_manager.hpp"
+#include "gfx/shader_mgr.hpp"
 
 /* Game renderer */
 

@@ -1,4 +1,4 @@
-#include "shader_manager.hpp"
+#include "shader_mgr.hpp"
 
 ShaderManager::ShaderManager(AssetManager &asset_manager)
     : asset_manager_(asset_manager) {}

@@ -13,3 +13,7 @@ By convention, the contents of `assets/` are files to be packaged with the game,
 
 ### Sandbox
 This is a sample project to demonstrate basic capabilities of the engine
+
+<!-- 
+ Headers only ever include what they need, whereas C++ files should use stdafx.hpp
+-->

@@ -7,11 +7,13 @@ target_sources(magnetar-core PRIVATE
 # GFX
   gfx/glad.c
   gfx/renderer.cpp
-  gfx/shader_manager.cpp
+  gfx/shader_mgr.cpp
   gfx/window.cpp
 # I/O
-  io/asset_manager.cpp
+  io/asset_mgr.cpp
   io/input.cpp
+  #
+  scene.cpp
 )
 
 #target_precompile_headers(${PROJECT_NAME} PRIVATE stdafx.hpp)
@@ -39,8 +41,9 @@ target_include_directories(magnetar-core PUBLIC
 
 target_link_libraries(magnetar-core PUBLIC
                       ${OpenGL_LIBRARIES}
-                      glfw
                       cglm
+                      flecs
+                      glfw
                       archive_static
                       lua_static
                       tiny-aes

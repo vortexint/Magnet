@@ -1,4 +1,4 @@
-#include "asset_manager.hpp"
+#include "asset_mgr.hpp"
 
 AssetManager::AssetManager(const char *secure_archive)
     : SECURE_ARCHIVE(secure_archive) {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -13,17 +14,19 @@
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 
-#include "mustache/ecs/ecs.hpp"
-
+extern "C" {
+/* Single-header */
 #include "qoi.h"
 
-#include "aes.hpp"
+/* Libraries */
+#include "cglm/cglm.h"
 
-extern "C" {
 #include "lauxlib.h"
 #include "lua.h"
 #include "lualib.h"
 
 #include "archive.h"
 #include "archive_entry.h"
+
+#include "aes.hpp"
 }
