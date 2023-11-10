@@ -18,7 +18,6 @@ public:
 
   unsigned int getShader(const std::string &shaderName);
 
-  // Modify the utility function signatures to include 'shaderName'.
   void setBool(const std::string &shaderName, const std::string &name,
                bool value) const;
   void setInt(const std::string &shaderName, const std::string &name,
@@ -26,6 +25,5 @@ public:
   void setFloat(const std::string &shaderName, const std::string &name,
                 float value) const;
 
-  // Added function to delete a shader.
   void deleteShader(const std::string &shaderName);
 };
