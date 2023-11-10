@@ -14,6 +14,10 @@ struct Camera {
                      // closest point at which objects are visible.
   float farPlane;    // The distance to the far clipping plane, defining the
                      // farthest point at which objects are visible.
+
+  Camera()
+      : fieldOfView(100.0f), aspectRatio(16.0f / 9.0f), nearPlane(0.1f),
+        farPlane(100.0f) {}
 };
 
 

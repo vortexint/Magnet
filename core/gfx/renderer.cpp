@@ -17,6 +17,22 @@ float texCoords[] = {
 unsigned int ID, VBO, VAO;
 //
 
+void Renderer::UpdateViewProjectionMatrix() {
+  mat4 projection, view;
+
+  glm_perspective(
+    glm_rad(activeCamera_.fieldOfView),
+    activeCamera_.aspectRatio,
+    activeCamera_.nearPlane,
+    activeCamera_.farPlane,
+    projection
+  );
+
+  // glm_lookat(float *eye, float *center, float *up, vec4 *dest)
+
+  // update the matrices in the vertex shader
+}
+
 Renderer::Renderer(AssetManager &assetManager)
     : assetMgr_(assetManager), shaderMgr_(assetManager) {
   /* OpenGL configuration */
@@ -26,7 +42,7 @@ Renderer::Renderer(AssetManager &assetManager)
 
   // TESTING
   ID = shaderMgr_.genShader("myShader", "shaders/vert.glsl",
-                                 "shaders/frag.glsl");
+                            "shaders/frag.glsl");
 
   glGenVertexArrays(1, &VAO);
   glGenBuffers(1, &VBO);
@@ -61,7 +77,6 @@ void Renderer::Render() const {
 }
 
 void Renderer::SetCamera(const magnetar::Camera &camera) {
-  // Maybe?
-  // shaderMgr_.SetCameraParameters(camera.fieldOfView, camera.aspectRatio,
-  //                               camera.nearPlane, camera.farPlane);
+  activeCamera_ = camera;
+  UpdateViewProjectionMatrix();
 }

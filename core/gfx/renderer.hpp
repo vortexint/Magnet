@@ -6,9 +6,11 @@
 /* Game renderer */
 
 class Renderer {
-
   AssetManager &assetMgr_;
   ShaderManager shaderMgr_;
+  magnetar::Camera activeCamera_;
+
+  void UpdateViewProjectionMatrix();
 
 public:
   Renderer(AssetManager &assetManager);
