@@ -1,18 +1,18 @@
 #include "shader_mgr.hpp"
 
 ShaderManager::ShaderManager(AssetManager &asset_manager)
-    : asset_manager_(asset_manager) {}
+    : asset_mgr_(asset_manager) {}
 
 unsigned int ShaderManager::genShader(const std::string &shaderName,
                                       const std::string &vertexPath,
                                       const std::string &fragmentPath) {
   size_t dataSize;
-  asset_manager_.openArchive();
-  unsigned char *vShaderData = asset_manager_.getAsset(vertexPath, dataSize);
+  asset_mgr_.openArchive();
+  unsigned char *vShaderData = asset_mgr_.getAsset(vertexPath, dataSize);
   std::string vShaderCodeStr(reinterpret_cast<char *>(vShaderData), dataSize);
-  unsigned char *fShaderData = asset_manager_.getAsset(fragmentPath, dataSize);
+  unsigned char *fShaderData = asset_mgr_.getAsset(fragmentPath, dataSize);
   std::string fShaderCodeStr(reinterpret_cast<char *>(fShaderData), dataSize);
-  asset_manager_.closeArchive();
+  asset_mgr_.closeArchive();
 
   const char *vShaderCode = vShaderCodeStr.c_str();
   const char *fShaderCode = fShaderCodeStr.c_str();

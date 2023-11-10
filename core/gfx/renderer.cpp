@@ -59,3 +59,9 @@ void Renderer::Render() const {
   glBindVertexArray(VAO);
   glDrawArrays(GL_TRIANGLES, 0, 3);
 }
+
+void Renderer::SetCamera(const magnetar::Camera &camera) {
+  // Maybe?
+  // shaderMgr_.SetCameraParameters(camera.fieldOfView, camera.aspectRatio,
+  //                               camera.nearPlane, camera.farPlane);
+}

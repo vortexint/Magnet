@@ -3,7 +3,7 @@
 
 
 SceneManager::SceneManager() {
-  
+
 }
 
 void SceneManager::Update() { ecs.progress(); }

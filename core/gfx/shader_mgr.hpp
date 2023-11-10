@@ -3,7 +3,7 @@
 #include "io/asset_mgr.hpp"
 
 class ShaderManager {
-  AssetManager &asset_manager_;
+  AssetManager &asset_mgr_;
   std::unordered_map<std::string, unsigned int> shaders_;
 
   // Utility function for checking shader compilation/linking errors.
