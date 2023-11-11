@@ -10,7 +10,7 @@ class WindowManager {
   std::unique_ptr<Renderer> renderer_;
 
 public:
-  WindowManager(int width, int height, const char *title, AssetManager &asset_manager);
+  WindowManager(int width, int height, const char *title, AssetManager &asset_manager, SceneManager &scene_manager);
   ~WindowManager();
 
   static void resize_callback(GLFWwindow *window, int width, int height);

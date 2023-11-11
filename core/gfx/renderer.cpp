@@ -1,4 +1,5 @@
 #include "renderer.hpp"
+#include "components.hpp"
 
 // TESTING
 float vertices[18] = {
@@ -17,24 +18,12 @@ float texCoords[] = {
 unsigned int ID, VBO, VAO;
 //
 
-void Renderer::UpdateViewProjectionMatrix() {
-  mat4 projection, view;
+Renderer::Renderer(AssetManager &assetManager, SceneManager &sceneManager)
+    : assetMgr_(assetManager), shaderMgr_(assetManager), sceneMgr_(sceneManager) {
+  /* GLAD manages function pointers for OpenGL so initialize GLAD
+   * before any OpenGL function is called */
+  gladLoadGL();
 
-  glm_perspective(
-    glm_rad(activeCamera_.fieldOfView),
-    activeCamera_.aspectRatio,
-    activeCamera_.nearPlane,
-    activeCamera_.farPlane,
-    projection
-  );
-
-  // glm_lookat(float *eye, float *center, float *up, vec4 *dest)
-
-  // update the matrices in the vertex shader
-}
-
-Renderer::Renderer(AssetManager &assetManager)
-    : assetMgr_(assetManager), shaderMgr_(assetManager) {
   /* OpenGL configuration */
   glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
   glEnable(GL_DEPTH_TEST);
@@ -46,8 +35,8 @@ Renderer::Renderer(AssetManager &assetManager)
 
   glGenVertexArrays(1, &VAO);
   glGenBuffers(1, &VBO);
-  // bind the Vertex Array Object first, then bind and set vertex buffer(s),
-  // and then configure vertex attributes(s).
+  /* bind Vertex Array Object first then bind and set vertex buffer(s),
+   * then configure vertex attributes(s). */
   glBindVertexArray(VAO);
 
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -71,12 +60,21 @@ void Renderer::Clear() const {
 
 void Renderer::Render() const {
 
+  mat4 projection, view;
+
+  // glm_perspective(
+  //   glm_rad(activeCamera_.fieldOfView),
+  //   activeCamera_.aspectRatio,
+  //   activeCamera_.nearPlane,
+  //   activeCamera_.farPlane,
+  //   projection
+  //);
+
+  // glm_lookat(float *eye, float *center, float *up, vec4 *dest)
+
+  // update the matrices in the vertex shader
+
   glUseProgram(ID);
   glBindVertexArray(VAO);
   glDrawArrays(GL_TRIANGLES, 0, 3);
-}
-
-void Renderer::SetCamera(const magnetar::Camera &camera) {
-  activeCamera_ = camera;
-  UpdateViewProjectionMatrix();
 }

@@ -4,7 +4,7 @@
 #include "stb_image.h"
 
 WindowManager::WindowManager(int width, int height, const char *title,
-                             AssetManager &asset_manager)
+                             AssetManager &asset_manager, SceneManager &scene_manager)
     : asset_manager_(asset_manager) {
   if (!glfwInit()) {
     throw std::runtime_error("Failed to initialize GLFW");
@@ -45,11 +45,7 @@ WindowManager::WindowManager(int width, int height, const char *title,
   glfwMakeContextCurrent(window_);
   glfwSetFramebufferSizeCallback(window_, resize_callback);
 
-  /* GLAD manages function pointers for OpenGL so we initialize GLAD
-   * before any OpenGL function is called */
-  gladLoadGL();
-
-  renderer_ = std::make_unique<Renderer>(asset_manager);
+  renderer_ = std::make_unique<Renderer>(asset_manager, scene_manager);
 }
 
 WindowManager::~WindowManager() {

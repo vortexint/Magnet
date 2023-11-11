@@ -1,23 +1,22 @@
 #pragma once
 
+#include "scene_mgr.hpp"
+
 #include "gfx/shader_mgr.hpp"
-#include "components.hpp"
 
 /* Game renderer */
 
 class Renderer {
   AssetManager &assetMgr_;
-  ShaderManager shaderMgr_;
-  magnetar::Camera activeCamera_;
+  SceneManager &sceneMgr_;
 
-  void UpdateViewProjectionMatrix();
+  ShaderManager shaderMgr_;
 
 public:
-  Renderer(AssetManager &assetManager);
+  Renderer(AssetManager &assetManager, SceneManager &sceneManager);
 
   void Clear() const;
-
   void Render() const;
 
-  void SetCamera(const magnetar::Camera &camera);
+  void SetActiveCamera(flecs::entity camera);
 };

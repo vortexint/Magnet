@@ -10,7 +10,9 @@ const char *const SECURE_ASSETS_ARCHIVE = "data";
 
 class GameContext : public Application {
 public:
-  GameContext(AssetManager &asset_manager) : Application(asset_manager) {
+
+  GameContext(AssetManager &asset_manager, SceneManager &scene_manager)
+      : Application(asset_manager, scene_manager) {
     // Additional initialization if needed
   }
 

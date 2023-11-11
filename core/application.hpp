@@ -5,10 +5,11 @@
 
 class Application {
   AssetManager &assetMgr_;
-  SceneManager sceneMgr_;
+  SceneManager &sceneMgr_;
 
 public:
-  Application(AssetManager &asset_manager);
+  Application(AssetManager &asset_manager,
+              SceneManager &SceneManager);
 
   void Update();
 };

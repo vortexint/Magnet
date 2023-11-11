@@ -5,9 +5,9 @@ git submodule update --init --recursive --progress
 ```
 
 ## Content management
-By convention, the contents of `assets/` are files to be packaged with the game, within it's archive that is loaded in run-time
+By convention, the contents of the project's `assets/` are files to be packaged with the game to an archive that is loaded in run-time
 
-> **Note**: the same applies to core
+The `core` includes default assets for rendering and scripting.
 
 ## Projects
 
