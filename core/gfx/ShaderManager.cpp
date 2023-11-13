@@ -1,7 +1,9 @@
-#include "shader_mgr.hpp"
+#include "magnetar/ShaderManager.hpp"
+
+#include <glad/glad.h>
 
 ShaderManager::ShaderManager(AssetManager &asset_manager)
-    : asset_mgr_(asset_manager) {}
+  : asset_mgr_(asset_manager) {}
 
 unsigned int ShaderManager::genShader(const std::string &shaderName,
                                       const std::string &vertexPath,
@@ -77,20 +79,21 @@ void ShaderManager::checkCompileErrors(unsigned int shader, std::string type) {
   if (type != "PROGRAM") {
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
     if (success) {
-      return; // Shader compilation successful, no need to proceed.
+      return;  // Shader compilation successful, no need to proceed.
     }
 
     glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-    std::cout << "ERROR::SHADER_COMPILATION_ERROR of type: " << type << "\n"
-              << infoLog << "\n --- " << std::endl;
+    //std::cout << "ERROR::SHADER_COMPILATION_ERROR of type: " << type << "\n"
+    //          << infoLog << "\n --- " << std::endl;
+              
   } else {
     glGetProgramiv(shader, GL_LINK_STATUS, &success);
     if (success) {
-      return; // Program linking successful, no need to proceed.
+      return;  // Program linking successful, no need to proceed.
     }
 
     glGetProgramInfoLog(shader, 1024, NULL, infoLog);
-    std::cout << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n"
-              << infoLog << "\n --- " << std::endl;
+    //std::cout << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n"
+    //          << infoLog << "\n --- " << std::endl;
   }
 }

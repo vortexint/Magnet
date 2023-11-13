@@ -1,6 +1,6 @@
 #pragma once
 
-#include "io/asset_mgr.hpp"
+#include "magnetar/AssetManager.hpp"
 
 class ShaderManager {
   AssetManager &asset_mgr_;
@@ -9,7 +9,7 @@ class ShaderManager {
   // Utility function for checking shader compilation/linking errors.
   void checkCompileErrors(unsigned int shader, std::string type);
 
-public:
+ public:
   ShaderManager(AssetManager &asset_manager);
 
   unsigned int genShader(const std::string &shaderName,

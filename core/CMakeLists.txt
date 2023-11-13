@@ -4,17 +4,10 @@ add_library(magnetar-core STATIC)
 add_library(magnetar::core ALIAS magnetar-core)
 
 target_sources(magnetar-core PRIVATE
-# GFX
   gfx/glad.c
-  gfx/renderer.cpp
-  gfx/shader_mgr.cpp
-  gfx/window.cpp
-# I/O
-  io/asset_mgr.cpp
-  io/input.cpp
-###
-  application.cpp
-  scene_mgr.cpp
+  gfx/ShaderManager.cpp
+  ApplicationContext.cpp
+  AssetManager.cpp
 )
 
 #target_precompile_headers(${PROJECT_NAME} PRIVATE stdafx.hpp)
@@ -32,12 +25,11 @@ target_compile_options(magnetar-core PUBLIC
 
 find_package(OpenGL REQUIRED)
 
-target_include_directories(magnetar-core PUBLIC
-                           # libraries
-                           ${CMAKE_SOURCE_DIR}/submodules/libarchive/libarchive
+target_include_directories(magnetar-core PRIVATE
                            ${OPENGL_INCLUDE_DIR}
                            PUBLIC
-                           ${CMAKE_CURRENT_SOURCE_DIR}
+                           ${CMAKE_CURRENT_SOURCE_DIR}/include
+                           ${CMAKE_SOURCE_DIR}/submodules/libarchive/libarchive
 )
 
 target_link_libraries(magnetar-core PUBLIC
@@ -47,6 +39,7 @@ target_link_libraries(magnetar-core PUBLIC
                       glfw
                       archive_static
                       lua_static
+                      spdlog
                       tiny-aes
 )
 

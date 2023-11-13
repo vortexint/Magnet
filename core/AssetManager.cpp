@@ -1,14 +1,13 @@
-#include "asset_mgr.hpp"
+#include "magnetar/AssetManager.hpp"
+
+#include <spdlog/spdlog.h>
 
 AssetManager::AssetManager(const char *secure_archive)
     : SECURE_ARCHIVE(secure_archive) {
   int openResult = openArchive();
-  if (openResult == -1) {
-    // Log error message
-    std::cout << "Error opening archive: " << archive_error_string(a)
-              << std::endl;
-    return;
-  }
+  if (openResult == -1)
+    spdlog::critical("Error opening archive: {}", archive_error_string(a));
+
 }
 
 AssetManager::~AssetManager() { closeArchive(); }
@@ -77,8 +76,7 @@ unsigned char *AssetManager::getAsset(std::string assetPath, size_t &dataSize) {
       return assetCache[assetPath].get();
     }
   }
-
-  /* Asset doesn't exist in the archive */
+  spdlog::error("Asset {} not found in archive", assetPath);
 
   dataSize = 0;
   return nullptr;

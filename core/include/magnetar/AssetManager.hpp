@@ -1,6 +1,11 @@
 #pragma once
 
-#include "stdafx.hpp"
+#include <memory>
+#include <unordered_map>
+#include <cstring>
+
+#include "archive.h"
+#include "archive_entry.h"
 
 class AssetManager {
 private:
