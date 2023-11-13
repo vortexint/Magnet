@@ -1,6 +1,8 @@
 #include "magnetar/AssetManager.hpp"
 
 #include <spdlog/spdlog.h>
+#include <archive.h>
+#include <archive_entry.h>
 
 AssetManager::AssetManager(const char *secure_archive)
     : SECURE_ARCHIVE(secure_archive) {

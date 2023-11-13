@@ -5,7 +5,9 @@ add_library(magnetar::core ALIAS magnetar-core)
 
 target_sources(magnetar-core PRIVATE
   gfx/glad.c
+  gfx/Renderer.cpp
   gfx/ShaderManager.cpp
+  gfx/WindowManager.cpp
   ApplicationContext.cpp
   AssetManager.cpp
 )

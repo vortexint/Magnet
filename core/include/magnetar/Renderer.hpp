@@ -1,15 +1,22 @@
 #pragma once
 
-#include "Components.hpp"
 #include <flecs.h>
+
+#include "Components.hpp"
+
+// forward declarations
+struct GLFWwindow;
 
 using namespace magnetar::components;
 
 class Renderer {
-  void RenderEntity(Transform &transform, MeshRenderer &render);
+  flecs::world* ecs;
+  flecs::entity activeCamera;
 
-public:
-  Renderer(flecs::world &ecs);
+ public:
+  Renderer(flecs::world* ecs);
 
-  void SetActiveCamera(flecs::entity cameraEntity);
+  void setActiveCamera(flecs::entity cameraEntity);
+
+  static void resizeCallback(GLFWwindow* window, int width, int height);
 };

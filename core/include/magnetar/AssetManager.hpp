@@ -4,8 +4,9 @@
 #include <unordered_map>
 #include <cstring>
 
-#include "archive.h"
-#include "archive_entry.h"
+// forward declarations
+struct archive;
+struct archive_entry;
 
 class AssetManager {
 private:

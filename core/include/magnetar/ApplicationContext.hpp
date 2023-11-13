@@ -9,14 +9,17 @@
 #include <memory>
 
 class ApplicationContext {
-  static std::unique_ptr<flecs::world> ecs;
-  static std::unique_ptr<AssetManager> assetManager;
+  static std::unique_ptr<flecs::world>  ecs;
+  static std::unique_ptr<AssetManager>  assetManager;
   static std::unique_ptr<WindowManager> windowManager;
   static std::unique_ptr<Renderer>      renderer;
 
  public:
+  ApplicationContext() = delete;
+
   static void initialize(const char *secureArchivePath, const char *gameTitle,
                          uint32_t width, uint32_t height);
+                         
   static void run(void);
 
   static AssetManager &getAssetManager() { return *assetManager; }
