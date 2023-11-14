@@ -1,20 +1,21 @@
 #include "magnetar/ShaderManager.hpp"
 
 #include <glad/glad.h>
+#include <spdlog/spdlog.h>
 
-ShaderManager::ShaderManager(AssetManager &asset_manager)
-  : asset_mgr_(asset_manager) {}
+ShaderManager::ShaderManager(AssetManager* assetMgr)
+  : assetManager(assetMgr) {}
 
 unsigned int ShaderManager::genShader(const std::string &shaderName,
                                       const std::string &vertexPath,
                                       const std::string &fragmentPath) {
   size_t dataSize;
-  asset_mgr_.openArchive();
-  unsigned char *vShaderData = asset_mgr_.getAsset(vertexPath, dataSize);
+  assetManager->openArchive();
+  unsigned char *vShaderData = assetManager->getAsset(vertexPath, dataSize);
   std::string vShaderCodeStr(reinterpret_cast<char *>(vShaderData), dataSize);
-  unsigned char *fShaderData = asset_mgr_.getAsset(fragmentPath, dataSize);
+  unsigned char *fShaderData = assetManager->getAsset(fragmentPath, dataSize);
   std::string fShaderCodeStr(reinterpret_cast<char *>(fShaderData), dataSize);
-  asset_mgr_.closeArchive();
+  assetManager->closeArchive();
 
   const char *vShaderCode = vShaderCodeStr.c_str();
   const char *fShaderCode = fShaderCodeStr.c_str();
@@ -45,7 +46,7 @@ unsigned int ShaderManager::genShader(const std::string &shaderName,
   return shaderProgram;
 }
 
-unsigned int ShaderManager::getShader(const std::string &shaderName) {
+unsigned int ShaderManager::getShader(const std::string &shaderName) const {
   return shaders_.at(shaderName);
 }
 
@@ -67,6 +68,13 @@ void ShaderManager::setFloat(const std::string &shaderName,
               value);
 }
 
+void ShaderManager::setMat4(const std::string &shaderName,
+                            const std::string &name, const mat4 matrix) const {
+  unsigned int shader = getShader(shaderName);
+  glUniformMatrix4fv(glGetUniformLocation(shader, name.c_str()), 1, GL_FALSE,
+                     (const GLfloat *)matrix);
+}
+
 void ShaderManager::deleteShader(const std::string &shaderName) {
   glDeleteProgram(shaders_.at(shaderName));
   shaders_.erase(shaderName);
@@ -83,9 +91,10 @@ void ShaderManager::checkCompileErrors(unsigned int shader, std::string type) {
     }
 
     glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-    //std::cout << "ERROR::SHADER_COMPILATION_ERROR of type: " << type << "\n"
-    //          << infoLog << "\n --- " << std::endl;
-              
+    spdlog::error("SHADER_COMPILATION_ERROR of type: {}", type);
+    spdlog::error("{}", infoLog);
+    spdlog::error("---");
+
   } else {
     glGetProgramiv(shader, GL_LINK_STATUS, &success);
     if (success) {
@@ -93,7 +102,8 @@ void ShaderManager::checkCompileErrors(unsigned int shader, std::string type) {
     }
 
     glGetProgramInfoLog(shader, 1024, NULL, infoLog);
-    //std::cout << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n"
-    //          << infoLog << "\n --- " << std::endl;
+    spdlog::error("PROGRAM_LINKING_ERROR of type: {}", type);
+    spdlog::error("{}", infoLog);
+    spdlog::error("---");
   }
 }

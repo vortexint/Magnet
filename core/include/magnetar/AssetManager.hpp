@@ -2,7 +2,7 @@
 
 #include <memory>
 #include <unordered_map>
-#include <cstring>
+#include <string>
 
 // forward declarations
 struct archive;
@@ -23,7 +23,7 @@ public:
   AssetManager(const char *secure_archive);
   ~AssetManager();
 
-  // Return -1 if could not open
+  // Returns -1 if could not open
   int openArchive();
   void closeArchive();
 

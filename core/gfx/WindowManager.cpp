@@ -1,21 +1,46 @@
+#include "magnetar/WindowManager.hpp"
+
 #include <GLFW/glfw3.h>
+#include <spdlog/spdlog.h>
 
-#include <magnetar/Renderer.hpp>
-#include <magnetar/WindowManager.hpp>
+#include "magnetar/Renderer.hpp"
 
-WindowManager::WindowManager(const char* title, uint32_t width, uint32_t height) {
+WindowManager::WindowManager(Renderer* renderer, const char* windowTitle) : renderer(renderer)  {
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+  glfwWindowHint(GLFW_SAMPLES, 4);
+
+  if (!glfwInit()) {
+    spdlog::critical("Failed to initialize GLFW");
+  }
+
+  window = glfwCreateWindow(INIT_WIDTH, INIT_HEIGHT, windowTitle, nullptr, nullptr);
+
+  glfwMakeContextCurrent(window);
+
+  glfwSetWindowUserPointer(window, this);
+
+  /* Setup callbacks */
+  glfwSetFramebufferSizeCallback(window, resizeCallback);
 }
 
 WindowManager::~WindowManager() {
-  glfwDestroyWindow(this->window);
+  glfwDestroyWindow(window);
   glfwTerminate();
 }
 
-void WindowManager::pollEvents() {
-  glfwPollEvents();
+void WindowManager::swapBuffers() { glfwSwapBuffers(window); }
+
+void WindowManager::pollEvents() { glfwPollEvents(); }
+
+void WindowManager::resizeCallback(GLFWwindow* window, int width, int height) {
+  static_cast<WindowManager*>(glfwGetWindowUserPointer(window))
+    ->renderer->resize(width, height);
 }
 
-void WindowManager::setResizeCallback(Renderer* renderer) {
-  glfwSetFramebufferSizeCallback(window, renderer->resizeCallback);
+bool WindowManager::shouldClose() const {
+  return glfwWindowShouldClose(window);
 }

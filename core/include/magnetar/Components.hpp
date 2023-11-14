@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cglm/cglm.h>
-
 namespace magnetar::components {
 
 /* Components */

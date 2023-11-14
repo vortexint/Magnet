@@ -1,18 +1,26 @@
 #pragma once
 
-#include <GLFW/glfw3.h>
+#include <cstdint>
 
-class Renderer; // Forward declaration
+// forward declarations
+class Renderer;
+struct GLFWwindow;
 class WindowManager {
   GLFWwindow* window;
+  Renderer* renderer;
 
  public:
-  WindowManager(const char* title, uint32_t width, uint32_t height);
+  WindowManager(Renderer* renderer, const char* windowTitle);
   ~WindowManager();
 
+  void swapBuffers();
   static void pollEvents();
 
-  void setResizeCallback(Renderer* renderer);
+  /* Callbacks */
+  static void resizeCallback(GLFWwindow* window, int width, int height);
 
-  bool shouldClose() const { return glfwWindowShouldClose(window); }
+  /* Getters */
+  GLFWwindow* getWindow() { return window; }
+
+  bool shouldClose() const;
 };

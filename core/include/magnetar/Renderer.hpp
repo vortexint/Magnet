@@ -1,22 +1,34 @@
 #pragma once
+/**
+ * @file Renderer.hpp
+ * @brief GLFW agnostic GL rendering component
+ */
 
+#include <cstdint>
 #include <flecs.h>
 
-#include "Components.hpp"
+const uint32_t INIT_WIDTH = 1280;
+const uint32_t INIT_HEIGHT = 720;
 
 // forward declarations
-struct GLFWwindow;
-
-using namespace magnetar::components;
-
+class ShaderManager;
 class Renderer {
   flecs::world* ecs;
   flecs::entity activeCamera;
 
+  ShaderManager* shaderManager;
+
+  int width = INIT_WIDTH;
+  int height = INIT_HEIGHT;
+
  public:
-  Renderer(flecs::world* ecs);
+  Renderer(flecs::world* ecs, ShaderManager* shaderManager);
+
+  void initialize();
+
+  void render() const;
 
   void setActiveCamera(flecs::entity cameraEntity);
 
-  static void resizeCallback(GLFWwindow* window, int width, int height);
+  void resize(int width, int height);
 };
