@@ -9,7 +9,7 @@
 /* ENTRY POINT */
 
 int main(void) {
-  ApplicationContext::initialize(SECURE_ASSETS_ARCHIVE, GAME_TITLE);
+  ApplicationContext::initialize(GAME_TITLE);
 
   /* Project code */
   AssetManager*  assetMgr  = ApplicationContext::getAssetManager();
@@ -20,7 +20,8 @@ int main(void) {
   // Load icon
   {
     size_t dataSize;
-    unsigned char *iconData = assetMgr->getAsset("icon.png", &dataSize);
+    unsigned char* iconData =
+      assetMgr->getAsset(SECURE_ASSETS_ARCHIVE, "icon.png", &dataSize);
 
     GLFWimage icons[1];
     icons[0].pixels =

@@ -21,7 +21,7 @@ class ApplicationContext {
  public:
   ApplicationContext() = delete;
 
-  static void initialize(const char *secureArchivePath, const char *gameTitle);
+  static void initialize(const char *gameTitle);
                          
   static void run(void);
 

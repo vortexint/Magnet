@@ -4,92 +4,54 @@
 #include <archive_entry.h>
 #include <spdlog/spdlog.h>
 
-AssetManager::AssetManager(const char* secure_archive)
-  : SECURE_ARCHIVE(secure_archive) {
-  int openResult = openArchive();
-  if (openResult == -1)
-    spdlog::critical("Error opening archive: {}", archive_error_string(a));
-  else
-    spdlog::info("Archive opened and indexed successfully");
-}
+const size_t BLOCK_SIZE = 10240;
 
-AssetManager::~AssetManager() { closeArchive(); }
+unsigned char* AssetManager::getAsset(const char* secure_archive,
+                                      const char* assetPath, size_t* dataSize) {
+  std::scoped_lock lock(mutex_);  // RAII-based mutex locking
 
-int AssetManager::openArchive() {
-  // Skip if archive is already open
-  if (archiveOpened) {
-    spdlog::warn("Archive is already open");
-    return 0;
-  }
-
-  a = archive_read_new();
+  struct archive* a = archive_read_new();
   archive_read_support_filter_lz4(a);
   archive_read_support_format_tar(a);
 
-  int r = archive_read_open_filename(a, SECURE_ARCHIVE, BLOCK_SIZE);
-  if (r != ARCHIVE_OK) {
-    spdlog::error("Failed to open archive: {}", archive_error_string(a));
-    return -1;
-  }
-
-  archiveOpened = true;
-  return 0;
-}
-
-void AssetManager::closeArchive() {
-  if (archiveOpened) {
+  // Open the archive file
+  if (archive_read_open_filename(a, secure_archive, BLOCK_SIZE) != ARCHIVE_OK) {
+    spdlog::error("Could not open archive {}: {}", secure_archive,
+                  archive_error_string(a));
     archive_read_free(a);
-    a = nullptr;
-    archiveOpened = false;
-    spdlog::info("Archive closed");
-  }
-}
-
-unsigned char* AssetManager::getAsset(std::string assetPath, size_t* dataSize) {
-  std::lock_guard<std::mutex> lock(assetAccessMutex);
-  size_t localDataSize;
-
-  // User may not be interested in dataSize
-  if (!dataSize) {
-    dataSize = &localDataSize;
+    throw std::runtime_error(archive_error_string(a));
   }
 
-  auto cacheResult = assetCache.find(assetPath);
-  if (cacheResult != assetCache.end()) {
-    *dataSize = cacheResult->second.dataSize;
-    return cacheResult->second.data.get();
-  }
+  struct archive_entry* entry;
+  size_t size;
+  unsigned char* buffer = nullptr;
 
-  if (!archiveOpened) {
-    int openResult = openArchive();
-    if (openResult == -1) {
-      spdlog::error("Cannot open archive");
-      *dataSize = 0;
-      return nullptr;
-    }
-  }
-
-  *dataSize = 0;
-
-  // Extract assetPath from archive
-  // Loop for archive extraction
   while (archive_read_next_header(a, &entry) == ARCHIVE_OK) {
     const char* currentFile = archive_entry_pathname(entry);
-
-    if (assetPath == currentFile) {
-      *dataSize = archive_entry_size(entry);
-      auto buffer = std::make_unique<unsigned char[]>(*dataSize);
-      archive_read_data(a, buffer.get(), *dataSize);
-      assetCache[assetPath] = CachedAsset{std::move(buffer), *dataSize};
+    if (strcmp(currentFile, assetPath) == 0) {
+      size = archive_entry_size(entry);
+      buffer = new unsigned char[size];
+      if (archive_read_data(a, buffer, size) != static_cast<ssize_t>(size)) {
+        delete[] buffer;
+        spdlog::error("Failed to read asset data from {}: {}",
+                      secure_archive, archive_error_string(a));
+        archive_read_free(a);
+      }
+      if (dataSize) {
+        *dataSize = size;
+      }
       break;
     }
   }
 
-  if (*dataSize == 0) {
-    spdlog::warn("{} was not found in archive", assetPath);
-    return nullptr;
+  archive_read_free(a);
+
+  if (!buffer) {
+    spdlog::warn("'{}' not found in archive '{}'.", assetPath,
+                 secure_archive);
   }
 
-  // Retrieve from cache again after inserting
-  return assetCache[assetPath].data.get();
+  spdlog::info("'{}' successfully loaded from '{}'.", assetPath,
+               secure_archive);
+  return buffer;
 }

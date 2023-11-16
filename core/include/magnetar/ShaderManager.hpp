@@ -1,33 +1,34 @@
 #pragma once
 
 #include <cglm/cglm.h>
+#include <unordered_map>
 
 #include "magnetar/AssetManager.hpp"
 
 class ShaderManager {
   AssetManager *assetManager;
-  std::unordered_map<std::string, unsigned int> shaders;
+  std::unordered_map<const char*, unsigned int> shaders;
 
   // Utility function for checking shader compilation/linking errors.
-  void checkCompileErrors(unsigned int shader, std::string type);
+  void checkCompileErrors(unsigned int shader, const char* type);
 
  public:
   ShaderManager(AssetManager *assetManager);
 
-  unsigned int genShader(const std::string &shaderName,
-                         const std::string &vertexPath,
-                         const std::string &fragmentPath);
+  unsigned int genShader(const char* shaderName,
+                         const char* vertexPath,
+                         const char* fragmentPath);
 
-  unsigned int getShader(const std::string &shaderName) const;
+  unsigned int getShader(const char* shaderName) const;
 
-  void setBool(const std::string &shaderName, const std::string &name,
+  void setBool(const char* shaderName, const char* name,
                bool value) const;
-  void setInt(const std::string &shaderName, const std::string &name,
+  void setInt(const char* shaderName, const char* name,
               int value) const;
-  void setFloat(const std::string &shaderName, const std::string &name,
+  void setFloat(const char* shaderName, const char* name,
                 float value) const;
-  void setMat4(const std::string &shaderName, const std::string &name,
+  void setMat4(const char* shaderName, const char* name,
                const mat4 matrix) const;
 
-  void deleteShader(const std::string &shaderName);
+  void deleteShader(const char* shaderName);
 };

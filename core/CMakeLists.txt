@@ -52,6 +52,8 @@ else()
   message(FATAL_ERROR "Unknown platform: \"" ${CMAKE_SYSTEM_NAME} "\"")
 endif()
 
+target_compile_definitions(magnetar-core PUBLIC SECURE_ASSETS_ARCHIVE="data")
+
 ### Utilities ###
 
 function(magnetar_package)
