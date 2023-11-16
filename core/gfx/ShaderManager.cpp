@@ -3,19 +3,19 @@
 #include <glad/glad.h>
 #include <spdlog/spdlog.h>
 
-ShaderManager::ShaderManager(AssetManager* assetMgr)
-  : assetManager(assetMgr) {}
+ShaderManager::ShaderManager(AssetManager* assetMgr) : assetManager(assetMgr) {}
 
 unsigned int ShaderManager::genShader(const std::string &shaderName,
                                       const std::string &vertexPath,
                                       const std::string &fragmentPath) {
   size_t dataSize;
-  assetManager->openArchive();
-  unsigned char *vShaderData = assetManager->getAsset(vertexPath, dataSize);
-  std::string vShaderCodeStr(reinterpret_cast<char *>(vShaderData), dataSize);
-  unsigned char *fShaderData = assetManager->getAsset(fragmentPath, dataSize);
-  std::string fShaderCodeStr(reinterpret_cast<char *>(fShaderData), dataSize);
+
   assetManager->closeArchive();
+  assetManager->openArchive();
+  unsigned char *vShaderData = assetManager->getAsset(vertexPath, &dataSize);
+  std::string vShaderCodeStr(reinterpret_cast<char *>(vShaderData), dataSize);
+  unsigned char *fShaderData = assetManager->getAsset(fragmentPath, &dataSize);
+  std::string fShaderCodeStr(reinterpret_cast<char *>(fShaderData), dataSize);
 
   const char *vShaderCode = vShaderCodeStr.c_str();
   const char *fShaderCode = fShaderCodeStr.c_str();
@@ -41,30 +41,30 @@ unsigned int ShaderManager::genShader(const std::string &shaderName,
   glDeleteShader(vertex);
   glDeleteShader(fragment);
 
-  shaders_.insert({shaderName, shaderProgram});
+  shaders.insert({shaderName, shaderProgram});
 
   return shaderProgram;
 }
 
 unsigned int ShaderManager::getShader(const std::string &shaderName) const {
-  return shaders_.at(shaderName);
+  return shaders.at(shaderName);
 }
 
 void ShaderManager::setBool(const std::string &shaderName,
                             const std::string &name, bool value) const {
-  glUniform1i(glGetUniformLocation(shaders_.at(shaderName), name.c_str()),
+  glUniform1i(glGetUniformLocation(shaders.at(shaderName), name.c_str()),
               static_cast<int>(value));
 }
 
 void ShaderManager::setInt(const std::string &shaderName,
                            const std::string &name, int value) const {
-  glUniform1i(glGetUniformLocation(shaders_.at(shaderName), name.c_str()),
+  glUniform1i(glGetUniformLocation(shaders.at(shaderName), name.c_str()),
               value);
 }
 
 void ShaderManager::setFloat(const std::string &shaderName,
                              const std::string &name, float value) const {
-  glUniform1f(glGetUniformLocation(shaders_.at(shaderName), name.c_str()),
+  glUniform1f(glGetUniformLocation(shaders.at(shaderName), name.c_str()),
               value);
 }
 
@@ -76,8 +76,8 @@ void ShaderManager::setMat4(const std::string &shaderName,
 }
 
 void ShaderManager::deleteShader(const std::string &shaderName) {
-  glDeleteProgram(shaders_.at(shaderName));
-  shaders_.erase(shaderName);
+  glDeleteProgram(shaders.at(shaderName));
+  shaders.erase(shaderName);
 }
 
 void ShaderManager::checkCompileErrors(unsigned int shader, std::string type) {
@@ -86,24 +86,16 @@ void ShaderManager::checkCompileErrors(unsigned int shader, std::string type) {
 
   if (type != "PROGRAM") {
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-    if (success) {
-      return;  // Shader compilation successful, no need to proceed.
-    }
+
+    if (success) return;  // Compilation successful, no need to proceed.
 
     glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-    spdlog::error("SHADER_COMPILATION_ERROR of type: {}", type);
-    spdlog::error("{}", infoLog);
-    spdlog::error("---");
-
+    spdlog::error("{0} SHADER: {1}", type, infoLog);
   } else {
     glGetProgramiv(shader, GL_LINK_STATUS, &success);
-    if (success) {
-      return;  // Program linking successful, no need to proceed.
-    }
+    if (success) return;  // Linking successful, no need to proceed.
 
     glGetProgramInfoLog(shader, 1024, NULL, infoLog);
-    spdlog::error("PROGRAM_LINKING_ERROR of type: {}", type);
-    spdlog::error("{}", infoLog);
-    spdlog::error("---");
+    spdlog::error("SHADER PROGRAM: {0}", infoLog);
   }
 }

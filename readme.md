@@ -14,7 +14,9 @@ The `core` includes default assets for rendering and scripting.
 ### Sandbox
 This is a sample project to demonstrate basic capabilities of the engine
 
-<!-- 
- headers only include what they need
- source files should use stdafx.hpp before including headers
+<!--
+ Developer notes:
+
+ - headers only include what they need
+ - source files should use stdafx.hpp before including headers
 -->

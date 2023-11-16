@@ -39,8 +39,8 @@ void Renderer::initialize() {
   // Add other config like stencil, alpha blending etc. as needed
 
   // TESTING
-  ID = shaderManager->genShader("myShader", "shaders/vert.glsl",
-                                "shaders/frag.glsl");
+  ID = shaderManager->genShader("myShader", "shaders/base.vert",
+                                "shaders/base.frag");
 
   glGenVertexArrays(1, &VAO);
   glGenBuffers(1, &VBO);
@@ -82,7 +82,7 @@ void Renderer::render() const {
   glm_lookat(
     (vec3){0.0f, 0.0f, 3.0f},  // Camera is at (0,0,3), in World Space
     (vec3){0.0f, 0.0f, 0.0f},  // and looks at the origin
-    (vec3){0.0f, 2.0f, 0.0f},  // Head is up (set to 0,-1,0 to look upside-down)
+    (vec3){0.0f, 1.0f, 0.0f},  // Head is up (set to 0,-1,0 to look upside-down)
     view);
 
   // 45 degrees field of view, 4:3 aspect ratio, display range: 0.1 unit <-> 100

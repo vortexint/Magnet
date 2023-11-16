@@ -4,16 +4,13 @@ add_library(magnetar-core STATIC)
 add_library(magnetar::core ALIAS magnetar-core)
 
 target_sources(magnetar-core PRIVATE
+  ApplicationContext.cpp
   gfx/glad.c
   gfx/Renderer.cpp
   gfx/ShaderManager.cpp
   gfx/WindowManager.cpp
-  ApplicationContext.cpp
-  AssetManager.cpp
+  io/AssetManager.cpp
 )
-
-#target_precompile_headers(${PROJECT_NAME} PRIVATE stdafx.hpp)
-
 target_compile_options(magnetar-core PUBLIC
     -O2
     # optimize for Size
@@ -63,16 +60,17 @@ function(magnetar_package)
   endif()
 
   add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    # it's best to remove tempdata to avoid shipping old assets
-    COMMAND rm -r ${CMAKE_BINARY_DIR}/tempdata || true
+  # remove tempdata so we
+  # 1. avoid shipping old assets
+  # 2. avoid merging unrelated assets from different projects
+  COMMAND rm -r ${CMAKE_BINARY_DIR}/tempdata || true
 
-    COMMAND mkdir -p ${CMAKE_BINARY_DIR}/tempdata
-    # merge core and project assets to new temp. dir
-    COMMAND cp -a ${MAGNETAR_CORE_ASSETS}/. ${CMAKE_BINARY_DIR}/tempdata
-    COMMAND cp -a ${ASSETS_DIR}/. ${CMAKE_BINARY_DIR}/tempdata
+  COMMAND mkdir -p ${CMAKE_BINARY_DIR}/tempdata
+  # merge core and project assets to new temp. dir
+  COMMAND cp -a ${MAGNETAR_CORE_ASSETS}/. ${CMAKE_BINARY_DIR}/tempdata
+  COMMAND cp -a ${ASSETS_DIR}/. ${CMAKE_BINARY_DIR}/tempdata
 
-    COMMAND tar -C ${CMAKE_BINARY_DIR}/tempdata -cvf - . | lz4 > $<TARGET_FILE_DIR:${PROJECT_NAME}>/data
-  )
+  COMMAND tar -C ${CMAKE_BINARY_DIR}/tempdata -cvf - . --transform='s,^\./,,' | lz4 > $<TARGET_FILE_DIR:${PROJECT_NAME}>/data)
 
   # decompress example:
   # lz4 -d folderABC.tar.lz4 -c | tar xvf -

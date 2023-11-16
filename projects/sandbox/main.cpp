@@ -19,9 +19,8 @@ int main(void) {
 
   // Load icon
   {
-    assetMgr->openArchive();
     size_t dataSize;
-    unsigned char *iconData = assetMgr->getAsset("icon.png", dataSize);
+    unsigned char *iconData = assetMgr->getAsset("icon.png", &dataSize);
 
     GLFWimage icons[1];
     icons[0].pixels =
@@ -31,8 +30,6 @@ int main(void) {
     glfwSetWindowIcon(window, 1, icons);
 
     free(icons[0].pixels);
-
-    assetMgr->closeArchive();
   }
 
   ApplicationContext::run();

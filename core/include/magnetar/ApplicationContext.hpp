@@ -14,9 +14,9 @@ class Renderer;
 class ApplicationContext {
   static std::unique_ptr<flecs::world>  ecs;
   static std::unique_ptr<AssetManager>  assetManager;
-  static std::unique_ptr<WindowManager> windowManager;
   static std::unique_ptr<ShaderManager> shaderManager;
   static std::unique_ptr<Renderer>      renderer;
+  static std::unique_ptr<WindowManager> windowManager;
 
  public:
   ApplicationContext() = delete;
