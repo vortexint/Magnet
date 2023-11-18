@@ -6,13 +6,29 @@ AssetManager::AssetManager() = default;
 
 AssetManager::~AssetManager() { closeArchive(); }
 
-void AssetManager::openArchive(std::string archivePath) {
+void AssetManager::openArchive(std::string archivePath,
+                               const std::string& password) {
   std::scoped_lock lock(mutex_);
   int error{};
-  archive_ = zip_open(archivePath.c_str(), 0, &error);
+  archive_ = zip_open(archivePath.c_str(), ZIP_RDONLY, &error);
   if (!archive_) {
-    spdlog::error("Could not open archive: {}", archivePath);
-    throw std::runtime_error("Could not open archive.");
+    spdlog::error("Could not open archive: {} (error code: {})", archivePath,
+                  error);
+    throw std::runtime_error("Could not open archive due to error code: " +
+                             std::to_string(error));
+  }
+
+  // If a password has been specified for this archive, apply it.
+  // This password will be used to decrypt files within the archive as they are
+  // read.
+  if (!password.empty() &&
+      zip_set_default_password(archive_, password.c_str()) < 0) {
+    zip_close(archive_);
+    archive_ = nullptr;
+    spdlog::error("Failed to set password for decrypting the archive: {}",
+                  archivePath);
+    throw std::runtime_error(
+      "Failed to set password for decrypting the archive.");
   }
 }
 

@@ -52,14 +52,15 @@ else()
   message(FATAL_ERROR "Unknown platform: \"" ${CMAKE_SYSTEM_NAME} "\"")
 endif()
 
-target_compile_definitions(magnetar-core PUBLIC SECURE_ASSETS_ARCHIVE="data.zip")
-
-### Utilities ###
+### Archive ###
 
 function(magnetar_package)
   if(NOT DEFINED ASSETS_DIR)
     message(FATAL_ERROR "Please define ASSETS_DIR it before calling magnetar_package()")
   endif()
+
+  string(TIMESTAMP TODAY "%Y%m%d") # Used as password for archive
+  target_compile_definitions(magnetar-core PUBLIC SECURE_ASSETS_ARCHIVE="data.zip" SECURE_ASSETS_PASSWORD="${TODAY}")
 
   add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
   # remove tempdata so we
@@ -73,6 +74,7 @@ function(magnetar_package)
   COMMAND cp -a ${ASSETS_DIR}/. ${CMAKE_BINARY_DIR}/tempdata
 
   # archive
-  COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/tempdata zip -r $<TARGET_FILE_DIR:${PROJECT_NAME}>/data .
+  COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/tempdata
+          zip --encrypt --password "${TODAY}" -r $<TARGET_FILE_DIR:${PROJECT_NAME}>/data .
   )
 endfunction()

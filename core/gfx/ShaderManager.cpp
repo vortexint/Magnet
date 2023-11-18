@@ -11,7 +11,7 @@ unsigned int ShaderManager::genShader(const char* shaderName,
                                       const char* vertexPath,
                                       const char* fragmentPath) {
 
-  assetManager->openArchive(SECURE_ASSETS_ARCHIVE);
+  assetManager->openArchive();
 
   std::string vertexSource, fragmentSource;
 

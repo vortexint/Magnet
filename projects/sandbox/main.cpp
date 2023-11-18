@@ -17,7 +17,7 @@ int main(void) {
 
   GLFWwindow* window = windowMgr->getWindow();
 
-  assetMgr->openArchive(SECURE_ASSETS_ARCHIVE);
+  assetMgr->openArchive();
   // Load icon
   {
     std::vector<unsigned char> imageData;
