@@ -10,43 +10,32 @@ ShaderManager::ShaderManager(AssetManager* assetMgr) : assetManager(assetMgr) {}
 unsigned int ShaderManager::genShader(const char* shaderName,
                                       const char* vertexPath,
                                       const char* fragmentPath) {
-  size_t vShaderSize, fShaderSize;
 
   assetManager->openArchive(SECURE_ASSETS_ARCHIVE);
 
+  std::string vertexSource, fragmentSource;
+
   // Retrieve the vertex shader source
 
-  unsigned char* vShaderData =
-    assetManager->getAsset(vertexPath, &vShaderSize);
-  if (!vShaderData) {
-    throw std::runtime_error("Vertex shader asset could not be loaded.");
-  }
-  // Safely convert the data to a const GLchar* for OpenGL
-  const GLchar* vShader = reinterpret_cast<const GLchar*>(vShaderData);
+  assetManager->getAsset(vertexPath, vertexSource);
+  assetManager->getAsset(fragmentPath, fragmentSource);
 
-  // Retrieve the fragment shader source
-  unsigned char* fShaderData =
-    assetManager->getAsset(fragmentPath, &fShaderSize);
-  if (!fShaderData) {
-    delete[] vShaderData;
-    throw std::runtime_error("Fragment shader asset could not be loaded.");
-  }
-  // Safely convert the data to a const GLchar* for OpenGL
-  const GLchar* fShader = reinterpret_cast<const GLchar*>(fShaderData);
+  const GLchar* vertData[] = {vertexSource.c_str()};
+  const GLchar* fragData[] = {fragmentSource.c_str()};
 
   assetManager->closeArchive();
 
-  unsigned int vertex, fragment;
+  GLuint vertex, fragment;
 
   // Create and compile the vertex shader
   vertex = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vertex, 1, &vShader, nullptr);
+  glShaderSource(vertex, 1, vertData, nullptr);
   glCompileShader(vertex);
   checkCompileErrors(vertex, "VERTEX");
 
   // Create and compile the fragment shader
   fragment = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fragment, 1, &fShader, nullptr);
+  glShaderSource(fragment, 1, fragData, nullptr);
   glCompileShader(fragment);
   checkCompileErrors(fragment, "FRAGMENT");
 
@@ -60,10 +49,6 @@ unsigned int ShaderManager::genShader(const char* shaderName,
   // Clean up shaders now that they are linked
   glDeleteShader(vertex);
   glDeleteShader(fragment);
-
-  // Free the loaded shader data
-  delete[] vShaderData;
-  delete[] fShaderData;
 
   // Store and return the shader program ID
   shaders.insert({shaderName, shaderProgram});

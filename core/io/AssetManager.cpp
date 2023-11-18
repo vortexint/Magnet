@@ -2,77 +2,78 @@
 
 #include <spdlog/spdlog.h>
 
-#include <iostream>
-#include <stdexcept>
-
-AssetManager::AssetManager() : zipArchive(nullptr) {}
+AssetManager::AssetManager() = default;
 
 AssetManager::~AssetManager() { closeArchive(); }
 
-bool AssetManager::openArchive(const std::string& archivePath) {
-  int error;
-  zipArchive = zip_open(archivePath.c_str(), ZIP_RDONLY, &error);
-
-  if (!zipArchive) {
-    // Handle error or convert it to a C++ exception:
-    zip_error_t zipError;
-    zip_error_init_with_code(&zipError, error);
-    std::string errorMessage = zip_error_strerror(&zipError);
-    zip_error_fini(&zipError);
-    throw std::runtime_error(errorMessage);
+void AssetManager::openArchive(std::string archivePath) {
+  std::scoped_lock lock(mutex_);
+  int error{};
+  archive_ = zip_open(archivePath.c_str(), 0, &error);
+  if (!archive_) {
+    spdlog::error("Could not open archive: {}", archivePath);
+    throw std::runtime_error("Could not open archive.");
   }
-
-  return true;
 }
 
 void AssetManager::closeArchive() {
-  if (zipArchive) {
-    zip_close(zipArchive);
-    zipArchive = nullptr;
+  std::scoped_lock lock(mutex_);
+  if (archive_) {
+    zip_close(archive_);
+    archive_ = nullptr;
   }
 }
 
-std::vector<unsigned char> AssetManager::getAsset(
-  const std::string& assetName) {
-  // Check if the asset is already in the cache
-  auto it = cache.find(assetName);
-  if (it != cache.end()) {
-    return it->second;
+std::shared_ptr<std::vector<unsigned char>> AssetManager::readAsset(
+  std::string_view assetName) {
+  std::string assetNameStr{assetName};  // Convert to string for map lookup
+  auto cached = cache_.find(assetNameStr);
+  if (cached != cache_.end()) {
+    return cached->second;
   }
 
-  // Locate the file inside the ZIP archive
-  zip_int64_t index = zip_name_locate(zipArchive, assetName.c_str(), 0);
+  zip_int64_t index = zip_name_locate(archive_, assetNameStr.c_str(), 0);
   if (index == -1) {
-    throw std::runtime_error("File not found in the archive");
+    spdlog::warn("Asset '{}' not found in archive.", assetNameStr);
+    return nullptr;
   }
 
-  // Open the file inside the ZIP archive
-  zip_file_t* file = zip_fopen_index(zipArchive, index, ZIP_FL_ENC_CP437);
+  zip_file_t* file = zip_fopen_index(archive_, index, 0);
   if (!file) {
-    throw std::runtime_error("Unable to open file within the archive");
+    spdlog::error("Failed to open asset '{}' in archive.", assetNameStr);
+    return nullptr;
   }
 
-  // Get file information
-  zip_stat_t file_stat;
-  if (zip_stat_index(zipArchive, index, ZIP_FL_ENC_CP437, &file_stat) != 0) {
+  zip_stat_t stat;
+  if (zip_stat_index(archive_, index, 0, &stat) != 0) {
+    spdlog::error("Failed to stat asset '{}' in archive.", assetNameStr);
     zip_fclose(file);
-    throw std::runtime_error(
-      "Unable to retrieve file information from the archive");
+    return nullptr;
   }
 
-  // Read file contents
-  std::vector<unsigned char> buffer(file_stat.size);
-  zip_int64_t bytesRead = zip_fread(file, buffer.data(), file_stat.size);
-  if (bytesRead < 0) {
+  auto buffer = std::make_shared<std::vector<unsigned char>>(stat.size);
+  if (zip_fread(file, buffer->data(), stat.size) != stat.size) {
+    spdlog::error("Failed to read asset '{}' from archive.", assetNameStr);
     zip_fclose(file);
-    throw std::runtime_error("Error reading file from the archive");
+    return nullptr;
   }
+
   zip_fclose(file);
-
-  // If the file was successfully read, add it to the cache
-  if (bytesRead == file_stat.size) {
-    cache[assetName] = buffer;
-  }
-
+  cache_[assetNameStr] = buffer;  // Cache the data.
   return buffer;
+}
+
+void AssetManager::getAsset(std::string_view assetName,
+                            std::vector<unsigned char>& buffer) {
+  std::shared_ptr<std::vector<unsigned char>> data = readAsset(assetName);
+  if (data) {
+    buffer = *data;
+  }
+}
+
+void AssetManager::getAsset(std::string_view assetName, std::string& buffer) {
+  std::shared_ptr<std::vector<unsigned char>> data = readAsset(assetName);
+  if (data) {
+    buffer.assign(data->begin(), data->end());
+  }
 }

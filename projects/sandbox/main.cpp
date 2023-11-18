@@ -20,14 +20,12 @@ int main(void) {
   assetMgr->openArchive(SECURE_ASSETS_ARCHIVE);
   // Load icon
   {
-
-    std::vector<unsigned char> icon = assetMgr->getAsset(
-      "icon.png"
-      );
+    std::vector<unsigned char> imageData;
+    assetMgr->getAsset("icon.png", imageData);
 
     GLFWimage icons[1];
     icons[0].pixels =
-      stbi_load_from_memory(icon.data(), icon.size(), &icons[0].width,
+      stbi_load_from_memory(imageData.data(), imageData.size(), &icons[0].width,
                             &icons[0].height, nullptr, STBI_rgb_alpha);
 
     glfwSetWindowIcon(window, 1, icons);

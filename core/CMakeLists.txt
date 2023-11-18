@@ -36,7 +36,6 @@ target_link_libraries(magnetar-core PUBLIC
                       cglm
                       flecs_static
                       glfw
-                      archive_static
                       lua_static
                       spdlog
                       tiny-aes
@@ -53,7 +52,7 @@ else()
   message(FATAL_ERROR "Unknown platform: \"" ${CMAKE_SYSTEM_NAME} "\"")
 endif()
 
-target_compile_definitions(magnetar-core PUBLIC SECURE_ASSETS_ARCHIVE="data")
+target_compile_definitions(magnetar-core PUBLIC SECURE_ASSETS_ARCHIVE="data.zip")
 
 ### Utilities ###
 
@@ -73,10 +72,7 @@ function(magnetar_package)
   COMMAND cp -a ${MAGNETAR_CORE_ASSETS}/. ${CMAKE_BINARY_DIR}/tempdata
   COMMAND cp -a ${ASSETS_DIR}/. ${CMAKE_BINARY_DIR}/tempdata
 
-  # Shell command to compress individual files with LZ4 and add them to a zip archive
-  COMMAND find ${CMAKE_BINARY_DIR}/tempdata -type f -exec lz4 -f --best {} {}.lz4 \;
-  COMMAND 7z a -tzip $<TARGET_FILE_DIR:${PROJECT_NAME}>/data.zip ${CMAKE_BINARY_DIR}/tempdata/*.lz4
+  # archive
+  COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/tempdata zip -r $<TARGET_FILE_DIR:${PROJECT_NAME}>/data .
   )
-  # decompress example:
-  # lz4 -d folderABC.tar.lz4 -c | tar xvf -
 endfunction()
