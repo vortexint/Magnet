@@ -40,6 +40,7 @@ target_link_libraries(magnetar-core PUBLIC
                       lua_static
                       spdlog
                       tiny-aes
+                      zip
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
@@ -72,8 +73,10 @@ function(magnetar_package)
   COMMAND cp -a ${MAGNETAR_CORE_ASSETS}/. ${CMAKE_BINARY_DIR}/tempdata
   COMMAND cp -a ${ASSETS_DIR}/. ${CMAKE_BINARY_DIR}/tempdata
 
-  COMMAND tar -C ${CMAKE_BINARY_DIR}/tempdata -cvf - . --transform='s,^\./,,' | lz4 > $<TARGET_FILE_DIR:${PROJECT_NAME}>/data)
-
+  # Shell command to compress individual files with LZ4 and add them to a zip archive
+  COMMAND find ${CMAKE_BINARY_DIR}/tempdata -type f -exec lz4 -f --best {} {}.lz4 \;
+  COMMAND 7z a -tzip $<TARGET_FILE_DIR:${PROJECT_NAME}>/data.zip ${CMAKE_BINARY_DIR}/tempdata/*.lz4
+  )
   # decompress example:
   # lz4 -d folderABC.tar.lz4 -c | tar xvf -
 endfunction()

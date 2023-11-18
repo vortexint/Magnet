@@ -1,5 +1,10 @@
 # Magnetar
 
+## Setup
+| Packages |
+|-|
+| cmake clang lz4 p7zip-full |
+
 ```sh
 git submodule update --init --recursive --progress
 ```

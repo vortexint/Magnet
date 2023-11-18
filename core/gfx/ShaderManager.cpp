@@ -12,10 +12,12 @@ unsigned int ShaderManager::genShader(const char* shaderName,
                                       const char* fragmentPath) {
   size_t vShaderSize, fShaderSize;
 
+  assetManager->openArchive(SECURE_ASSETS_ARCHIVE);
+
   // Retrieve the vertex shader source
 
   unsigned char* vShaderData =
-    assetManager->getAsset(SECURE_ASSETS_ARCHIVE, vertexPath, &vShaderSize);
+    assetManager->getAsset(vertexPath, &vShaderSize);
   if (!vShaderData) {
     throw std::runtime_error("Vertex shader asset could not be loaded.");
   }
@@ -24,13 +26,15 @@ unsigned int ShaderManager::genShader(const char* shaderName,
 
   // Retrieve the fragment shader source
   unsigned char* fShaderData =
-    assetManager->getAsset(SECURE_ASSETS_ARCHIVE, fragmentPath, &fShaderSize);
+    assetManager->getAsset(fragmentPath, &fShaderSize);
   if (!fShaderData) {
     delete[] vShaderData;
     throw std::runtime_error("Fragment shader asset could not be loaded.");
   }
   // Safely convert the data to a const GLchar* for OpenGL
   const GLchar* fShader = reinterpret_cast<const GLchar*>(fShaderData);
+
+  assetManager->closeArchive();
 
   unsigned int vertex, fragment;
 

@@ -1,57 +1,78 @@
 #include "magnetar/AssetManager.hpp"
 
-#include <archive.h>
-#include <archive_entry.h>
 #include <spdlog/spdlog.h>
 
-const size_t BLOCK_SIZE = 10240;
+#include <iostream>
+#include <stdexcept>
 
-unsigned char* AssetManager::getAsset(const char* secure_archive,
-                                      const char* assetPath, size_t* dataSize) {
-  std::scoped_lock lock(mutex_);  // RAII-based mutex locking
+AssetManager::AssetManager() : zipArchive(nullptr) {}
 
-  struct archive* a = archive_read_new();
-  archive_read_support_filter_lz4(a);
-  archive_read_support_format_tar(a);
+AssetManager::~AssetManager() { closeArchive(); }
 
-  // Open the archive file
-  if (archive_read_open_filename(a, secure_archive, BLOCK_SIZE) != ARCHIVE_OK) {
-    spdlog::error("Could not open archive {}: {}", secure_archive,
-                  archive_error_string(a));
-    archive_read_free(a);
-    throw std::runtime_error(archive_error_string(a));
+bool AssetManager::openArchive(const std::string& archivePath) {
+  int error;
+  zipArchive = zip_open(archivePath.c_str(), ZIP_RDONLY, &error);
+
+  if (!zipArchive) {
+    // Handle error or convert it to a C++ exception:
+    zip_error_t zipError;
+    zip_error_init_with_code(&zipError, error);
+    std::string errorMessage = zip_error_strerror(&zipError);
+    zip_error_fini(&zipError);
+    throw std::runtime_error(errorMessage);
   }
 
-  struct archive_entry* entry;
-  size_t size;
-  unsigned char* buffer = nullptr;
+  return true;
+}
 
-  while (archive_read_next_header(a, &entry) == ARCHIVE_OK) {
-    const char* currentFile = archive_entry_pathname(entry);
-    if (strcmp(currentFile, assetPath) == 0) {
-      size = archive_entry_size(entry);
-      buffer = new unsigned char[size];
-      if (archive_read_data(a, buffer, size) != static_cast<ssize_t>(size)) {
-        delete[] buffer;
-        spdlog::error("Failed to read asset data from {}: {}",
-                      secure_archive, archive_error_string(a));
-        archive_read_free(a);
-      }
-      if (dataSize) {
-        *dataSize = size;
-      }
-      break;
-    }
+void AssetManager::closeArchive() {
+  if (zipArchive) {
+    zip_close(zipArchive);
+    zipArchive = nullptr;
+  }
+}
+
+std::vector<unsigned char> AssetManager::getAsset(
+  const std::string& assetName) {
+  // Check if the asset is already in the cache
+  auto it = cache.find(assetName);
+  if (it != cache.end()) {
+    return it->second;
   }
 
-  archive_read_free(a);
-
-  if (!buffer) {
-    spdlog::warn("'{}' not found in archive '{}'.", assetPath,
-                 secure_archive);
+  // Locate the file inside the ZIP archive
+  zip_int64_t index = zip_name_locate(zipArchive, assetName.c_str(), 0);
+  if (index == -1) {
+    throw std::runtime_error("File not found in the archive");
   }
 
-  spdlog::info("'{}' successfully loaded from '{}'.", assetPath,
-               secure_archive);
+  // Open the file inside the ZIP archive
+  zip_file_t* file = zip_fopen_index(zipArchive, index, ZIP_FL_ENC_CP437);
+  if (!file) {
+    throw std::runtime_error("Unable to open file within the archive");
+  }
+
+  // Get file information
+  zip_stat_t file_stat;
+  if (zip_stat_index(zipArchive, index, ZIP_FL_ENC_CP437, &file_stat) != 0) {
+    zip_fclose(file);
+    throw std::runtime_error(
+      "Unable to retrieve file information from the archive");
+  }
+
+  // Read file contents
+  std::vector<unsigned char> buffer(file_stat.size);
+  zip_int64_t bytesRead = zip_fread(file, buffer.data(), file_stat.size);
+  if (bytesRead < 0) {
+    zip_fclose(file);
+    throw std::runtime_error("Error reading file from the archive");
+  }
+  zip_fclose(file);
+
+  // If the file was successfully read, add it to the cache
+  if (bytesRead == file_stat.size) {
+    cache[assetName] = buffer;
+  }
+
   return buffer;
 }

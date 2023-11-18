@@ -1,16 +1,20 @@
 #pragma once
 
-#include <mutex>
+#include <zip.h>
 
-// forward declarations
-struct archive;
-struct archive_entry;
-
+#include <string>
+#include <unordered_map>
+#include <vector>
 class AssetManager {
+  zip_t* zipArchive;
+  std::unordered_map<std::string, std::vector<unsigned char>> cache;
 
-  std::mutex mutex_;
  public:
+  AssetManager();
+  ~AssetManager();
 
-  unsigned char* getAsset(const char* secure_archive, const char* assetPath,
-                          size_t* dataSize = nullptr);
+  bool openArchive(const std::string& archivePath);
+  void closeArchive();
+
+  std::vector<unsigned char> getAsset(const std::string& assetName);
 };
