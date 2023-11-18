@@ -13,9 +13,6 @@
 [submodule "submodules/tiny-AES-c"]
 	path = submodules/tiny-AES-c
 	url = https://github.com/kokke/tiny-AES-c.git
-[submodule "submodules/libarchive"]
-	path = submodules/libarchive
-	url = https://github.com/libarchive/libarchive.git
 [submodule "submodules/spdlog"]
 	path = submodules/spdlog
 	url = https://github.com/gabime/spdlog.git
@@ -28,3 +25,9 @@
 [submodule "submodules/flecs"]
 	path = submodules/flecs
 	url = https://github.com/SanderMertens/flecs.git
+[submodule "submodules/rwkv.cpp"]
+	path = submodules/rwkv.cpp
+	url = https://github.com/saharNooby/rwkv.cpp.git
+[submodule "submodules/libzip"]
+	path = submodules/libzip
+	url = https://github.com/nih-at/libzip.git
