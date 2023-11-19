@@ -14,10 +14,12 @@ By convention, the contents of the project's `assets/` are files to be packaged 
 
 The `core` includes default assets for rendering and scripting.
 
-## Projects
+<h2 align="center">Projects</h2>
 
 ### Sandbox
 This is a sample project to demonstrate basic capabilities of the engine
+
+---
 
 <!--
  Developer notes:
