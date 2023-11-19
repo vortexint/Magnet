@@ -1,12 +1,12 @@
-#include "magnetar/ApplicationContext.hpp"
+#include "magnet/ApplicationContext.hpp"
 
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/basic_file_sink.h>
 
-#include "magnetar/Renderer.hpp"
-#include "magnetar/ShaderManager.hpp"
-#include "magnetar/WindowManager.hpp"
+#include "magnet/Renderer.hpp"
+#include "magnet/ShaderManager.hpp"
+#include "magnet/WindowManager.hpp"
 
 std::unique_ptr<flecs::world>  ApplicationContext::ecs = nullptr;
 std::unique_ptr<AssetManager>  ApplicationContext::assetManager = nullptr;

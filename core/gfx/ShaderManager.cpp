@@ -1,4 +1,4 @@
-#include "magnetar/ShaderManager.hpp"
+#include "magnet/ShaderManager.hpp"
 
 #include <glad/glad.h>
 #include <spdlog/spdlog.h>

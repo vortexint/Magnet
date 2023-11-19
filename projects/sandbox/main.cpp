@@ -1,4 +1,4 @@
-#include <magnetar/ApplicationContext.hpp>
+#include <magnet/ApplicationContext.hpp>
 #include <GLFW/glfw3.h>
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -12,6 +12,7 @@ int main(void) {
   ApplicationContext::initialize(GAME_TITLE);
 
   /* Project code */
+  
   AssetManager*  assetMgr  = ApplicationContext::getAssetManager();
   WindowManager* windowMgr = ApplicationContext::getWindowManager();
 

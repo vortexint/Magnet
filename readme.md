@@ -1,4 +1,4 @@
-# Magnetar
+# Magnet
 
 ## Setup
 | Packages |

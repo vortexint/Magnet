@@ -1,5 +1,5 @@
-#include "magnetar/Renderer.hpp"
-#include "magnetar/ShaderManager.hpp"
+#include "magnet/Renderer.hpp"
+#include "magnet/ShaderManager.hpp"
 
 #include <glad/glad.h>
 #include <spdlog/spdlog.h>

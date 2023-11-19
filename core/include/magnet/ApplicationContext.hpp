@@ -4,8 +4,8 @@
 
 #include <memory>
 
-#include "magnetar/AssetManager.hpp"
-#include "magnetar/WindowManager.hpp"
+#include "magnet/AssetManager.hpp"
+#include "magnet/WindowManager.hpp"
 
 // forward declarations
 class ShaderManager;

@@ -3,7 +3,7 @@
 #include <cglm/cglm.h>
 #include <unordered_map>
 
-#include "magnetar/AssetManager.hpp"
+#include "magnet/AssetManager.hpp"
 
 class ShaderManager {
   AssetManager *assetManager;

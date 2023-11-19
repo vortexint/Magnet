@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cglm/cglm.h>
-namespace magnetar::components {
+namespace magnet::components {
 
 /* Components */
 
@@ -46,4 +46,4 @@ struct Rigidbody {
   bool fixed;
 };
 
-} // namespace magnetar
+} // namespace magnet

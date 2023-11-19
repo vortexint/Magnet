@@ -1,9 +1,9 @@
-#include "magnetar/WindowManager.hpp"
+#include "magnet/WindowManager.hpp"
 
 #include <GLFW/glfw3.h>
 #include <spdlog/spdlog.h>
 
-#include "magnetar/Renderer.hpp"
+#include "magnet/Renderer.hpp"
 
 WindowManager::WindowManager(Renderer* renderer, const char* windowTitle) : renderer(renderer)  {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);

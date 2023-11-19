@@ -1,4 +1,4 @@
-#include "magnetar/AssetManager.hpp"
+#include "magnet/AssetManager.hpp"
 
 #include <spdlog/spdlog.h>
 
