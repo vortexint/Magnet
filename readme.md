@@ -3,7 +3,7 @@
 ## Setup
 | Packages |
 |-|
-| cmake clang lz4 p7zip-full |
+| cmake clang libgl1-mesa-dev x11proto-core-dev libx11-dev lz4 p7zip-full openexr |
 
 ```sh
 git submodule update --init --recursive --progress
@@ -16,7 +16,7 @@ The `core` includes default assets for rendering and scripting.
 
 <h2 align="center">Projects</h2>
 
-### Sandbox
+### Sandbox <img src="projects/sandbox/assets/icon.png" alt="icon" width="128" height="128" align="left" valign="middle">
 This is a sample project to demonstrate basic capabilities of the engine
 
 ---

@@ -3,7 +3,7 @@
 #include <cglm/cglm.h>
 namespace magnet::components {
 
-/* Components */
+/* Scene Components*/
 
 // An entity's transformation relative to it's parent.
 struct Transform {
@@ -13,6 +13,10 @@ struct Transform {
 };
 
 // RENDERING //
+
+struct Skybox {
+  uint textureID;  // cube map texture ID
+};
 
 // The parameters and properties of a virtual camera in a scene.
 // Requires a Transform component.
