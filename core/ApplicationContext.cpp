@@ -37,7 +37,8 @@ void ApplicationContext::initialize(const char *windowTitle) {
 void ApplicationContext::run() {
   while (!windowManager->shouldClose()) {
     /* Update all active systems and subsystems */
-
+    ecs->progress();
+    
     /* Render all visible objects */
     renderer->render();
 

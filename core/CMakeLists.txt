@@ -10,6 +10,7 @@ target_sources(magnet-core PRIVATE
   gfx/ShaderManager.cpp
   gfx/WindowManager.cpp
   io/AssetManager.cpp
+  io/Input.cpp
 )
 target_compile_options(magnet-core PUBLIC
     -O2

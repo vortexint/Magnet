@@ -27,8 +27,7 @@ float texCoords[] = {
   0.5f, 1.0f   // top-center corner
 };
 
-unsigned int SkyboxProgramID, TriangleProgramID, skyboxVAO, skyboxVBO,
-  skyboxEBO, TriVBO, TriVAO;
+unsigned int TriangleProgramID, TriVBO, TriVAO;
 //
 
 // Different variable name for initializer disambiguation
@@ -42,35 +41,15 @@ void Renderer::initialize() {
   gladLoadGL();
 
   /* OpenGL configuration */
-  glClearColor(0.5f, 0.1f, 0.1f, 1.0f);
+  glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_MULTISAMPLE);
   // Add other config like stencil, alpha blending etc. as needed
 
   // TESTING
-  SkyboxProgramID = shaderManager->genShader(
-    "skyboxShader", "shaders/skybox.vert", "shaders/skybox.frag");
 
   TriangleProgramID = shaderManager->genShader("myShader", "shaders/base.vert",
                                                "shaders/base.frag");
-
-  glGenVertexArrays(1, &skyboxVAO);
-  glGenBuffers(1, &skyboxVBO);
-  glGenBuffers(1, &skyboxEBO);
-  glBindVertexArray(skyboxVAO);
-
-  glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), &cubeVertices,
-               GL_STATIC_DRAW);
-
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, skyboxEBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cubeIndices), &cubeIndices,
-               GL_STATIC_DRAW);
-
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-  glEnableVertexAttribArray(0);
-
-  glBindVertexArray(0);
 
   glGenVertexArrays(1, &TriVAO);
   glGenBuffers(1, &TriVBO);
@@ -101,29 +80,11 @@ void Renderer::render() const {
   // Draw skybox first
   glDepthFunc(GL_LEQUAL);  // Change depth function so depth test passes when
                            // values are equal to depth buffer's content
-  glUseProgram(SkyboxProgramID);
 
   mat4 model, view, projection;
   glm_mat4_identity(model);
   glm_mat4_identity(view);
   glm_mat4_identity(projection);
-
-  mat4 viewSkybox;
-  glm_mat4_copy(view, viewSkybox);
-  viewSkybox[3][0] = 0.0f;
-  viewSkybox[3][1] = 0.0f;
-  viewSkybox[3][2] = 0.0f;
-
-  shaderManager->setMat4("skyboxShader", "view", viewSkybox);
-  shaderManager->setMat4("skyboxShader", "projection", projection);
-
-  glDepthFunc(GL_LEQUAL);  // Change the depth function so depth test passes
-                           // when values are equal to depth buffer's content
-  glBindVertexArray(skyboxVAO);
-  // Assuming we have 14 indices for the cube's triangle strip
-  glDrawElements(GL_TRIANGLE_STRIP, 14, GL_UNSIGNED_SHORT, 0);
-  glBindVertexArray(0);
-  glDepthFunc(GL_LESS); // Set depth function back to default
 
   // Create basic transformations
   glm_rotate(model, (float)glfwGetTime(), (vec3){0.0f, 1.0f, 0.0f});
