@@ -6,7 +6,9 @@
 
 #include <cstdint>
 #include <flecs.h>
+#include <glad/glad.h>
 
+// Acquired by Window Manager
 const uint32_t INIT_WIDTH = 1280;
 const uint32_t INIT_HEIGHT = 720;
 

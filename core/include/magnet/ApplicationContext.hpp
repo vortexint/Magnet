@@ -20,6 +20,7 @@ class ApplicationContext {
 
  public:
   ApplicationContext() = delete;
+  ~ApplicationContext();
 
   static void initialize(const char *gameTitle);
                          

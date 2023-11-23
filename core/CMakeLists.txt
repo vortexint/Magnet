@@ -4,13 +4,14 @@ add_library(magnet-core STATIC)
 add_library(magnet::core ALIAS magnet-core)
 
 target_sources(magnet-core PRIVATE
-  ApplicationContext.cpp
+  applicationContext.cpp
   gfx/glad.c
-  gfx/Renderer.cpp
-  gfx/ShaderManager.cpp
-  gfx/WindowManager.cpp
-  io/AssetManager.cpp
-  io/Input.cpp
+  gfx/renderer.cpp
+  gfx/shaderManager.cpp
+  gfx/windowManager.cpp
+  io/assetManager.cpp
+  io/input.cpp
+  ui/interface.cpp
 )
 target_compile_options(magnet-core PUBLIC
     -O2
