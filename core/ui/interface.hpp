@@ -2,8 +2,8 @@
 
 #include <memory>
 
-#include "WindowManager.hpp"
-#include "Renderer.hpp"
+#include "magnet/WindowManager.hpp"
+#include "magnet/Renderer.hpp"
 
 #define NK_INCLUDE_FIXED_TYPES
 #define NK_INCLUDE_STANDARD_IO
