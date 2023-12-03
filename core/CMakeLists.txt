@@ -54,13 +54,16 @@ else()
   message(FATAL_ERROR "Unknown platform: \"" ${CMAKE_SYSTEM_NAME} "\"")
 endif()
 
+find_program(ZIP_EXECUTABLE zip)
+if(NOT ZIP_EXECUTABLE)
+  message(FATAL_ERROR "zip was not found!")
+endif()
+
 ### Archive ###
 
-function(magnet_package)
-  if(NOT DEFINED ASSETS_DIR)
-    message(FATAL_ERROR "Please define ASSETS_DIR it before calling magnet_package()")
-  endif()
+set(${ASSETS_DIR} UNDEFINED)
 
+function(magnet_package)
   string(TIMESTAMP TODAY "%Y%m%d") # Used as password for archive
   target_compile_definitions(magnet-core PUBLIC SECURE_ASSETS_ARCHIVE="data.zip" SECURE_ASSETS_PASSWORD="${TODAY}")
 
@@ -73,7 +76,7 @@ function(magnet_package)
   COMMAND mkdir -p ${CMAKE_BINARY_DIR}/tempdata
   # merge core and project assets to new temp. dir
   COMMAND cp -a ${MAGNET_CORE_ASSETS}/. ${CMAKE_BINARY_DIR}/tempdata
-  COMMAND cp -a ${ASSETS_DIR}/. ${CMAKE_BINARY_DIR}/tempdata
+  COMMAND cp -a ${ASSETS_DIR}/. ${CMAKE_BINARY_DIR}/tempdata || true
 
   # archive
   COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/tempdata

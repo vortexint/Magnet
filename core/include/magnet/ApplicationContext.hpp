@@ -11,6 +11,12 @@
 class ShaderManager;
 class Renderer;
 
+class ProjectInterface {
+ public:
+  virtual void init() = 0;
+  virtual void update() = 0;
+};
+
 class ApplicationContext {
   static std::unique_ptr<flecs::world>  ecs;
   static std::unique_ptr<AssetManager>  assetManager;
@@ -22,9 +28,8 @@ class ApplicationContext {
   ApplicationContext() = delete;
   ~ApplicationContext();
 
+  static void registerInterface(ProjectInterface* interface);
   static void initialize(const char *gameTitle);
-                         
-  static void run(void);
 
   static AssetManager* getAssetManager()   { return assetManager.get(); }
   static WindowManager* getWindowManager() { return windowManager.get(); }

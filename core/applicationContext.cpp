@@ -14,6 +14,12 @@ std::unique_ptr<ShaderManager> ApplicationContext::shaderManager = nullptr;
 std::unique_ptr<Renderer>      ApplicationContext::renderer = nullptr;
 std::unique_ptr<WindowManager> ApplicationContext::windowManager = nullptr;
 
+ProjectInterface* registeredInterface = nullptr;
+
+void ApplicationContext::registerInterface(ProjectInterface *interface) {
+  registeredInterface = interface;
+}
+
 void ApplicationContext::initialize(const char *windowTitle) {
   /* Set up logging */
   auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
@@ -32,13 +38,15 @@ void ApplicationContext::initialize(const char *windowTitle) {
   windowManager = std::make_unique<WindowManager>(renderer.get(), windowTitle);
 
   renderer->initialize(); // Set up renderer
-}
+  registeredInterface->init();
 
-void ApplicationContext::run() {
+  /* Main loop */
   while (!windowManager->shouldClose()) {
     /* Update all active systems and subsystems */
     ecs->progress();
-    
+
+    registeredInterface->update();
+
     /* Render all visible objects */
     renderer->render();
 
