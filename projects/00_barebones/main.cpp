@@ -2,7 +2,7 @@
 
 const char* const TITLE = "Barebones Example";
 
-class Interface : public ProjectInterface {
+class AppInterface : public ProjectInterface {
  public:
   void init() override {
     // AssetManager*  assetMgr  = ApplicationContext::getAssetManager();
@@ -18,7 +18,7 @@ class Interface : public ProjectInterface {
 };
 
 int main(void) {
-  ApplicationContext::registerInterface(new Interface());
+  ApplicationContext::registerInterface(new AppInterface());
 
   ApplicationContext::initialize(TITLE);
   return 0;

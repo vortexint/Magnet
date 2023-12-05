@@ -10,6 +10,5 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 ### Magnet Framework ###
 
 add_subdirectory(core) # magnet::core
-set(MAGNET_CORE_ASSETS ${CMAKE_SOURCE_DIR}/core/assets) # workaround
 
 add_subdirectory(projects)

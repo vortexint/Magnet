@@ -4,14 +4,16 @@ add_library(magnet-core STATIC)
 add_library(magnet::core ALIAS magnet-core)
 
 target_sources(magnet-core PRIVATE
-  applicationContext.cpp
+  ApplicationContext.cpp
+
   gfx/glad.c
-  gfx/renderer.cpp
-  gfx/shaderManager.cpp
-  gfx/windowManager.cpp
-  io/assetManager.cpp
-  io/input.cpp
-  ui/interface.cpp
+  gfx/UI.cpp
+  gfx/Renderer.cpp
+  gfx/ShaderManager.cpp
+  gfx/WindowManager.cpp
+  
+  IO/AssetManager.cpp
+  IO/Input.cpp
 )
 target_compile_options(magnet-core PUBLIC
     -O2
@@ -61,9 +63,7 @@ endif()
 
 ### Archive ###
 
-set(${ASSETS_DIR} UNDEFINED)
-
-function(magnet_package)
+function(magnet_package assets_directory)
   string(TIMESTAMP TODAY "%Y%m%d") # Used as password for archive
   target_compile_definitions(magnet-core PUBLIC SECURE_ASSETS_ARCHIVE="data.zip" SECURE_ASSETS_PASSWORD="${TODAY}")
 
@@ -75,8 +75,8 @@ function(magnet_package)
 
   COMMAND mkdir -p ${CMAKE_BINARY_DIR}/tempdata
   # merge core and project assets to new temp. dir
-  COMMAND cp -a ${MAGNET_CORE_ASSETS}/. ${CMAKE_BINARY_DIR}/tempdata
-  COMMAND cp -a ${ASSETS_DIR}/. ${CMAKE_BINARY_DIR}/tempdata || true
+  COMMAND cp -a ${CMAKE_SOURCE_DIR}/core/assets/. ${CMAKE_BINARY_DIR}/tempdata
+  COMMAND cp -a ${assets_directory}/. ${CMAKE_BINARY_DIR}/tempdata || true
 
   # archive
   COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/tempdata

@@ -3,6 +3,8 @@
 
 #include <spdlog/spdlog.h>
 
+#include "UI.hpp"
+
 // TESTING
 #include <GLFW/glfw3.h>
 static const GLfloat cubeVertices[] = {
@@ -27,6 +29,10 @@ float texCoords[] = {
 };
 
 unsigned int TriangleProgramID, TriVBO, TriVAO;
+
+struct nk_context* ctx;
+struct nk_colorf bg;
+struct nk_image img;
 //
 
 // Different variable name for initializer disambiguation
@@ -111,6 +117,8 @@ void Renderer::render() const {
   glUseProgram(TriangleProgramID);
   glBindVertexArray(TriVAO);
   glDrawArrays(GL_TRIANGLES, 0, 3);
+
+  //nk_glfw3_render(NK_ANTI_ALIASING_ON);
   // TESTING
 }
 

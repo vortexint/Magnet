@@ -2,11 +2,10 @@
 
 #include <cstdint>
 
-#define GLFW_INCLUDE_NONE
-#include "GLFW/glfw3.h"
-
 // forward declarations
 class Renderer;
+struct GLFWwindow;
+
 class WindowManager {
   GLFWwindow* window;
   Renderer* renderer;

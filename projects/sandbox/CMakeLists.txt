@@ -9,7 +9,5 @@ target_sources(${PROJECT_NAME} PRIVATE
 #target_precompile_headers(${PROJECT_NAME} PRIVATE app.hpp)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE magnet-core tweeny)
-                      
-# Package project assets
-set(ASSETS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/assets)
-magnet_package()
+
+magnet_package(${CMAKE_CURRENT_SOURCE_DIR}/assets)
