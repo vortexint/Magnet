@@ -1,6 +1,6 @@
 
 <h1 align="center">
-<img src="magnet icon.png" alt="drawing" width="128"/><br>
+<img src="https://vortex-dev.com/assets/img/magnet.png" alt="drawing" width="128"/><br>
 Magnet<br>
 <sup><sup><sub>A robust C++ framework for 3D software</sub></sup></sup></h2>
 
@@ -26,7 +26,11 @@ Choose the right one according to your system.
 - [CMake](https://cmake.org/)
 - [OpenEXR](https://openexr.com/en/latest/install.html)
 
+After getting the dependencies, run the commands:
+
 ```sh
+git clone https://github.com/vortexdevsoftware/Magnet.git
+cd Magnet
 git submodule update --init --recursive --progress
 ```
 
@@ -55,8 +59,8 @@ Next, register your Project Interface for init, update callback.
 ```cpp
 #include <magnet/ApplicationContext.hpp>
 
-// Note: the core's libraries are **SHARED**
-// so you can use any of them to your project as needed.
+// Note: the core's libraries are SHARED
+// So you can use any of them as needed.
 #include <GLFW/glfw3.h>
 
 class AppInterface : public ProjectInterface {
@@ -99,5 +103,5 @@ Seek the tutorials and samples in the [samples](samples/) directory.
 
 <h2 align="center">Projects</h2>
 
-### Sandbox <img src="projects/sandbox/assets/icon.png" alt="icon" width="128" height="128" align="left" valign="middle">
+### Sandbox <img src="samples/sandbox/assets/icon.png" alt="icon" width="128" height="128" align="left" valign="middle">
 This is a sample project to demonstrate basic capabilities of the engine
