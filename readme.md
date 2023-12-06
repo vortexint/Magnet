@@ -6,9 +6,10 @@ Magnet<br>
 
 ## Dependencies
 **Linux**
+
 <sup>
 
-Choose the right one according to your system.
+Choose the appropriate package manager for your system.
 
 </sup>
 
@@ -19,7 +20,12 @@ Choose the right one according to your system.
 | dnf | clang mesa-libGL-devel libX11-devel lz4 p7zip openexr |
 | zypper | cmake clang Mesa-libGL-devel libX11-devel lz4 p7zip openexr |
 
-<sup>Note: some packages may already be shipped with your system</sup>
+<sup>
+
+*Some packages may already be installed on your system.*
+
+</sup>
+
 
 **Windows**
 - [Git](https://git-scm.com/)
@@ -35,27 +41,26 @@ git submodule update --init --recursive --progress
 ```
 
 ## Usage
-Setup is CMake-oriented, Prefer an IDE that can manage CMake configuration automatically every time that a CMakeLists.txt file is saved such as:
+The setup is CMake-oriented. Prefer an IDE that manages CMake configuration automatically on save, such as::
 
 - [VSCode](https://code.visualstudio.com/) + [CMake Tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cmake-tools)
 - [Visual Studio](https://visualstudio.microsoft.com/)
 - [CLion](https://www.jetbrains.com/clion/)
 
-### Add Project
-As this project extends beyond the scope of a single library, you will design your project within the framework itself.
+### Adding a Project
+As this project extends beyond a single library, you design your project within the framework. Create a directory in `projects/` and add it to `projects/CMakeLists.txt`.
 
-Create your project directory in `projects/` and add it to `projects/CMakeLists.txt`
 <sup>
 
 *Alternatively, you can duplicate an existing project.*
 
 </sup>
 
-Afterward, you can work on your project's code structure.
+Next, let's work on the project's code structure...
 
 ### Implementing Logic
 
-Next, register your Project Interface for init, update callback.
+Register your Project Interface for init and update callbacks.
 ```cpp
 #include <magnet/ApplicationContext.hpp>
 
@@ -69,11 +74,9 @@ class AppInterface : public ProjectInterface {
     AssetManager*  assetMgr  = ApplicationContext::getAssetManager();
     WindowManager* windowMgr = ApplicationContext::getWindowManager();
 
-    // Here you would use the AssetManager to load
-    // essential assets of your project, including textures, sounds, etc.
-
     GLFWwindow* window = windowMgr->getWindow();
-    // ...
+
+    // Use AssetManager to load essential assets, etc...
   }
 
   void update() override {
@@ -93,7 +96,7 @@ Always make sure your project's CMakeLists.txt calls `magnet_package()`, otherwi
 # ...
 magnet_package(${CMAKE_CURRENT_SOURCE_DIR}/assets) 
 
-# if not using any asset, pass a directory that doesn't exist anywhere instead:
+# If not using any assets, pass a non-existent directory:
 magnet_package(UNDEFINED)
 ```
 
