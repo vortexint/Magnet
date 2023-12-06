@@ -12,13 +12,15 @@ Choose the right one according to your system.
 
 </sup>
 
-| Manager| Packages                                                                        |
-| --- | -------------------------------------------------------------------------------
+| Manager| Packages |
+| - | - |
 | apt | cmake clang libgl1-mesa-dev x11proto-core-dev libx11-dev lz4 p7zip-full openexr |
-|pacman| cmake clang mesa xorgproto libx11 lz4 p7zip openexr |
-|dnf| clang mesa-libGL-devel libX11-devel lz4 p7zip openexr |
-|zypper| cmake clang Mesa-libGL-devel libX11-devel lz4 p7zip openexr |
+| pacman | cmake clang mesa xorgproto libx11 lz4 p7zip openexr |
+| dnf | clang mesa-libGL-devel libX11-devel lz4 p7zip openexr |
+| zypper | cmake clang Mesa-libGL-devel libX11-devel lz4 p7zip openexr |
+
 <sup>Note: some packages may already be shipped with your system</sup>
+
 **Windows**
 - [Git](https://git-scm.com/)
 - [CMake](https://cmake.org/)
