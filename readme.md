@@ -41,7 +41,7 @@ git submodule update --init --recursive --progress
 ```
 
 ## Usage
-The setup is CMake-oriented. Prefer an IDE that manages CMake configuration automatically on save, such as::
+The setup is CMake-oriented. Prefer an IDE that manages CMake configuration automatically on save, such as:
 
 - [VSCode](https://code.visualstudio.com/) + [CMake Tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cmake-tools)
 - [Visual Studio](https://visualstudio.microsoft.com/)
