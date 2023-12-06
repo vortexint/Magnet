@@ -1,6 +1,6 @@
 
 <h1 align="center">
-<img src="https://vortex-dev.com/assets/img/magnet.png" alt="drawing" width="128"/><br>
+<img src="https://vortex-dev.com/assets/img/magnet.png" alt="3D horseshoe magnet icon" width="128"/><br>
 Magnet<br>
 <sup><sup><sub>A robust C++ framework for 3D software</sub></sup></sup></h2>
 
