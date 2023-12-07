@@ -2,7 +2,7 @@
 <h1 align="center">
 <img src="https://vortex-dev.com/assets/img/magnet.png" alt="3D horseshoe magnet icon" width="128"/><br>
 Magnet<br>
-<sup><sup><sub>A robust C++ framework for 3D software</sub></sup></sup></h2>
+<sup><sup><sub>A robust C++ framework for 3D software</sub></sup></sup></h1>
 
 ## Dependencies
 **Linux**
@@ -32,35 +32,45 @@ Choose the appropriate package manager for your system.
 - [CMake](https://cmake.org/)
 - [OpenEXR](https://openexr.com/en/latest/install.html)
 
-After getting the dependencies, run the commands:
-
-```sh
-git clone https://github.com/vortexdevsoftware/Magnet.git
-cd Magnet
-git submodule update --init --recursive --progress
-```
-
 ## Usage
-The setup is CMake-oriented. Prefer an IDE that manages CMake configuration automatically on save, such as:
+This project uses CMake as it's build system, prefer an IDE that manages CMake configuration automatically on save, such as:
 
 - [VSCode](https://code.visualstudio.com/) + [CMake Tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cmake-tools)
 - [Visual Studio](https://visualstudio.microsoft.com/)
 - [CLion](https://www.jetbrains.com/clion/)
 
-### Adding a Project
-As this project extends beyond a single library, you design your project within the framework. Create a directory in `projects/` and add it to `projects/CMakeLists.txt`.
+### Simple setup example
+Assuming your project uses CMake and you have all the dependencies, in your working directory, run:
 
-<sup>
+```sh
+mkdir submodules
+cd submodules
+git submodule add https://github.com/vortexdevsoftware/Magnet.git
+git submodule update --init --recursive --progress
+```
 
-*Alternatively, you can duplicate an existing project.*
+#### Configure CMakeLists.txt
 
-</sup>
+You can create a directory within your project's directory for assets to ship with the executable; By convention, "assets/" is used.  
+
+The `core` directory includes default assets for rendering and scripting.
+
+Always make sure your project's CMakeLists.txt calls `magnet_package()`, otherwise no assets will be packaged.
+
+```cmake
+# ...
+target_link_libraries(myApp PRIVATE magnet-core)
+
+magnet_package(${CMAKE_CURRENT_SOURCE_DIR}/assets) 
+
+# If not using any assets, pass a non-existent directory:
+magnet_package(UNDEFINED)
+```
 
 Next, let's work on the project's code structure...
 
-### Implementing Logic
+#### Project Interface
 
-Register your Project Interface for init and update callbacks.
 ```cpp
 #include <magnet/ApplicationContext.hpp>
 
@@ -68,6 +78,7 @@ Register your Project Interface for init and update callbacks.
 // So you can use any of them as needed.
 #include <GLFW/glfw3.h>
 
+// Register Interface for init and update callbacks
 class AppInterface : public ProjectInterface {
  public:
   void init() override {
@@ -85,24 +96,14 @@ class AppInterface : public ProjectInterface {
 };
 ```
 
-### Content management
-You can create a directory within your project's directory for assets to ship with the executable; By convention, "assets/" is used.  
-
-The `core` directory includes default assets for rendering and scripting.
-
-Always make sure your project's CMakeLists.txt calls `magnet_package()`, otherwise no assets will be packaged.
-
-```cmake
-# ...
-magnet_package(${CMAKE_CURRENT_SOURCE_DIR}/assets) 
-
-# If not using any assets, pass a non-existent directory:
-magnet_package(UNDEFINED)
-```
-
 ## Learning Material
 
-Seek the tutorials and samples in the [samples](samples/) directory.
+Seek the tutorials and samples in the [samples](samples/) directory:
+
+| Project | Goal |
+|-|-|
+|[Barebones](samples/00_barebones/)| As raw as it gets, establishes a minimal project |
+|[Primitives](samples/01_primitives/)| Use native features and prefabs to populate the scene |
 
 <h2 align="center">Projects</h2>
 
