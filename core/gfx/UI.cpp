@@ -1,5 +1,6 @@
 #include <glad/glad.h>
 
+#include "magnet/ApplicationContext.hpp"
 #include "magnet/ShaderManager.hpp"
 
 #define NK_INCLUDE_FIXED_TYPES
@@ -13,9 +14,6 @@
 
 #define NK_IMPLEMENTATION
 #include "UI.hpp"
-
-#define MAX_VERTEX_BUFFER 512 * 1024
-#define MAX_ELEMENT_BUFFER 128 * 1024
 
 #ifndef NK_GLFW_TEXT_MAX
 #define NK_GLFW_TEXT_MAX 256
@@ -41,8 +39,6 @@ struct nk_glfw_device {
   struct nk_draw_null_texture tex_null;
   GLuint vbo, vao, ebo;
   GLuint prog;
-  GLuint vert_shdr;
-  GLuint frag_shdr;
   GLint attrib_pos;
   GLint attrib_uv;
   GLint attrib_col;
@@ -79,68 +75,13 @@ static struct nk_glfw {
 #define NK_SHADER_64BIT "#extension GL_ARB_gpu_shader_int64 : require\n"
 
 NK_API void nk_glfw3_device_create() {
-  GLint status;
-  GLint len = 0;
-  static const GLchar *vertex_shader =
-    NK_SHADER_VERSION NK_SHADER_BINDLESS NK_SHADER_64BIT
-    "uniform mat4 ProjMtx;\n"
-    "in vec2 Position;\n"
-    "in vec2 TexCoord;\n"
-    "in vec4 Color;\n"
-    "out vec2 Frag_UV;\n"
-    "out vec4 Frag_Color;\n"
-    "void main() {\n"
-    "   Frag_UV = TexCoord;\n"
-    "   Frag_Color = Color;\n"
-    "   gl_Position = ProjMtx * vec4(Position.xy, 0, 1);\n"
-    "}\n";
-  static const GLchar *fragment_shader =
-    NK_SHADER_VERSION NK_SHADER_BINDLESS NK_SHADER_64BIT
-    "precision mediump float;\n"
-    "uniform uint64_t Texture;\n"
-    "in vec2 Frag_UV;\n"
-    "in vec4 Frag_Color;\n"
-    "out vec4 Out_Color;\n"
-    "void main(){\n"
-    "   sampler2D smp = sampler2D(Texture);\n"
-    "   Out_Color = Frag_Color * texture(smp, Frag_UV.st);\n"
-    "}\n";
-
+  ShaderManager* shaderManager = ApplicationContext::getShaderManager();
   struct nk_glfw_device *dev = &glfw.ogl;
   nk_buffer_init_default(&dev->cmds);
-  dev->prog = glCreateProgram();
-  dev->vert_shdr = glCreateShader(GL_VERTEX_SHADER);
-  dev->frag_shdr = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(dev->vert_shdr, 1, &vertex_shader, 0);
-  glShaderSource(dev->frag_shdr, 1, &fragment_shader, 0);
-  glCompileShader(dev->vert_shdr);
-  glCompileShader(dev->frag_shdr);
-  glGetShaderiv(dev->vert_shdr, GL_COMPILE_STATUS, &status);
 
-  glGetShaderiv(dev->vert_shdr, GL_INFO_LOG_LENGTH, &len);
-  if (len > 1) {
-    char *log = (char *)calloc((size_t)len, sizeof(char));
-    glGetShaderInfoLog(dev->vert_shdr, len, NULL, log);
-    fprintf(stdout, "[GL]: failed to compile shader: %s", log);
-    free(log);
-  }
-
-  glGetShaderiv(dev->frag_shdr, GL_INFO_LOG_LENGTH, &len);
-  if (len > 1) {
-    char *log = (char *)calloc((size_t)len, sizeof(char));
-    glGetShaderInfoLog(dev->frag_shdr, len, NULL, log);
-    fprintf(stdout, "[GL]: failed to compile shader: %s", log);
-    free(log);
-  }
-
-  assert(status == GL_TRUE);
-  glGetShaderiv(dev->frag_shdr, GL_COMPILE_STATUS, &status);
-  assert(status == GL_TRUE);
-  glAttachShader(dev->prog, dev->vert_shdr);
-  glAttachShader(dev->prog, dev->frag_shdr);
-  glLinkProgram(dev->prog);
-  glGetProgramiv(dev->prog, GL_LINK_STATUS, &status);
-  assert(status == GL_TRUE);
+  dev->prog = shaderManager->genShader("nk",
+                           "shaders/nk.vert",
+                         "shaders/nk.frag");
 
   dev->uniform_tex = glGetUniformLocation(dev->prog, "Texture");
   dev->uniform_proj = glGetUniformLocation(dev->prog, "ProjMtx");
@@ -271,10 +212,6 @@ NK_INTERN void nk_glfw3_device_upload_atlas(const void *image, int width,
 NK_API void nk_glfw3_device_destroy(void) {
   int i = 0;
   struct nk_glfw_device *dev = &glfw.ogl;
-  glDetachShader(dev->prog, dev->vert_shdr);
-  glDetachShader(dev->prog, dev->frag_shdr);
-  glDeleteShader(dev->vert_shdr);
-  glDeleteShader(dev->frag_shdr);
   glDeleteProgram(dev->prog);
   nk_glfw3_destroy_texture(dev->font_tex_index);
 

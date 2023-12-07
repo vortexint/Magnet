@@ -37,7 +37,9 @@ void ApplicationContext::initialize(const char *windowTitle) {
   renderer = std::make_unique<Renderer>(ecs.get(), shaderManager.get());
   windowManager = std::make_unique<WindowManager>(renderer.get(), windowTitle);
 
-  renderer->initialize(); // Set up renderer
+  /* Set up renderer*/
+  renderer->initialize();
+
   registeredInterface->init();
 
   /* Main loop */
@@ -47,7 +49,7 @@ void ApplicationContext::initialize(const char *windowTitle) {
 
     registeredInterface->update();
 
-    /* Render all visible objects */
+    /* Render everything */
     renderer->render();
 
     /* Swap buffers */

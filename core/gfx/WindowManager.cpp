@@ -6,6 +6,8 @@
 
 #include "magnet/Renderer.hpp"
 
+#include "UI.hpp"
+
 WindowManager::WindowManager(Renderer* renderer, const char* windowTitle) : renderer(renderer)  {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
@@ -35,7 +37,10 @@ WindowManager::~WindowManager() {
 
 void WindowManager::swapBuffers() { glfwSwapBuffers(window); }
 
-void WindowManager::pollEvents() { glfwPollEvents(); }
+void WindowManager::pollEvents() { 
+  glfwPollEvents();
+  nk_glfw3_new_frame();
+}
 
 void WindowManager::resizeCallback(GLFWwindow* window, int width, int height) {
   static_cast<WindowManager*>(glfwGetWindowUserPointer(window))

@@ -1,7 +1,7 @@
 #pragma once
 /**
  * @file Renderer.hpp
- * @brief GLFW-agnostic GL rendering component
+ * @brief GL rendering component
  */
 
 #include <cstdint>

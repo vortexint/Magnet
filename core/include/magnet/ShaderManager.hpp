@@ -19,8 +19,10 @@ class ShaderManager {
                          const char* vertexPath,
                          const char* fragmentPath);
 
+  /* Getters */
   unsigned int getShader(const char* shaderName) const;
 
+  /* Setters */
   void setBool(const char* shaderName, const char* name,
                bool value) const;
   void setInt(const char* shaderName, const char* name,

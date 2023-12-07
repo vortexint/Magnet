@@ -63,7 +63,7 @@ target_link_libraries(myApp PRIVATE magnet-core)
 
 magnet_package(${CMAKE_CURRENT_SOURCE_DIR}/assets) 
 
-# If not using any assets, pass a non-existent directory:
+# Necessary. If not using any custom assets, pass a non-existent directory:
 magnet_package(UNDEFINED)
 ```
 
@@ -100,7 +100,7 @@ class AppInterface : public ProjectInterface {
 
 Seek the tutorials and samples in the [samples](samples/) directory:
 
-| Project | Goal |
+| Tutorial | Description |
 |-|-|
 |[Barebones](samples/00_barebones/)| As raw as it gets, establishes a minimal project |
 |[Primitives](samples/01_primitives/)| Use native features and prefabs to populate the scene |

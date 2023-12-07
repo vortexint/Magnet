@@ -60,6 +60,8 @@ unsigned int ShaderManager::getShader(const char* shaderName) const {
   return shaders.at(shaderName);
 }
 
+/* Setters */
+
 void ShaderManager::setBool(const char* shaderName, const char* name,
                             bool value) const {
   glUniform1i(glGetUniformLocation(shaders.at(shaderName), name),
