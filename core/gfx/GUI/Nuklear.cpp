@@ -13,7 +13,7 @@
 #define NK_KEYSTATE_BASED_INPUT
 
 #define NK_IMPLEMENTATION
-#include "UI.hpp"
+#include "magnet/GUI.hpp"
 
 #ifndef NK_GLFW_TEXT_MAX
 #define NK_GLFW_TEXT_MAX 256
@@ -69,10 +69,6 @@ static struct nk_glfw {
   int is_double_click_down;
   struct nk_vec2 double_click_pos;
 } glfw;
-
-#define NK_SHADER_VERSION "#version 450 core\n"
-#define NK_SHADER_BINDLESS "#extension GL_ARB_bindless_texture : require\n"
-#define NK_SHADER_64BIT "#extension GL_ARB_gpu_shader_int64 : require\n"
 
 NK_API void nk_glfw3_device_create() {
   ShaderManager* shaderManager = ApplicationContext::getShaderManager();

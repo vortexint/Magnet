@@ -1,10 +1,10 @@
-#include "magnet/ShaderManager.hpp"
-#include "magnet/ApplicationContext.hpp"
 #include "magnet/Renderer.hpp"
 
 #include <spdlog/spdlog.h>
 
-#include "UI.hpp"
+#include "magnet/ApplicationContext.hpp"
+#include "magnet/ShaderManager.hpp"
+#include "magnet/GUI.hpp"
 #define MAX_VERTEX_BUFFER 512 * 1024
 #define MAX_ELEMENT_BUFFER 128 * 1024
 
@@ -42,8 +42,6 @@ void Renderer::initialize() {
   /*nk_style_load_all_cursors(ctx, atlas->cursors);*/
     /*nk_style_set_font(ctx, &droid->handle);*/
   }
-
-  ctx->style.window.border_color = nk_rgba(255, 255, 255, 255);
 }
 
 void Renderer::render() const {
