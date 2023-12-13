@@ -32,7 +32,8 @@ void ApplicationContext::initialize(const char *windowTitle) {
 
   /* Initialize components*/
   ecs = std::make_unique<flecs::world>();
-  assetManager = std::make_unique<AssetManager>();
+  assetManager =
+    std::make_unique<AssetManager>(SECURE_ASSETS_ARCHIVE, SECURE_ASSETS_PASSWORD);
   shaderManager = std::make_unique<ShaderManager>(assetManager.get());
   renderer = std::make_unique<Renderer>(ecs.get(), shaderManager.get());
   windowManager = std::make_unique<WindowManager>(renderer.get(), windowTitle);

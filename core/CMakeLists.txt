@@ -69,7 +69,7 @@ function(magnet_package assets_directory)
   string(TIMESTAMP TODAY "%Y%m%d") # Used as password for archive
   target_compile_definitions(magnet-core PUBLIC SECURE_ASSETS_ARCHIVE="data.zip" SECURE_ASSETS_PASSWORD="${TODAY}")
 
-  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+  add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD
   # remove tempdata so we
   # 1. avoid shipping old assets
   # 2. avoid merging unrelated assets from different projects

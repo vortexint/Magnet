@@ -2,12 +2,8 @@
 
 #include <spdlog/spdlog.h>
 
-AssetManager::AssetManager() = default;
-
-AssetManager::~AssetManager() { closeArchive(); }
-
-void AssetManager::openArchive(std::string archivePath,
-                               const std::string& password) {
+AssetManager::AssetManager(std::string archivePath,
+                           const std::string& password) {
   std::scoped_lock lock(mutex_);
   int error{};
   archive_ = zip_open(archivePath.c_str(), ZIP_RDONLY, &error);
@@ -32,7 +28,7 @@ void AssetManager::openArchive(std::string archivePath,
   }
 }
 
-void AssetManager::closeArchive() {
+AssetManager::~AssetManager() {
   std::scoped_lock lock(mutex_);
   if (archive_) {
     zip_close(archive_);

@@ -417,6 +417,24 @@ NK_API struct nk_context *nk_glfw3_init(GLFWwindow *win,
   glfw.is_double_click_down = nk_false;
   glfw.double_click_pos = nk_vec2(0, 0);
 
+  {
+    struct nk_font_atlas *atlas; //
+
+    nk_glfw3_font_stash_begin(&atlas);
+    std::vector<unsigned char> imageData;
+
+    AssetManager* assetMgr;
+    //assetMgr->getAsset("fonts/Roboto-Regular.ttf",
+    //                   imageData
+    //                   );
+
+
+    //struct nk_font *roboto = nk_font_atlas_add_from_memory(atlas, imageData.data(), imageData.size(), 12, 0);
+    nk_glfw3_font_stash_end();
+    /*nk_style_load_all_cursors(ctx, atlas->cursors);*/
+    /*nk_style_set_font(ctx, &droid->handle);*/
+  }
+
   return &glfw.ctx;
 }
 

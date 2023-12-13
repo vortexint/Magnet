@@ -11,7 +11,6 @@ void Interface::init() {
 
   GLFWwindow* window = windowMgr->getWindow();
 
-  assetMgr->openArchive();
   // Load icon
   {
     std::vector<unsigned char> imageData;
@@ -27,6 +26,5 @@ void Interface::init() {
     free(icons[0].pixels);
   }
 
-  assetMgr->closeArchive();
 }
 void Interface::update() {}

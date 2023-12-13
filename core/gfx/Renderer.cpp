@@ -32,16 +32,6 @@ void Renderer::initialize() {
   /* Set up UI */
   ctx = nk_glfw3_init(windowManager->getWindow(), NK_GLFW3_INSTALL_CALLBACKS,
                       MAX_VERTEX_BUFFER, MAX_ELEMENT_BUFFER);
-
-  {
-    struct nk_font_atlas* atlas;
-    nk_glfw3_font_stash_begin(&atlas);
-
-
-    nk_glfw3_font_stash_end();
-  /*nk_style_load_all_cursors(ctx, atlas->cursors);*/
-    /*nk_style_set_font(ctx, &droid->handle);*/
-  }
 }
 
 void Renderer::render() const {

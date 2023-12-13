@@ -11,7 +11,6 @@ unsigned int ShaderManager::genShader(const char* shaderName,
                                       const char* vertexPath,
                                       const char* fragmentPath) {
 
-  assetManager->openArchive();
 
   std::string vertexSource, fragmentSource;
 
@@ -22,8 +21,6 @@ unsigned int ShaderManager::genShader(const char* shaderName,
 
   const GLchar* vertData[] = {vertexSource.c_str()};
   const GLchar* fragData[] = {fragmentSource.c_str()};
-
-  assetManager->closeArchive();
 
   GLuint vertex, fragment;
 

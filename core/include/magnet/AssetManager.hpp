@@ -11,12 +11,8 @@
 
 class AssetManager {
  public:
-  AssetManager();
+  AssetManager(std::string archivePath, const std::string& password);
   ~AssetManager();
-
-  void openArchive(std::string archivePath = SECURE_ASSETS_ARCHIVE,
-                   const std::string& password = SECURE_ASSETS_PASSWORD);
-  void closeArchive();
 
   void getAsset(std::string_view assetName, std::vector<unsigned char>& buffer);
   void getAsset(std::string_view assetName, std::string& buffer);
