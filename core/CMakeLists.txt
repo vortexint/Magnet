@@ -6,6 +6,7 @@ add_library(magnet::core ALIAS magnet-core)
 target_sources(magnet-core PRIVATE
   ApplicationContext.cpp
 
+  gfx/GUI/Interface.cpp
   gfx/GUI/Nuklear.cpp
   gfx/GUI/Themes.cpp
   

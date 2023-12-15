@@ -34,7 +34,10 @@ WindowManager::~WindowManager() {
   glfwTerminate();
 }
 
-void WindowManager::swapBuffers() { glfwSwapBuffers(window); }
+void WindowManager::swapBuffers() {
+  nk_glfw3_render(NK_ANTI_ALIASING_ON);
+  glfwSwapBuffers(window);
+}
 
 void WindowManager::pollEvents() { 
   glfwPollEvents();

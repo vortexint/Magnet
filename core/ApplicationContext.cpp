@@ -48,10 +48,11 @@ void ApplicationContext::initialize(const char *windowTitle) {
     /* Update all active systems and subsystems */
     ecs->progress();
 
-    registeredInterface->update();
 
     /* Render everything */
     renderer->render();
+
+    registeredInterface->update();
 
     /* Swap buffers */
     windowManager->swapBuffers();

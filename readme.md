@@ -40,7 +40,7 @@ This project uses CMake as it's build system, prefer an IDE that manages CMake c
 - [CLion](https://www.jetbrains.com/clion/)
 
 ### Simple setup example
-Assuming your project uses CMake and you have all the dependencies, in your working directory, run:
+Assuming your project uses CMake & Git and you have all the dependencies, in your working directory, run:
 
 ```sh
 mkdir submodules

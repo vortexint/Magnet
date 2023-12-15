@@ -1,6 +1,6 @@
 ### Tutorials ###
 
-#add_subdirectory(00_barebones)
+add_subdirectory(00_barebones)
 
 ### Samples ###
 
