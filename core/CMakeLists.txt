@@ -5,18 +5,13 @@ add_library(magnet::core ALIAS magnet-core)
 
 target_sources(magnet-core PRIVATE
   ApplicationContext.cpp
-
-  gfx/UI/Interface.cpp
-  gfx/UI/Nuklear.cpp
-  
-  gfx/glad.c
-  gfx/Renderer.cpp
-  gfx/ShaderManager.cpp
-  gfx/WindowManager.cpp
   
   IO/AssetManager.cpp
   IO/Input.cpp
 )
+
+add_subdirectory(gfx)
+
 target_compile_options(magnet-core PUBLIC
     -O2
     # optimize for Size

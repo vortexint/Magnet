@@ -29,8 +29,8 @@ void initialize() {
     std::vector<unsigned char> fontData;
 
     struct nk_font_config config = nk_font_config(24);
-    config.oversample_h = 3;
-    config.oversample_v = 3;
+    config.oversample_h = 5;
+    config.oversample_v = 5;
 
     nk_glfw3_font_stash_begin(&atlas);
 
@@ -45,13 +45,13 @@ void initialize() {
                                               fontData.size(), 16, &config);
 
     nk_glfw3_font_stash_end();
-    nk_style_set_font(ctx, &kanit->handle);
+    nk_style_set_font(ctx, &firacd->handle);
   }
 
   /* Set theme */
   {
     struct nk_color table[NK_COLOR_COUNT];
-    table[NK_COLOR_TEXT] = nk_rgb_hex("bdbdbd");
+    table[NK_COLOR_TEXT] = nk_rgb_hex("d8d8d8");
     table[NK_COLOR_WINDOW] = nk_rgb_hex("282828");
     table[NK_COLOR_HEADER] = nk_rgb_hex("212121");
     table[NK_COLOR_BORDER] = nk_rgb_hex("404040");
@@ -85,6 +85,7 @@ void initialize() {
     ctx->style.button.rounding = 2;
     ctx->style.window.padding = {5, 5};
     ctx->style.window.spacing = {5, 5};
+    ctx->style.window.header.spacing = {1,1};
   }
 }
 

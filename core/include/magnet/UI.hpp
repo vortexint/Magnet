@@ -40,11 +40,10 @@ NK_API void nk_glfw3_destroy_texture(int tex_index);
 namespace Magnet::UI {
 
 void initialize();
-
-struct nk_context *getContext();
+nk_context *getContext();
 
 namespace Widgets {
- void showConsole(bool *);
+ void showDevTools();
 }
 
 }  // namespace Magnet::UI
