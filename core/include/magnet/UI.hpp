@@ -3,6 +3,13 @@
 #include <GLFW/glfw3.h>
 #include <string.h>
 
+#define NK_INCLUDE_FIXED_TYPES
+#define NK_INCLUDE_STANDARD_IO
+#define NK_INCLUDE_STANDARD_VARARGS
+#define NK_INCLUDE_DEFAULT_ALLOCATOR
+#define NK_INCLUDE_VERTEX_BUFFER_OUTPUT
+#define NK_INCLUDE_FONT_BAKING
+#define NK_KEYSTATE_BASED_INPUT
 #include "nuklear.h"
 
 enum nk_glfw_init_state { NK_GLFW3_DEFAULT = 0, NK_GLFW3_INSTALL_CALLBACKS };
@@ -30,10 +37,14 @@ NK_API GLuint64 nk_glfw3_get_tex_ogl_handle(int tex_index);
 NK_API int nk_glfw3_create_texture(const void *image, int width, int height);
 NK_API void nk_glfw3_destroy_texture(int tex_index);
 
-namespace Magnet::GUI {
+namespace Magnet::UI {
 
 void initialize();
 
 struct nk_context *getContext();
 
-}  // namespace Magnet::GUI
+namespace Widgets {
+ void showConsole(bool *);
+}
+
+}  // namespace Magnet::UI

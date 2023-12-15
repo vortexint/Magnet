@@ -12,7 +12,7 @@ void Interface::init() {
   WindowManager* windowMgr = ApplicationContext::getWindowManager();
 
   window = windowMgr->getWindow();
-  ctx = Magnet::GUI::getContext();
+  ctx = Magnet::UI::getContext();
 
   // Load icon
   {
@@ -37,17 +37,19 @@ void Interface::update() {
   static float value = 0.6f;
   static int i = 20;
 
-  if (nk_begin(ctx, "Demo", nk_rect(50, 50, 230, 250),
-               NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE |
+  if (nk_begin(ctx, "Panel", nk_rect(50, 50, 230, 250),
+               NK_WINDOW_BORDER | NK_WINDOW_MOVABLE |
                  NK_WINDOW_MINIMIZABLE | NK_WINDOW_TITLE)) {
-    /* fixed widget pixel width */
-    nk_layout_row_static(ctx, 30, 80, 1);
+    // first row with height: 30 composed of two widgets
+    nk_layout_row_dynamic(ctx, 30, 2);
+
+    if (nk_button_label(ctx, "button")) {
+      /* event handling */
+    }
     if (nk_button_label(ctx, "button")) {
       /* event handling */
     }
 
-    /* fixed widget window ratio width */
-    nk_layout_row_dynamic(ctx, 30, 2);
     if (nk_option_label(ctx, "easy", op == EASY)) op = EASY;
     if (nk_option_label(ctx, "hard", op == HARD)) op = HARD;
 

@@ -3,17 +3,9 @@
 #include "magnet/ApplicationContext.hpp"
 #include "magnet/ShaderManager.hpp"
 
-#define NK_INCLUDE_FIXED_TYPES
-#define NK_INCLUDE_STANDARD_IO
-#define NK_INCLUDE_STANDARD_VARARGS
-#define NK_INCLUDE_DEFAULT_ALLOCATOR
-#define NK_INCLUDE_VERTEX_BUFFER_OUTPUT
-#define NK_INCLUDE_FONT_BAKING
-#define NK_INCLUDE_DEFAULT_FONT
-#define NK_KEYSTATE_BASED_INPUT
 
 #define NK_IMPLEMENTATION
-#include "magnet/GUI.hpp"
+#include "magnet/UI.hpp"
 
 #ifndef NK_GLFW_TEXT_MAX
 #define NK_GLFW_TEXT_MAX 256
@@ -416,25 +408,7 @@ NK_API struct nk_context *nk_glfw3_init(GLFWwindow *win,
 
   glfw.is_double_click_down = nk_false;
   glfw.double_click_pos = nk_vec2(0, 0);
-
-  {
-    struct nk_font_atlas *atlas; //
-
-    nk_glfw3_font_stash_begin(&atlas);
-    std::vector<unsigned char> imageData;
-
-    AssetManager* assetMgr;
-    //assetMgr->getAsset("fonts/Roboto-Regular.ttf",
-    //                   imageData
-    //                   );
-
-
-    //struct nk_font *roboto = nk_font_atlas_add_from_memory(atlas, imageData.data(), imageData.size(), 12, 0);
-    nk_glfw3_font_stash_end();
-    /*nk_style_load_all_cursors(ctx, atlas->cursors);*/
-    /*nk_style_set_font(ctx, &droid->handle);*/
-  }
-
+  
   return &glfw.ctx;
 }
 

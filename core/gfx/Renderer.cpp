@@ -3,7 +3,7 @@
 #include <spdlog/spdlog.h>
 
 #include "magnet/ShaderManager.hpp"
-#include "magnet/GUI.hpp"
+#include "magnet/UI.hpp"
 
 void SetupState() {
   /* OpenGL State configuration */
@@ -22,7 +22,7 @@ void Renderer::initialize() {
    * before any OpenGL function is called */
   gladLoadGL();
 
-  Magnet::GUI::initialize();
+  Magnet::UI::initialize();
 }
 
 void Renderer::render() const {
