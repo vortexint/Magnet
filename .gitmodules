@@ -1,18 +1,12 @@
 [submodule "submodules/Lua"]
 	path = submodules/Lua
 	url = https://github.com/Sororfortuna/LuaCMake
-[submodule "submodules/bullet3"]
-	path = submodules/bullet3
-	url = https://github.com/bulletphysics/bullet3.git
 [submodule "submodules/glfw"]
 	path = submodules/glfw
 	url = https://github.com/glfw/glfw.git
 [submodule "submodules/tweeny"]
 	path = submodules/tweeny
 	url = https://github.com/mobius3/tweeny.git
-[submodule "submodules/tiny-AES-c"]
-	path = submodules/tiny-AES-c
-	url = https://github.com/kokke/tiny-AES-c.git
 [submodule "submodules/spdlog"]
 	path = submodules/spdlog
 	url = https://github.com/gabime/spdlog.git
@@ -28,6 +22,9 @@
 [submodule "submodules/rwkv.cpp"]
 	path = submodules/rwkv.cpp
 	url = https://github.com/saharNooby/rwkv.cpp.git
-[submodule "submodules/libzip"]
-	path = submodules/libzip
-	url = https://github.com/nih-at/libzip.git
+[submodule "submodules/enet"]
+	path = submodules/enet
+	url = https://github.com/zpl-c/enet.git
+[submodule "submodules/libarchive"]
+	path = submodules/libarchive
+	url = https://github.com/libarchive/libarchive.git
