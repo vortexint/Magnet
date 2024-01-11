@@ -4,6 +4,8 @@
 Magnet<br>
 <sup><sup><sub>A robust C++ framework for 3D software</sub></sup></sup></h1>
 
+**[Official webpage](https://vortex-dev.com/?p=magnet) · [License](license.md)**
+
 ## Dependencies
 **Linux**
 
@@ -22,15 +24,16 @@ Choose the appropriate package manager for your system.
 
 <sup>
 
-*Some packages may already be installed on your system.*
+*Most packages are likely already installed on your system.*
 
 </sup>
 
 
 **Windows**
-- [Git](https://git-scm.com/)
 - [CMake](https://cmake.org/)
+- [Git](https://git-scm.com/)
 - [OpenEXR](https://openexr.com/en/latest/install.html)
+- [Python](https://www.python.org/downloads/)
 
 ## Usage
 This project uses CMake as it's build system, prefer an IDE that manages CMake configuration automatically on save, such as:
@@ -39,8 +42,13 @@ This project uses CMake as it's build system, prefer an IDE that manages CMake c
 - [Visual Studio](https://visualstudio.microsoft.com/)
 - [CLion](https://www.jetbrains.com/clion/)
 
-### Simple setup example
-Assuming your project uses CMake & Git and you have all the dependencies, in your working directory, run:
+### Setup example
+<sup>
+
+Assuming your project uses CMake & Git and you have all the dependencies.
+
+</sup>
+in your working directory, run:
 
 ```sh
 mkdir submodules
@@ -63,8 +71,8 @@ target_link_libraries(myApp PRIVATE magnet-core)
 
 magnet_package(${CMAKE_CURRENT_SOURCE_DIR}/assets) 
 
-# Necessary. If not using any custom assets, pass a non-existent directory:
-magnet_package(UNDEFINED)
+# Necessary. If not using any custom assets, pass an empty string.
+magnet_package("")
 ```
 
 Next, let's work on the project's code structure...
@@ -98,14 +106,13 @@ class AppInterface : public ProjectInterface {
 
 ## Learning Material
 
-Seek the tutorials and samples in the [samples](samples/) directory:
+There are several [samples](samples/) to learn from:
 
 | Tutorial | Description |
 |-|-|
 |[Barebones](samples/00_barebones/)| As raw as it gets, establishes a minimal project |
 |[Primitives](samples/01_primitives/)| Use native features and prefabs to populate the scene |
 
-<h2 align="center">Projects</h2>
-
-### Sandbox <img src="samples/sandbox/assets/icon.png" alt="icon" width="128" height="128" align="left" valign="middle">
-This is a sample project to demonstrate basic capabilities of the engine
+| Project | Description |
+|-|-|
+|[Sandbox](samples/sandbox/)| Garry's Mod clone |

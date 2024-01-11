@@ -1,91 +1,81 @@
 #include "magnet/AssetManager.hpp"
 
+#include <archive.h>
+#include <archive_entry.h>
 #include <spdlog/spdlog.h>
 
-AssetManager::AssetManager(std::string archivePath,
-                           const std::string& password) {
-  std::scoped_lock lock(mutex_);
-  int error{};
-  archive_ = zip_open(archivePath.c_str(), ZIP_RDONLY, &error);
-  if (!archive_) {
-    spdlog::error("Could not open archive: {} (error code: {})", archivePath,
-                  error);
-    throw std::runtime_error("Could not open archive due to error code: " +
-                             std::to_string(error));
-  }
+const size_t BLOCK_SIZE = 10240;
 
-  // If a password has been specified for this archive, apply it.
-  // This password will be used to decrypt files within the archive as they are
-  // read.
-  if (!password.empty() &&
-      zip_set_default_password(archive_, password.c_str()) < 0) {
-    zip_close(archive_);
-    archive_ = nullptr;
-    spdlog::error("Failed to set password for decrypting the archive: {}",
-                  archivePath);
-    throw std::runtime_error(
-      "Failed to set password for decrypting the archive.");
+// An instance of AssetManager is dedicated to a single archive.
+AssetManager::AssetManager(const char* archivePath,
+                           const char* key) : aPath(archivePath)
+{
+  if (key) {
+    // TODO: implement decryption
   }
 }
 
 AssetManager::~AssetManager() {
-  std::scoped_lock lock(mutex_);
-  if (archive_) {
-    zip_close(archive_);
-    archive_ = nullptr;
-  }
+  
 }
 
-std::shared_ptr<std::vector<unsigned char>> AssetManager::readAsset(
+// Returns the asset's data in a generic type that can be converted.
+std::optional<std::vector<std::uint8_t>> AssetManager::readAsset(
   std::string_view assetName) {
-  std::string assetNameStr{assetName};  // Convert to string for map lookup
-  auto cached = cache_.find(assetNameStr);
-  if (cached != cache_.end()) {
-    return cached->second;
+  std::scoped_lock lock(mutex); // declared in AssetManager.hpp
+
+  struct archive* a = archive_read_new();
+  archive_read_support_format_tar(a);
+
+  if (archive_read_open_filename(a, aPath, BLOCK_SIZE) != ARCHIVE_OK) {
+    spdlog::error("Failed to open {}: {}", aPath, archive_error_string(a));
+    archive_read_free(a);
+    throw std::runtime_error("Failed to open archive");
   }
 
-  zip_int64_t index = zip_name_locate(archive_, assetNameStr.c_str(), 0);
-  if (index == -1) {
-    spdlog::warn("Asset '{}' not found in archive.", assetNameStr);
-    return nullptr;
+  std::unique_ptr<struct archive, decltype(&archive_read_free)> archivePtr(
+    a, archive_read_free);
+
+  archive_entry* entry;
+  std::vector<std::uint8_t> buffer;
+  bool found = false;
+
+  while (archive_read_next_header(a, &entry) == ARCHIVE_OK) {
+    spdlog::info("Reading {}", archive_entry_pathname(entry));
+    if (archive_entry_pathname(entry) == assetName) {
+      size_t size = archive_entry_size(entry);
+      buffer.resize(size);
+      if (archive_read_data(a, buffer.data(), size) != size) {
+        spdlog::error("Failed to read {}: {}", assetName,
+                      archive_error_string(a));
+        throw std::runtime_error("Failed to read asset");
+      }
+      found = true;
+      break;
+    }
   }
 
-  zip_file_t* file = zip_fopen_index(archive_, index, 0);
-  if (!file) {
-    spdlog::error("Failed to open asset '{}' in archive.", assetNameStr);
-    return nullptr;
+  if (!found) {
+    spdlog::error("Asset {} not found", assetName);
+    throw std::runtime_error("Asset not found");
   }
 
-  zip_stat_t stat;
-  if (zip_stat_index(archive_, index, 0, &stat) != 0) {
-    spdlog::error("Failed to stat asset '{}' in archive.", assetNameStr);
-    zip_fclose(file);
-    return nullptr;
-  }
-
-  auto buffer = std::make_shared<std::vector<unsigned char>>(stat.size);
-  if (zip_fread(file, buffer->data(), stat.size) != stat.size) {
-    spdlog::error("Failed to read asset '{}' from archive.", assetNameStr);
-    zip_fclose(file);
-    return nullptr;
-  }
-
-  zip_fclose(file);
-  cache_[assetNameStr] = buffer;  // Cache the data.
   return buffer;
 }
 
 void AssetManager::getAsset(std::string_view assetName,
-                            std::vector<unsigned char>& buffer) {
-  std::shared_ptr<std::vector<unsigned char>> data = readAsset(assetName);
-  if (data) {
-    buffer = *data;
+                            std::vector<uint8_t>& buffer) {
+  auto optBuffer = readAsset(assetName);
+  if (!optBuffer) {
+    throw std::runtime_error("Failed to read asset");
   }
+  buffer = std::move(*optBuffer);
 }
 
 void AssetManager::getAsset(std::string_view assetName, std::string& buffer) {
-  std::shared_ptr<std::vector<unsigned char>> data = readAsset(assetName);
-  if (data) {
-    buffer.assign(data->begin(), data->end());
+  auto optBuffer = readAsset(assetName);
+  if (!optBuffer) {
+    throw std::runtime_error("Failed to read asset");
   }
+  buffer.assign(optBuffer->begin(), optBuffer->end());
 }

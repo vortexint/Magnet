@@ -34,13 +34,12 @@ target_include_directories(magnet-core PRIVATE
 
 target_link_libraries(magnet-core PUBLIC
                       ${OpenGL_LIBRARIES}
+                      archive_static
                       cglm
                       flecs_static
                       glfw
                       lua_static
                       spdlog
-                      tiny-aes
-                      zip
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
@@ -53,30 +52,50 @@ else()
   message(FATAL_ERROR "Unknown platform: \"" ${CMAKE_SYSTEM_NAME} "\"")
 endif()
 
-find_program(ZIP_EXECUTABLE zip)
-if(NOT ZIP_EXECUTABLE)
-  message(FATAL_ERROR "zip was not found!")
-endif()
-
-### Archive ###
-
-function(magnet_package assets_directory)
-  string(TIMESTAMP TODAY "%Y%m%d") # Used as password for archive
-  target_compile_definitions(magnet-core PUBLIC SECURE_ASSETS_ARCHIVE="data.zip" SECURE_ASSETS_PASSWORD="${TODAY}")
-
-  add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD
-  # remove tempdata so we
-  # 1. avoid shipping old assets
-  # 2. avoid merging unrelated assets from different projects
-  COMMAND rm -r ${CMAKE_BINARY_DIR}/tempdata || true
-
-  COMMAND mkdir -p ${CMAKE_BINARY_DIR}/tempdata
-  # merge core and project assets to new temp. dir
-  COMMAND cp -a ${CMAKE_SOURCE_DIR}/core/assets/. ${CMAKE_BINARY_DIR}/tempdata
-  COMMAND cp -a ${assets_directory}/. ${CMAKE_BINARY_DIR}/tempdata || true
-
-  # archive
-  COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/tempdata
-          zip --encrypt --password "${TODAY}" -r $<TARGET_FILE_DIR:${PROJECT_NAME}>/data .
+# Asset Packaging 
+#
+# Call this function with the following arguments:
+# - ASSET_DIR: The directory to be archived.
+# - ARCHIVE_NAME: The name of the archive file (without extension).
+#
+# The function will perform the following steps:
+# - Generate a random key using OpenSSL.
+# - Archive the specified directory.
+# - Encrypt the archive using the generated key.
+# - Write the encrypted data to the file $<TARGET_FILE_DIR:${TARGET}>/{ARCHIVE_NAME}.magnet".
+# - Define the preprocessor macros {ARCHIVE_NAME}="{ARCHIVE_NAME}.magnet" and {ARCHIVE_NAME}_KEY="{KEY}" to the target.
+function(magnet_package TARGET ASSET_DIR)
+  set(options)
+  set(oneValueArgs ARCHIVE_NAME)
+  set(multiValueArgs)
+  cmake_parse_arguments(
+    PARSE_ARGV 2 ARG "${options}" "${oneValueArgs}" "${multiValueArgs}"
   )
+
+  if(NOT ARG_ARCHIVE_NAME)
+    message(FATAL_ERROR "magnet-package: ARCHIVE_NAME not specified")
+  endif()
+
+  set(ARCHIVE_PATH $<TARGET_FILE_DIR:${TARGET}>/${ARG_ARCHIVE_NAME}.magnet)
+
+  execute_process(
+    COMMAND openssl rand -hex 32
+    OUTPUT_VARIABLE KEY
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+
+  add_custom_command(TARGET ${TARGET} PRE_BUILD
+    COMMAND tar -C ${ASSET_DIR} -cv . > ${ARCHIVE_PATH}
+    # COMMAND tar cvf - ${ASSET_DIR} | openssl enc -chacha20 -K ${KEY} > ${ARCHIVE_PATH}
+    COMMENT "Created \"${ARCHIVE_PATH}\" with key \"${KEY}\""
+  )
+
+  target_compile_definitions(${TARGET} PRIVATE ARCH_${ARG_ARCHIVE_NAME}="${ARG_ARCHIVE_NAME}.magnet" ARCH_${ARG_ARCHIVE_NAME}_KEY="${KEY}")
 endfunction()
+
+function(magnet_package_core TARGET)
+  set(CORE_ASSETS_DIR ${CMAKE_SOURCE_DIR}/core/assets)
+  magnet_package(${TARGET} ${CORE_ASSETS_DIR} ARCHIVE_NAME core)
+endfunction()
+
+magnet_package_core(magnet-core) # For ARCH_core and ARCH_core_KEY definitions

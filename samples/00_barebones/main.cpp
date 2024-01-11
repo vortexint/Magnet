@@ -5,11 +5,11 @@ const char* const TITLE = "Barebones Example";
 class AppInterface : public ProjectInterface {
  public:
   void init() override {
-    // AssetManager*  assetMgr  = ApplicationContext::getAssetManager();
+    // AssetManager  assetMgr("archive.magnet", "key")
     // WindowManager* windowMgr = ApplicationContext::getWindowManager();
 
-    // Under normal circumstances, here you would use the AssetManager to load
-    // essential assets of your project, including textures, sounds, etc.
+    // Here you would use the AssetManager to load essential assets of your
+    // project, including shaders, textures, sounds, etc...
   }
 
   void update() override {

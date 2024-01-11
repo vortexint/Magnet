@@ -1,28 +1,26 @@
 #pragma once
 
-#include <zip.h>
-
-#include <memory>
 #include <mutex>
+#include <optional>
+#include <span>
 #include <string>
-#include <string_view>
-#include <unordered_map>
 #include <vector>
 
+struct archive;
+struct archive_entry;
+
 class AssetManager {
+  std::mutex mutex;
+
+  archive* a;
+  const char* aPath;
+
+  std::optional<std::vector<std::uint8_t>> readAsset(std::string_view assetName);
+
  public:
-  AssetManager(std::string archivePath, const std::string& password);
+  AssetManager(const char* archivePath, const char* key = nullptr);
   ~AssetManager();
 
-  void getAsset(std::string_view assetName, std::vector<unsigned char>& buffer);
+  void getAsset(std::string_view assetName, std::vector<uint8_t>& buffer);
   void getAsset(std::string_view assetName, std::string& buffer);
-
- private:
-  std::mutex mutex_;
-  std::unordered_map<std::string, std::shared_ptr<std::vector<unsigned char>>>
-    cache_;
-  zip_t* archive_{nullptr};
-
-  std::shared_ptr<std::vector<unsigned char>> readAsset(
-    std::string_view assetName);
 };

@@ -68,8 +68,8 @@ NK_API void nk_glfw3_device_create() {
   nk_buffer_init_default(&dev->cmds);
 
   dev->prog = shaderManager->genShader("nk",
-                           "shaders/nk.vert",
-                         "shaders/nk.frag");
+                           "./shaders/nk.vert",
+                           "./shaders/nk.frag");
 
   dev->uniform_tex = glGetUniformLocation(dev->prog, "Texture");
   dev->uniform_proj = glGetUniformLocation(dev->prog, "ProjMtx");
