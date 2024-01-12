@@ -8,7 +8,7 @@
 void Interface::init() {
   
 
-  AssetManager assetMgr(ARCH_data);
+  AssetManager assetMgr(ARCH_data, ARCH_data_KEY);
   WindowManager* windowMgr = ApplicationContext::getWindowManager();
 
   window = windowMgr->getWindow();
@@ -33,6 +33,5 @@ void Interface::init() {
 
 void Interface::update() {
 
-  
 
 }

@@ -12,4 +12,4 @@ target_link_libraries(${PROJECT_NAME} PRIVATE magnet-core tweeny)
 
 
 magnet_package_core(${PROJECT_NAME})
-magnet_package(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/assets ARCHIVE_NAME data)
+magnet_package(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/assets data)

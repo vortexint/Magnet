@@ -1,6 +1,6 @@
 
 <h1 align="center">
-<img src="https://vortex-dev.com/assets/img/magnet.png" alt="3D horseshoe magnet icon" width="128"/><br>
+<img src="https://github.com/vortexdevsoftware/Magnet/assets/18470725/add58edd-4713-4795-a4cb-bd7e59c8e96e" alt="3D horseshoe magnet icon" width="128"/><br>
 Magnet<br>
 <sup><sup><sub>A robust C++ framework for 3D software</sub></sup></sup></h1>
 
@@ -69,10 +69,10 @@ Always make sure your project's CMakeLists.txt calls `magnet_package()`, otherwi
 # ...
 target_link_libraries(myApp PRIVATE magnet-core)
 
-magnet_package(${CMAKE_CURRENT_SOURCE_DIR}/assets) 
+# Asset Packaging
+magnet_package_core(${PROJECT_NAME})
 
-# Necessary. If not using any custom assets, pass an empty string.
-magnet_package("")
+magnet_package(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/assets data) # generates data.magnet from assets/
 ```
 
 Next, let's work on the project's code structure...
@@ -82,7 +82,7 @@ Next, let's work on the project's code structure...
 ```cpp
 #include <magnet/ApplicationContext.hpp>
 
-// Note: the core's libraries are SHARED
+// Note: the core's libraries are PUBLIC
 // So you can use any of them as needed.
 #include <GLFW/glfw3.h>
 
@@ -90,7 +90,8 @@ Next, let's work on the project's code structure...
 class AppInterface : public ProjectInterface {
  public:
   void init() override {
-    AssetManager*  assetMgr  = ApplicationContext::getAssetManager();
+    // If using an Asset Manager:
+    AssetManager assetMgr(ARCH_data, ARCH_data_KEY); // Macros provided by magnet_package()
     WindowManager* windowMgr = ApplicationContext::getWindowManager();
 
     GLFWwindow* window = windowMgr->getWindow();
@@ -99,7 +100,7 @@ class AppInterface : public ProjectInterface {
   }
 
   void update() override {
-    // Project-specific update logic
+    // Do something every update...
   }
 };
 ```
