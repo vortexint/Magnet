@@ -11,7 +11,7 @@
 static void Console(bool* enabled);
 static void ExampleAppMainMenuBar(bool* enabled);
 
-void Magnet::UI::Widgets::showDevTools() {
+void Magnet::Widgets::showDevTools() {
   static bool show_menu_bar = false;
   static bool show_console = false;
 

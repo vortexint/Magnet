@@ -1,8 +1,6 @@
 /**
  * @file Interface.cpp
  * @author Igor Alexey (igor@vortex-dev.com)
- * @brief Not to be confused with ProjectInterface, manages Graphical User
- * Interface
  */
 
 #include "magnet/ApplicationContext.hpp"
@@ -13,10 +11,10 @@
 #define MAX_VERTEX_BUFFER 512 * 1024
 #define MAX_ELEMENT_BUFFER 128 * 1024
 
-namespace Magnet::UI {
+namespace Magnet {
 nk_context* ctx;
 
-void initialize() {
+void nk_initialize() {
   WindowManager* windowManager = ApplicationContext::getWindowManager();
   AssetManager* assetMgr = ApplicationContext::getAssetManager();
 
@@ -84,6 +82,6 @@ void initialize() {
   }
 }
 
-struct nk_context* getContext() { return ctx; }
+struct nk_context* get_nk_context() { return ctx; }
 
 }  // namespace Magnet::UI

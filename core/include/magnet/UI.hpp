@@ -38,13 +38,13 @@ NK_API GLuint64 nk_glfw3_get_tex_ogl_handle(int tex_index);
 NK_API int nk_glfw3_create_texture(const void *image, int width, int height);
 NK_API void nk_glfw3_destroy_texture(int tex_index);
 
-namespace Magnet::UI {
+namespace Magnet {
 
-void initialize();
-nk_context *getContext();
+void nk_initialize();
+nk_context* get_nk_context();
 
 namespace Widgets {
  void showDevTools();
 }
 
-}  // namespace Magnet::UI
+}  // namespace Magnet

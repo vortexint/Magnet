@@ -1,6 +1,7 @@
 #include "app.hpp"
 
 #include <GLFW/glfw3.h>
+#include <spdlog/spdlog.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -12,7 +13,7 @@ void Interface::init() {
   WindowManager* windowMgr = ApplicationContext::getWindowManager();
 
   window = windowMgr->getWindow();
-  ctx = Magnet::UI::getContext();
+  ctx = Magnet::get_nk_context();
 
   // Load icon
   {
@@ -32,13 +33,26 @@ void Interface::init() {
 }
 
 void Interface::update() {
-
+  static float value = 0.6f;
+  
   if(nk_begin(ctx, "Hello World", nk_rect(50, 50, 200, 200),
               NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE |
                 NK_WINDOW_MINIMIZABLE | NK_WINDOW_TITLE)) {
     nk_layout_row_dynamic(ctx, 30, 2);
-    nk_button_label(ctx, "button");
-    nk_button_label(ctx, "button");
+    nk_button_label(ctx, "Modal");
+
+    if(nk_button_label(ctx, "button")) {
+      spdlog::info("Button clicked");
+    }
+    
+    nk_layout_row_begin(ctx, NK_STATIC, 30, 20);
+
+    nk_layout_row_push(ctx, 50);
+    nk_label(ctx, "Value:", NK_TEXT_LEFT);
+    nk_layout_row_push(ctx, 110);
+    nk_slider_float(ctx, 0, &value, 1.0f, 0.1f);
+
+    nk_layout_row_end(ctx);
   }
   nk_end(ctx);
 

@@ -1,5 +1,5 @@
 target_sources(magnet-core PRIVATE
-  Interface.cpp
+  UI.cpp
   Nuklear.cpp
 )
 

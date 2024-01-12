@@ -24,7 +24,7 @@ void Renderer::initialize() {
 
   SetupState();
 
-  Magnet::UI::initialize();
+  Magnet::nk_initialize();
 }
 
 void Renderer::render() const {
