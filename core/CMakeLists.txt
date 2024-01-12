@@ -93,7 +93,7 @@ function(magnet_package TARGET ASSET_DIR)
   )
 
   add_custom_command(TARGET ${TARGET} PRE_BUILD
-    COMMAND tar -C ${ASSET_DIR} -cv . > ${ARCHIVE_PATH}
+    COMMAND tar -cvf ${ARCHIVE_PATH} -C ${ASSET_DIR} .
     # COMMAND tar cvf - ${ASSET_DIR} | openssl enc -chacha20 -K ${KEY} > ${ARCHIVE_PATH}
     COMMENT "Created \"${ARCHIVE_PATH}\" with key \"${KEY}\""
   )
