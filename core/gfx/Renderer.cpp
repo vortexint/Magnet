@@ -22,14 +22,16 @@ void Renderer::initialize() {
    * before any OpenGL function is called */
   gladLoadGL();
 
+  SetupState();
+
   Magnet::UI::initialize();
 }
 
 void Renderer::render() const {
-  SetupState();
   /* Assuming that we'll always render something to all pixels, this
    * is not necessary but is considered good practice */
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 }
 
 void Renderer::resize(int width, int height) {

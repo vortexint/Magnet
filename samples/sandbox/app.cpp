@@ -33,5 +33,13 @@ void Interface::init() {
 
 void Interface::update() {
 
+  if(nk_begin(ctx, "Hello World", nk_rect(50, 50, 200, 200),
+              NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE |
+                NK_WINDOW_MINIMIZABLE | NK_WINDOW_TITLE)) {
+    nk_layout_row_dynamic(ctx, 30, 2);
+    nk_button_label(ctx, "button");
+    nk_button_label(ctx, "button");
+  }
+  nk_end(ctx);
 
 }
