@@ -33,7 +33,7 @@ NK_API void nk_glfw3_mouse_button_callback(GLFWwindow *win, int button,
                                            int action, int mods);
 
 NK_API GLuint nk_glfw3_get_tex_ogl_id(int tex_index);
-NK_API GLuint64 nk_glfw3_get_tex_ogl_handle(int tex_index);
+NK_API uint64_t nk_glfw3_get_tex_ogl_handle(int tex_index);
 NK_API int nk_glfw3_create_texture(const void *image, int width, int height);
 NK_API void nk_glfw3_destroy_texture(int tex_index);
 
