@@ -1,5 +1,3 @@
-set(CMAKE_CXX_STANDARD 23)
-
 add_library(magnet-core STATIC)
 add_library(magnet::core ALIAS magnet-core)
 
@@ -12,16 +10,26 @@ target_sources(magnet-core PRIVATE
 
 add_subdirectory(gfx)
 
-target_compile_options(magnet-core PUBLIC
-    -O2
-    # optimize for Size
-    -Os
-    # dead code elimination
-    -fdata-sections
-    -Wl,--gc-sections
-    -fomit-frame-pointer
-    -mcmodel=small
-)
+if(MSVC)
+  target_compile_options(magnet-core PUBLIC
+    $<$<CONFIG:Release>:/O2>
+    $<$<CONFIG:Release>:/Os>
+    $<$<CONFIG:Release>:/Gy>
+    $<$<CONFIG:Release>:/OPT:REF>
+    $<$<CONFIG:Release>:/Oy>
+  )
+else()
+  target_compile_options(magnet-core PUBLIC
+    -Wall
+    -Wextra
+    $<$<CONFIG:Release>:-O2>
+    $<$<CONFIG:Release>:-Os>
+    $<$<CONFIG:Release>:-fdata-sections>
+    $<$<CONFIG:Release>:-Wl,--gc-sections>
+    $<$<CONFIG:Release>:-fomit-frame-pointer>
+    $<$<CONFIG:Release>:-mcmodel=small>
+  )
+endif()
 
 find_package(OpenGL REQUIRED)
 

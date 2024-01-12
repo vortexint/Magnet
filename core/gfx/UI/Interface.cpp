@@ -34,11 +34,6 @@ void initialize() {
 
     nk_glfw3_font_stash_begin(&atlas);
 
-    assetMgr->getAsset("./fonts/Kanit-Regular.ttf", fontData);
-
-    nk_font* kanit = nk_font_atlas_add_from_memory(
-      atlas, fontData.data(), fontData.size(), 22, &config);
-
     assetMgr->getAsset("./fonts/FiraCode-Regular.ttf", fontData);
 
     nk_font* firacd = nk_font_atlas_add_from_memory(atlas, fontData.data(),

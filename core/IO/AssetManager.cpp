@@ -1,7 +1,9 @@
 #include "magnet/AssetManager.hpp"
 
+#define LIBARCHIVE_STATIC
 #include <archive.h>
 #include <archive_entry.h>
+
 #include <spdlog/spdlog.h>
 
 const size_t BLOCK_SIZE = 10240;
@@ -11,7 +13,7 @@ AssetManager::AssetManager(const char* archivePath,
                            const char* key) : aPath(archivePath)
 {
   if (key) {
-    // TODO: implement decryption
+    // TODO: implement decryption...?
   }
 }
 
@@ -41,11 +43,11 @@ std::optional<std::vector<std::uint8_t>> AssetManager::readAsset(
   bool found = false;
 
   while (archive_read_next_header(a, &entry) == ARCHIVE_OK) {
-    spdlog::info("Reading {}", archive_entry_pathname(entry));
+    spdlog::debug("Reading {}", archive_entry_pathname(entry));
     if (archive_entry_pathname(entry) == assetName) {
       size_t size = archive_entry_size(entry);
       buffer.resize(size);
-      if (archive_read_data(a, buffer.data(), size) != size) {
+      if (static_cast<ssize_t>(archive_read_data(a, buffer.data(), size)) != static_cast<ssize_t>(size)) {
         spdlog::error("Failed to read {}: {}", assetName,
                       archive_error_string(a));
         throw std::runtime_error("Failed to read asset");

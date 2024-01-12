@@ -2,7 +2,6 @@
 
 #include <mutex>
 #include <optional>
-#include <span>
 #include <string>
 #include <vector>
 
@@ -12,7 +11,7 @@ struct archive_entry;
 class AssetManager {
   std::mutex mutex;
 
-  archive* a;
+  archive* a = nullptr;
   const char* aPath;
 
   std::optional<std::vector<std::uint8_t>> readAsset(std::string_view assetName);
