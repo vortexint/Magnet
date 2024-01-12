@@ -19,7 +19,7 @@ void Interface::init() {
     std::vector<unsigned char> imageData;
     assetMgr.getAsset("./icon.png", imageData);
 
-    GLFWimage icons[1] = { };
+    GLFWimage icons[1] = {};
     icons[0].pixels =
       stbi_load_from_memory(imageData.data(), imageData.size(), &icons[0].width,
                             &icons[0].height, nullptr, STBI_rgb_alpha);

@@ -13,7 +13,7 @@ class AppInterface : public ProjectInterface {
   }
 
   void update() override {
-    // Project-specific update logic
+    // Project-specific
   }
 };
 
