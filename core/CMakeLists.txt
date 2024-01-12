@@ -11,17 +11,20 @@ target_sources(magnet-core PRIVATE
 )
 
 add_subdirectory(gfx)
-
-target_compile_options(magnet-core PUBLIC
-    -O2
-    # optimize for Size
-    -Os
-    # dead code elimination
-    -fdata-sections
-    -Wl,--gc-sections
-    -fomit-frame-pointer
-    -mcmodel=small
-)
+if (MSVC)
+    # These optimizations cause issues in msvc
+else()
+    target_compile_options(magnet-core PUBLIC
+        -O2
+        # optimize for Size
+        -Os
+        # dead code elimination
+        -fdata-sections
+        -Wl,--gc-sections
+        -fomit-frame-pointer
+        -mcmodel=small
+    )
+endif()
 
 find_package(OpenGL REQUIRED)
 
@@ -85,7 +88,7 @@ function(magnet_package TARGET ASSET_DIR)
   )
 
   add_custom_command(TARGET ${TARGET} PRE_BUILD
-    COMMAND tar -C ${ASSET_DIR} -cv . > ${ARCHIVE_PATH}
+    COMMAND tar -cvf ${ARCHIVE_PATH} ${ASSET_DIR}
     # COMMAND tar cvf - ${ASSET_DIR} | openssl enc -chacha20 -K ${KEY} > ${ARCHIVE_PATH}
     COMMENT "Created \"${ARCHIVE_PATH}\" with key \"${KEY}\""
   )
