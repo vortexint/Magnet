@@ -1,5 +1,7 @@
 #include "magnet/AssetManager.hpp"
-
+#if defined(__WIN32) || defined(WIN32)
+#define LIBARCHIVE_STATIC
+#endif
 #include <archive.h>
 #include <archive_entry.h>
 #include <spdlog/spdlog.h>
