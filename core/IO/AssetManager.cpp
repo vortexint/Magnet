@@ -47,7 +47,7 @@ std::optional<std::vector<std::uint8_t>> AssetManager::readAsset(
     if (archive_entry_pathname(entry) == assetName) {
       size_t size = archive_entry_size(entry);
       buffer.resize(size);
-      if (static_cast<ssize_t>(archive_read_data(a, buffer.data(), size)) != static_cast<ssize_t>(size)) {
+      if (static_cast<la_ssize_t>(archive_read_data(a, buffer.data(), size)) != static_cast<la_ssize_t>(size)) {
         spdlog::error("Failed to read {}: {}", assetName,
                       archive_error_string(a));
         throw std::runtime_error("Failed to read asset");
