@@ -142,7 +142,7 @@ NK_API GLuint nk_glfw3_get_tex_ogl_id(int tex_index) {
   return dev->tex_ids[tex_index];
 }
 
-NK_API GLuint64 nk_glfw3_get_tex_ogl_handle(int tex_index) {
+NK_API uint64_t nk_glfw3_get_tex_ogl_handle(int tex_index) {
   struct nk_glfw_device *dev = &glfw.ogl;
   assert(tex_index >= 0 && tex_index < NK_GLFW_MAX_TEXTURES);
   return dev->tex_handles[tex_index];
