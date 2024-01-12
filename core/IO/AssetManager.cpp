@@ -8,7 +8,7 @@ const size_t BLOCK_SIZE = 10240;
 
 // An instance of AssetManager is dedicated to a single archive.
 AssetManager::AssetManager(const char* archivePath,
-                           const char* key) : aPath(archivePath)
+                           const char* key) : aPath(archivePath), a(nullptr)
 {
   if (key) {
     // TODO: implement decryption
