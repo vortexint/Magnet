@@ -112,7 +112,7 @@ There are several [samples](samples/) to learn from:
 | Tutorial | Description |
 |-|-|
 |[Barebones](samples/00_barebones/)| As raw as it gets, establishes a minimal project |
-|[Primitives](samples/01_primitives/)| Use native features and prefabs to populate the scene |
+|[Primitives](samples/01_primitives/)| Populating the scenes with simple models |
 
 | Project | Description |
 |-|-|
