@@ -70,9 +70,8 @@ Always make sure your project's CMakeLists.txt calls `magnet_package()`, otherwi
 target_link_libraries(myApp PRIVATE magnet-core)
 
 # Asset Packaging
-magnet_package_core(${PROJECT_NAME})
-
-magnet_package(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/assets data) # generates data.magnet from assets/
+magnet_package_core(myApp) # required
+magnet_package(myApp ${CMAKE_CURRENT_SOURCE_DIR}/assets data) # generates data.magnet from "assets/" directory
 ```
 
 Next, let's work on the project's code structure...

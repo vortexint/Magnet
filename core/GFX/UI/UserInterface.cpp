@@ -1,12 +1,7 @@
-/**
- * @file Interface.cpp
- * @author Igor Alexey (igor@vortex-dev.com)
- */
+#include <spdlog/spdlog.h>
 
 #include "magnet/ApplicationContext.hpp"
-#include "magnet/UI.hpp"
-
-#include <spdlog/spdlog.h>
+#include "magnet/UserInterface.hpp"
 
 #define MAX_VERTEX_BUFFER 512 * 1024
 #define MAX_ELEMENT_BUFFER 128 * 1024
@@ -26,19 +21,22 @@ void nk_initialize() {
     nk_font_atlas* atlas;
     std::vector<unsigned char> fontData;
 
-    struct nk_font_config config = nk_font_config(24);
-    config.oversample_h = 5;
-    config.oversample_v = 5;
+    struct nk_font_config config = nk_font_config(13);
+    config.oversample_h = 3;
+    config.oversample_v = 3;
 
     nk_glfw3_font_stash_begin(&atlas);
 
     assetMgr->getAsset("./fonts/FiraCode-Regular.ttf", fontData);
 
-    nk_font* firacd = nk_font_atlas_add_from_memory(atlas, fontData.data(),
+    //nk_font* firacode = nk_font_atlas_add_from_memory(atlas, fontData.data(), fontData.size(), 16, &config);
+    assetMgr->getAsset("./fonts/Roboto-Regular.ttf", fontData);
+
+    nk_font* roboto = nk_font_atlas_add_from_memory(atlas, fontData.data(),
                                               fontData.size(), 16, &config);
 
     nk_glfw3_font_stash_end();
-    nk_style_set_font(ctx, &firacd->handle);
+    nk_style_set_font(ctx, &roboto->handle);
   }
 
   /* Set theme */

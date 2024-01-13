@@ -23,6 +23,9 @@ class Renderer {
   int width = INIT_WIDTH;
   int height = INIT_HEIGHT;
 
+  double lastTime = 0.0;
+
+
  public:
   Renderer(flecs::world* ecs, ShaderManager* shaderManager);
 

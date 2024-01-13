@@ -8,8 +8,9 @@
 #include "magnet/WindowManager.hpp"
 
 // forward declarations
-class ShaderManager;
+class InputManager;
 class Renderer;
+class ShaderManager;
 
 class ProjectInterface {
  public:

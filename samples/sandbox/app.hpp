@@ -1,7 +1,7 @@
 #pragma once
 
 #include <magnet/ApplicationContext.hpp>
-#include <magnet/UI.hpp>
+#include <magnet/UserInterface.hpp>
 
 const char *const GAME_TITLE = "Sandbox";
 

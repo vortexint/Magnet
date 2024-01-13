@@ -33,6 +33,8 @@ void Interface::init() {
 }
 
 void Interface::update() {
+  Magnet::DevTools(ctx);
+
   static float value = 0.6f;
   
   if(nk_begin(ctx, "Hello World", nk_rect(50, 50, 200, 200),

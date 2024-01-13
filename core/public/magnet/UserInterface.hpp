@@ -43,8 +43,6 @@ namespace Magnet {
 void nk_initialize();
 nk_context* get_nk_context();
 
-namespace Widgets {
- void showDevTools();
-}
+void DevTools(nk_context* ctx);
 
-}  // namespace Magnet
+} // namespace Magnet

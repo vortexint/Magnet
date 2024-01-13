@@ -5,7 +5,7 @@
 #include <spdlog/spdlog.h>
 
 #include "magnet/Renderer.hpp"
-#include "magnet/UI.hpp"
+#include "magnet/UserInterface.hpp"
 
 WindowManager::WindowManager(Renderer* renderer, const char* windowTitle) : renderer(renderer)  {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);

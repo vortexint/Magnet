@@ -3,12 +3,11 @@ add_library(magnet::core ALIAS magnet-core)
 
 target_sources(magnet-core PRIVATE
   ApplicationContext.cpp
-  
-  IO/AssetManager.cpp
-  IO/Input.cpp
+  Common.cpp
 )
 
-add_subdirectory(gfx)
+add_subdirectory(GFX) # Graphics
+add_subdirectory(IO)  # Input/Output
 
 if(MSVC)
   target_compile_options(magnet-core PUBLIC
@@ -36,7 +35,7 @@ find_package(OpenGL REQUIRED)
 target_include_directories(magnet-core PRIVATE
                            ${OPENGL_INCLUDE_DIR}
                            PUBLIC
-                           ${CMAKE_CURRENT_SOURCE_DIR}/include
+                           ${CMAKE_CURRENT_SOURCE_DIR}/public
                            ${CMAKE_SOURCE_DIR}/submodules/libarchive/libarchive
 )
 

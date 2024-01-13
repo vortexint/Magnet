@@ -3,7 +3,7 @@
 #include <spdlog/spdlog.h>
 
 #include "magnet/ShaderManager.hpp"
-#include "magnet/UI.hpp"
+#include "magnet/UserInterface.hpp"
 
 void SetupState() {
   /* OpenGL State configuration */

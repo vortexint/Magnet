@@ -5,7 +5,7 @@
 
 
 #define NK_IMPLEMENTATION
-#include "magnet/UI.hpp"
+#include "magnet/UserInterface.hpp"
 
 #ifndef NK_GLFW_TEXT_MAX
 #define NK_GLFW_TEXT_MAX 256
@@ -443,13 +443,11 @@ NK_API void nk_glfw3_new_frame(void) {
   nk_input_begin(ctx);
   for (i = 0; i < glfw.text_len; ++i) nk_input_unicode(ctx, glfw.text[i]);
 
-#ifdef NK_GLFW_GL4_MOUSE_GRABBING
   /* optional grabbing behavior */
   if (ctx->input.mouse.grab)
     glfwSetInputMode(glfw.win, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
   else if (ctx->input.mouse.ungrab)
     glfwSetInputMode(glfw.win, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-#endif
 
   nk_input_key(ctx, NK_KEY_DEL, glfwGetKey(win, GLFW_KEY_DELETE) == GLFW_PRESS);
   nk_input_key(ctx, NK_KEY_ENTER,
