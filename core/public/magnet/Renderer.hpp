@@ -5,12 +5,13 @@
  */
 
 #include <cstdint>
-#include <flecs.h>
 #include <glad/glad.h>
+
+#include <magnet/SceneManager.hpp>
 
 namespace Magnet {
 
-// Acquired by Window Manager
+// Used by Window Manager
 const uint32_t INIT_WIDTH = 1280;
 const uint32_t INIT_HEIGHT = 720;
 
@@ -28,7 +29,7 @@ class Renderer {
   double lastTime = 0.0;
 
  public:
-  Renderer(flecs::world* ecs, ShaderManager* shaderManager);
+  Renderer();
 
   void render() const;
 

@@ -8,14 +8,14 @@
 namespace Magnet {
 
 class ShaderManager {
-  AssetManager *assetManager;
+  AssetManager* assetManager;
   std::unordered_map<const char*, unsigned int> shaders;
 
   // Utility function for checking shader compilation/linking errors.
   void checkCompileErrors(unsigned int shader, const char* type);
 
  public:
-  ShaderManager(AssetManager *assetManager);
+  ShaderManager();
 
   unsigned int genShader(const char* shaderName,
                          const char* vertexPath,

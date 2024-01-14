@@ -1,7 +1,5 @@
 #pragma once
 
-#include <flecs.h>
-
 #include <memory>
 
 #include <magnet/AssetManager.hpp>
@@ -11,6 +9,7 @@ namespace Magnet {
 // forward declarations
 class InputManager;
 class Renderer;
+class SceneManager;
 class ShaderManager;
 
 class ProjectInterface {
@@ -20,7 +19,7 @@ class ProjectInterface {
 };
 
 class ApplicationContext {
-  static std::unique_ptr<flecs::world>  ecs;
+  static std::unique_ptr<SceneManager>  sceneManager;
   static std::unique_ptr<AssetManager>  assetManager;
   static std::unique_ptr<ShaderManager> shaderManager;
   static std::unique_ptr<Renderer>      renderer;

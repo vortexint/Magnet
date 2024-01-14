@@ -1,4 +1,5 @@
-#include "magnet/ShaderManager.hpp"
+#include <magnet/ShaderManager.hpp>
+#include <magnet/ApplicationContext.hpp>
 
 #include <glad/glad.h>
 #include <spdlog/spdlog.h>
@@ -7,7 +8,9 @@
 
 namespace Magnet {
 
-ShaderManager::ShaderManager(AssetManager* assetMgr) : assetManager(assetMgr) {}
+ShaderManager::ShaderManager() {
+  assetManager = ApplicationContext::getAssetManager();
+}
 
 unsigned int ShaderManager::genShader(const char* shaderName,
                                       const char* vertexPath,

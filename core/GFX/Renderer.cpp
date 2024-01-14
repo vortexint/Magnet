@@ -1,10 +1,11 @@
-#include "magnet/Renderer.hpp"
 
+#include <flecs.h>
 #include <spdlog/spdlog.h>
 
+#include <magnet/Renderer.hpp>
 #include <magnet/ShaderManager.hpp>
-#include <magnet/UserInterface.hpp>
 #include <magnet/Time.hpp>
+#include <magnet/UserInterface.hpp>
 
 namespace Magnet {
 
@@ -13,9 +14,9 @@ void SetupState() {
   glClearColor(0.f, 0.f, 0.f, 1.0f);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_MULTISAMPLE);
-} 
+}
 
-Renderer::Renderer(flecs::world* scene, ShaderManager* shaderMgr) : ecs(scene), shaderManager(shaderMgr) {
+Renderer::Renderer() {
   /* GLAD manages function pointers for OpenGL so initialize GLAD
    * before any OpenGL function is called */
   gladLoadGL();
@@ -29,7 +30,6 @@ void Renderer::render() const {
   /* Assuming that we'll always render something to all pixels, this
    * is not necessary but is considered good practice */
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 }
 
 void Renderer::resize(int width, int height) {
