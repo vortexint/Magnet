@@ -4,8 +4,10 @@
 #include <GLFW/glfw3.h>
 #include <spdlog/spdlog.h>
 
-#include "magnet/Renderer.hpp"
-#include "magnet/UserInterface.hpp"
+#include <magnet/Renderer.hpp>
+#include <magnet/UserInterface.hpp>
+
+namespace Magnet {
 
 WindowManager::WindowManager(Renderer* renderer, const char* windowTitle) : renderer(renderer)  {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -52,3 +54,5 @@ void WindowManager::resizeCallback(GLFWwindow* window, int width, int height) {
 bool WindowManager::shouldClose() const {
   return glfwWindowShouldClose(window);
 }
+
+} // namespace Magnet

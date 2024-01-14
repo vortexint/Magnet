@@ -3,9 +3,9 @@
 #include <cstdint>
 
 // forward declarations
-class Renderer;
 struct GLFWwindow;
-
+namespace Magnet {
+class Renderer;
 class WindowManager {
   GLFWwindow* window;
   Renderer* renderer;
@@ -21,7 +21,9 @@ class WindowManager {
   static void resizeCallback(GLFWwindow* window, int width, int height);
 
   /* Getters */
-  GLFWwindow* getWindow() { return window; }
+  GLFWwindow* getWindow() const { return window; }
 
   bool shouldClose() const;
 };
+
+} // namespace Magnet

@@ -63,7 +63,7 @@ static struct nk_glfw {
 } glfw;
 
 NK_API void nk_glfw3_device_create() {
-  ShaderManager* shaderManager = ApplicationContext::getShaderManager();
+  Magnet::ShaderManager *shaderManager = Magnet::ApplicationContext::getShaderManager();
   struct nk_glfw_device *dev = &glfw.ogl;
   nk_buffer_init_default(&dev->cmds);
 

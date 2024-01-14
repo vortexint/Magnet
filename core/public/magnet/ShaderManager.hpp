@@ -5,6 +5,8 @@
 
 #include "magnet/AssetManager.hpp"
 
+namespace Magnet {
+
 class ShaderManager {
   AssetManager *assetManager;
   std::unordered_map<const char*, unsigned int> shaders;
@@ -34,3 +36,5 @@ class ShaderManager {
 
   void deleteShader(const char* shaderName);
 };
+
+}  // namespace Magnet

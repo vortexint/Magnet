@@ -5,6 +5,8 @@
 
 const char *const GAME_TITLE = "Sandbox";
 
+using namespace Magnet;
+
 class Interface : public ProjectInterface {
   GLFWwindow* window;
   nk_context* ctx;

@@ -2,22 +2,20 @@
 
 #include <spdlog/spdlog.h>
 
-#include "magnet/ShaderManager.hpp"
-#include "magnet/UserInterface.hpp"
+#include <magnet/ShaderManager.hpp>
+#include <magnet/UserInterface.hpp>
+#include <magnet/Time.hpp>
+
+namespace Magnet {
 
 void SetupState() {
   /* OpenGL State configuration */
   glClearColor(0.f, 0.f, 0.f, 1.0f);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_MULTISAMPLE);
-  // Add other config like stencil, alpha blending etc. as needed
 } 
 
 Renderer::Renderer(flecs::world* scene, ShaderManager* shaderMgr) : ecs(scene), shaderManager(shaderMgr) {
-  // Can't do much here, since GLFW has not been initialized yet
-}
-
-void Renderer::initialize() {
   /* GLAD manages function pointers for OpenGL so initialize GLAD
    * before any OpenGL function is called */
   gladLoadGL();
@@ -41,3 +39,5 @@ void Renderer::resize(int width, int height) {
   /* Set the viewport to be the entire window */
   glViewport(0, 0, width, height);
 }
+
+}  // namespace Magnet

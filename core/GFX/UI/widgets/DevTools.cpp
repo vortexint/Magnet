@@ -1,9 +1,3 @@
-/**
- * @file Topbar.cpp
- * @author Igor Alexey
- * @brief DevTools top bar widget
- */
-
 #include <magnet/ApplicationContext.hpp>
 #include <magnet/UserInterface.hpp>
 
@@ -13,7 +7,7 @@ void DevTools(nk_context* ctx) {
   static bool show_console = false;
   static bool show_debug_info = false;
 
-  static GLFWwindow* window = ApplicationContext::getWindowManager()->getWindow();
+  //static GLFWwindow* window = ApplicationContext::getWindowManager()->getWindow();
 
   /* Debug Info */
   if(show_debug_info) {

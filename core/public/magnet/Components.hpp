@@ -1,11 +1,14 @@
 #pragma once
 
 #include <cglm/cglm.h>
-namespace magnet::components {
+namespace Magnet::Components {
 
-/* Scene Components*/
+/* Scene Components */
 
-// An entity's transformation relative to it's parent.
+/**
+ * @struct Transform
+ * @brief An entity's transformation relative to its parent.
+ */
 struct Transform {
   vec3 translation{0.0f, 0.0f, 0.0f};
   versor rotation{0.0f, 0.0f, 0.0f};
@@ -15,32 +18,31 @@ struct Transform {
 // RENDERING //
 
 struct Skybox {
-  uint textureID;  // cube map texture ID
+  uint textureID;  ///< ID of the skybox texture.
 };
 
-// The parameters and properties of a virtual camera in a scene.
-// Requires a Transform component.
-struct Camera {
-  float fieldOfView = 60.0f;        // Angle defining visible scene extent.
-  float aspectRatio = 16.0f / 9.0f; // Width-to-height ratio.
-  float nearPlane = 0.1f;           // Distance to near clipping plane.
-  float farPlane = 100.0f;          // Distance to far clipping plane.
+/**
+ * @struct Viewport
+ * @brief Describes a virtual camera with it's own view frustum.
+ */
+struct Viewport {
+  float fieldOfView = 60.0f;         /// Angle defining visible scene extent.
+  float aspectRatio = 16.0f / 9.0f;  /// Width-to-height ratio.
+  float nearPlane = 0.1f;            /// Distance to near clipping plane.
+  float farPlane = 100.0f;           /// Distance to far clipping plane.
 };
 
-struct MeshRenderer {};
+struct MeshRenderer {
+  uint32_t vao;
+  uint32_t vbo;
+  uint32_t ebo;
+  uint32_t numIndices;
+};
 
 // PHYSICS //
 
-struct BoxCollider {
-  float center, size;
-};
-
-struct SphereCollider {
-  float center, size;
-};
-
-struct CapsuleCollider {
-  float center, direction, height, radius;
+struct Collider {
+  // TODO: Add collider types
 };
 
 
@@ -50,4 +52,4 @@ struct Rigidbody {
   bool fixed;
 };
 
-} // namespace magnet
+} // namespace Magnet::Components

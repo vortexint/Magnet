@@ -5,6 +5,8 @@
 
 #include <cstring>
 
+namespace Magnet {
+
 ShaderManager::ShaderManager(AssetManager* assetMgr) : assetManager(assetMgr) {}
 
 unsigned int ShaderManager::genShader(const char* shaderName,
@@ -106,3 +108,5 @@ void ShaderManager::checkCompileErrors(unsigned int shader, const char* type) {
     spdlog::error("SHADER PROGRAM: {0}", infoLog);
   }
 }
+
+}  // namespace Magnet

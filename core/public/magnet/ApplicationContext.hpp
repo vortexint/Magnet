@@ -4,9 +4,10 @@
 
 #include <memory>
 
-#include "magnet/AssetManager.hpp"
-#include "magnet/WindowManager.hpp"
+#include <magnet/AssetManager.hpp>
+#include <magnet/WindowManager.hpp>
 
+namespace Magnet {
 // forward declarations
 class InputManager;
 class Renderer;
@@ -36,3 +37,5 @@ class ApplicationContext {
   static WindowManager* getWindowManager() { return windowManager.get(); }
   static ShaderManager* getShaderManager() { return shaderManager.get(); }
 };
+
+}  // namespace Magnet

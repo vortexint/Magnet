@@ -8,6 +8,8 @@
 #include <flecs.h>
 #include <glad/glad.h>
 
+namespace Magnet {
+
 // Acquired by Window Manager
 const uint32_t INIT_WIDTH = 1280;
 const uint32_t INIT_HEIGHT = 720;
@@ -25,11 +27,8 @@ class Renderer {
 
   double lastTime = 0.0;
 
-
  public:
   Renderer(flecs::world* ecs, ShaderManager* shaderManager);
-
-  void initialize();
 
   void render() const;
 
@@ -37,3 +36,5 @@ class Renderer {
 
   void resize(int width, int height);
 };
+
+} // namespace Magnet
