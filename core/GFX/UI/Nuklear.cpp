@@ -307,8 +307,9 @@ NK_API void nk_glfw3_render(enum nk_anti_aliasing AA) {
       tex_handle = nk_glfw3_get_tex_ogl_handle(tex_index);
 
       /* tex handle must be made resident in each context that uses it */
-      if (!glIsTextureHandleResidentARB(tex_handle))
+      if (!glIsTextureHandleResidentARB(tex_handle)) {
         glMakeTextureHandleResidentARB(tex_handle);
+      }
 
       glUniformHandleui64ARB(dev->uniform_tex, tex_handle);
       glScissor(
