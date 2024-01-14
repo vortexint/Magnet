@@ -18,18 +18,18 @@ struct Transform {
 // RENDERING //
 
 struct Skybox {
-  uint textureID;  ///< ID of the skybox texture.
+  uint textureID;  // ID of the skybox texture.
 };
 
 /**
- * @struct Viewport
+ * @struct Camera
  * @brief Describes a virtual camera with it's own view frustum.
  */
-struct Viewport {
-  float fieldOfView = 60.0f;         /// Angle defining visible scene extent.
-  float aspectRatio = 16.0f / 9.0f;  /// Width-to-height ratio.
-  float nearPlane = 0.1f;            /// Distance to near clipping plane.
-  float farPlane = 100.0f;           /// Distance to far clipping plane.
+struct Camera {
+  float fieldOfView = 60.0f;         // Angle defining visible scene extent.
+  float aspectRatio = 16.0f / 9.0f;  // Width-to-height ratio.
+  float nearPlane = 0.1f;            // Distance to near clipping plane.
+  float farPlane = 100.0f;           // Distance to far clipping plane.
 };
 
 struct MeshRenderer {
