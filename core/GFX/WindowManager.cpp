@@ -1,15 +1,16 @@
-#include "magnet/WindowManager.hpp"
+#include <magnet/WindowManager.hpp>
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <spdlog/spdlog.h>
 
+#include <magnet/ApplicationContext.hpp>
 #include <magnet/Renderer.hpp>
 #include <magnet/UserInterface.hpp>
 
 namespace Magnet {
 
-WindowManager::WindowManager(Renderer* renderer, const char* windowTitle) : renderer(renderer)  {
+WindowManager::WindowManager(const char* windowTitle) {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
@@ -21,11 +22,10 @@ WindowManager::WindowManager(Renderer* renderer, const char* windowTitle) : rend
     spdlog::critical("Failed to initialize GLFW");
   }
 
-  window = glfwCreateWindow(INIT_WIDTH, INIT_HEIGHT, windowTitle, nullptr, nullptr);
+  window =
+    glfwCreateWindow(INIT_WIDTH, INIT_HEIGHT, windowTitle, nullptr, nullptr);
 
   glfwMakeContextCurrent(window);
-
-  glfwSetWindowUserPointer(window, this);
 
   /* Setup callbacks */
   glfwSetFramebufferSizeCallback(window, resizeCallback);
@@ -41,18 +41,17 @@ void WindowManager::swapBuffers() {
   glfwSwapBuffers(window);
 }
 
-void WindowManager::pollEvents() { 
+void WindowManager::pollEvents() {
   glfwPollEvents();
   nk_glfw3_new_frame();
 }
 
-void WindowManager::resizeCallback(GLFWwindow* window, int width, int height) {
-  static_cast<WindowManager*>(glfwGetWindowUserPointer(window))
-    ->renderer->resize(width, height);
+void WindowManager::resizeCallback(GLFWwindow*, int width, int height) {
+  ApplicationContext::getRenderer()->resize(width, height);
 }
 
 bool WindowManager::shouldClose() const {
   return glfwWindowShouldClose(window);
 }
 
-} // namespace Magnet
+}  // namespace Magnet

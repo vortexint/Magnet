@@ -36,6 +36,7 @@ class ApplicationContext {
   static AssetManager* getAssetManager()   { return assetManager.get(); }
   static WindowManager* getWindowManager() { return windowManager.get(); }
   static ShaderManager* getShaderManager() { return shaderManager.get(); }
+  static Renderer* getRenderer()           { return renderer.get(); }
 };
 
 }  // namespace Magnet

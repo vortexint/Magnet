@@ -8,10 +8,9 @@ namespace Magnet {
 class Renderer;
 class WindowManager {
   GLFWwindow* window;
-  Renderer* renderer;
 
  public:
-  WindowManager(Renderer* renderer, const char* windowTitle);
+  WindowManager(const char* windowTitle);
   ~WindowManager();
 
   void swapBuffers();

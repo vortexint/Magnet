@@ -23,18 +23,18 @@ void ApplicationContext::registerInterface(ProjectInterface *interface) {
 }
 
 void ApplicationContext::initialize(const char *windowTitle) {
-  // Set up logging
+  /* Logging */
   auto consoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
   auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("log.txt", true);
   auto logger = std::make_shared<spdlog::logger>(
     "multi_sink", spdlog::sinks_init_list{consoleSink, fileSink});
   spdlog::set_default_logger(logger);
 
-  // Initialize components
+  /* Component Initialization */
   ecs           = std::make_unique<flecs::world>();
   assetManager  = std::make_unique<AssetManager>(ARCH_core, ARCH_core_KEY);
   shaderManager = std::make_unique<ShaderManager>(assetManager.get());
-  windowManager = std::make_unique<WindowManager>(renderer.get(), windowTitle);
+  windowManager = std::make_unique<WindowManager>(windowTitle);
   renderer      = std::make_unique<Renderer>(ecs.get(), shaderManager.get());
 
   registeredInterface->init();

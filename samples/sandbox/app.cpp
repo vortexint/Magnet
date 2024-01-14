@@ -8,7 +8,6 @@
 
 void Interface::init() {
   
-
   AssetManager assetMgr(ARCH_data, ARCH_data_KEY);
   WindowManager* windowMgr = ApplicationContext::getWindowManager();
 
