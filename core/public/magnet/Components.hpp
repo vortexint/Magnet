@@ -15,7 +15,7 @@ struct Transform {
   vec3 scale{1.0f, 1.0f, 1.0f};
 };
 
-// RENDERING //
+/* RENDERING */
 
 struct Skybox {
   uint textureID;  // ID of the skybox texture.
@@ -39,7 +39,15 @@ struct MeshRenderer {
   uint32_t numIndices;
 };
 
-// PHYSICS //
+/* AUDIO */
+
+struct AudioSource {
+  uint32_t sourceID;
+  float volume = 1.0f;
+  bool loop = false;
+};
+
+/* PHYSICS */
 
 struct Collider {
   // TODO: Add collider types
