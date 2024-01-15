@@ -6,6 +6,7 @@
 #include <magnet/Renderer.hpp>
 #include <magnet/SceneManager.hpp>
 #include <magnet/ShaderManager.hpp>
+#include <magnet/Time.hpp>
 #include <magnet/WindowManager.hpp>
 
 namespace Magnet {
@@ -42,18 +43,20 @@ void ApplicationContext::initialize(const char *windowTitle) {
 
   /* Main loop */
   while (!windowManager->shouldClose()) {
+    Time::Update();
+
     /* Poll for and process events */
     windowManager->pollEvents();
 
     /* Update all active systems and subsystems */
-    sceneManager->progress();
+    sceneManager->progress(Time::getDelta());
 
     registeredInterface->update();
 
+    /* Draw everything */
     renderer->render();
 
     windowManager->swapBuffers();
-
   }
 }
 

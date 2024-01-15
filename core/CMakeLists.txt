@@ -3,8 +3,8 @@ add_library(magnet::core ALIAS magnet-core)
 
 target_sources(magnet-core PRIVATE
   ApplicationContext.cpp
-  Common.cpp
   SceneManager.cpp
+  Time.cpp
 )
 
 add_subdirectory(GFX) # Graphics

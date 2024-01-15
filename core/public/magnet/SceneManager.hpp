@@ -9,7 +9,7 @@ class SceneManager {
   std::unique_ptr<flecs::world> ecs;
 public:
   SceneManager();
-  void progress();
+  void progress(float deltaTime);
 };
 
 } // namespace Magnet

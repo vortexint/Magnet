@@ -1,5 +1,6 @@
 #include <magnet/ApplicationContext.hpp>
 #include <magnet/UserInterface.hpp>
+#include <magnet/Time.hpp>
 
 namespace Magnet {
 
@@ -13,8 +14,9 @@ void DevTools(nk_context* ctx) {
   if(show_debug_info) {
     nk_begin(ctx, "DebugInfo", nk_rect(0, 0, 200, 200),
              NK_WINDOW_NO_SCROLLBAR | NK_WINDOW_NO_INPUT);
-    nk_layout_row_dynamic(ctx, 30, 1);
+    nk_layout_row_static(ctx, 30, 200, 1);
     nk_label(ctx, "Debug Info", NK_TEXT_LEFT);
+    // FPS counter
     
     nk_end(ctx);
   }

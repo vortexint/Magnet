@@ -6,8 +6,8 @@ SceneManager::SceneManager() {
   ecs = std::make_unique<flecs::world>();
 }
 
-void SceneManager::progress() {
-  ecs->progress();
+void SceneManager::progress(float deltaTime) {
+  ecs->progress(deltaTime);
 }
 
 } // namespace Magnet

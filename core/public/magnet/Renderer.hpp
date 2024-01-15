@@ -26,16 +26,21 @@ class Renderer {
   int width = INIT_WIDTH;
   int height = INIT_HEIGHT;
 
-  double lastTime = 0.0;
+  uint64_t frameCount = 0;
 
  public:
   Renderer();
 
-  void render() const;
+  void render();
+
+  /* Setters */
 
   void setActiveCamera(flecs::entity cameraEntity);
+  void setSize(int width, int height);
 
-  void resize(int width, int height);
+  /* Getters */
+
+  uint64_t getFrameCount() const { return frameCount; }  
 };
 
 } // namespace Magnet

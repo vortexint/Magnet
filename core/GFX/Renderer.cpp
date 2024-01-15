@@ -1,10 +1,7 @@
-
-#include <flecs.h>
 #include <spdlog/spdlog.h>
 
 #include <magnet/Renderer.hpp>
 #include <magnet/ShaderManager.hpp>
-#include <magnet/Time.hpp>
 #include <magnet/UserInterface.hpp>
 
 namespace Magnet {
@@ -26,13 +23,16 @@ Renderer::Renderer() {
   Magnet::nk_initialize();
 }
 
-void Renderer::render() const {
+void Renderer::render() {
   /* Assuming that we'll always render something to all pixels, this
    * is not necessary but is considered good practice */
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+  frameCount++;
 }
 
-void Renderer::resize(int width, int height) {
+void Renderer::setSize(int width, int height) {
   this->width = width;
   this->height = height;
 

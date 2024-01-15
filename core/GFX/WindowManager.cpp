@@ -47,7 +47,7 @@ void WindowManager::pollEvents() {
 }
 
 void WindowManager::resizeCallback(GLFWwindow*, int width, int height) {
-  ApplicationContext::getRenderer()->resize(width, height);
+  ApplicationContext::getRenderer()->setSize(width, height);
 }
 
 bool WindowManager::shouldClose() const {
