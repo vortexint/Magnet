@@ -2,7 +2,7 @@
 
 const char* const TITLE = "Primitives Example";
 
-class AppInterface : public ProjectInterface {
+class AppInterface : public Magnet::ProjectInterface {
  public:
   void init() override {
     AssetManager assetMgr(ARCH_assets);
@@ -15,8 +15,8 @@ class AppInterface : public ProjectInterface {
 };
 
 int main(void) {
-  ApplicationContext::registerInterface(new AppInterface());
+  Magnet::ApplicationContext::registerInterface(new AppInterface());
 
-  ApplicationContext::initialize(TITLE);
+  Magnet::ApplicationContext::initialize(TITLE);
   return 0;
 }
