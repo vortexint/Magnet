@@ -4,8 +4,8 @@
 
 namespace Magnet {
 
-auto Time::currentTime = std::chrono::high_resolution_clock::now();
-auto Time::lastTime = std::chrono::high_resolution_clock::now();
+std::chrono::high_resolution_clock::time_point Time::currentTime = std::chrono::high_resolution_clock::now();
+std::chrono::high_resolution_clock::time_point Time::lastTime = std::chrono::high_resolution_clock::now();
 double Time::deltaTime = 0.0;
 
 void Time::Update() {
