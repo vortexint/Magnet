@@ -1,8 +1,10 @@
 #include <magnet/ApplicationContext.hpp>
 
+using namespace Magnet;
+
 const char* const TITLE = "Primitives Example";
 
-class AppInterface : public Magnet::ProjectInterface {
+class AppInterface : public ProjectInterface {
  public:
   void init() override {
     AssetManager assetMgr(ARCH_assets);
@@ -15,8 +17,8 @@ class AppInterface : public Magnet::ProjectInterface {
 };
 
 int main(void) {
-  Magnet::ApplicationContext::registerInterface(new AppInterface());
+  ApplicationContext::registerInterface(new AppInterface());
 
-  Magnet::ApplicationContext::initialize(TITLE);
+  ApplicationContext::initialize(TITLE);
   return 0;
 }
