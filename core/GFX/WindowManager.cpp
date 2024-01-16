@@ -6,8 +6,8 @@
 
 #include <magnet/ApplicationContext.hpp>
 #include <magnet/Renderer.hpp>
-#include <magnet/UserInterface.hpp>
 #include <magnet/InputManager.hpp>
+#include <magnet/UserInterface.hpp>
 
 namespace Magnet {
 
@@ -41,13 +41,12 @@ WindowManager::~WindowManager() {
 }
 
 void WindowManager::swapBuffers() {
-  nk_glfw3_render(NK_ANTI_ALIASING_ON);
   glfwSwapBuffers(window);
 }
 
 void WindowManager::pollEvents() {
   glfwPollEvents();
-  nk_glfw3_new_frame();
+  nk_impl_new_frame();
 }
 
 void WindowManager::resizeCallback(GLFWwindow*, int width, int height) {

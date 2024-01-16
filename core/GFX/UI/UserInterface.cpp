@@ -13,7 +13,7 @@ void nk_initialize() {
   WindowManager* windowManager = ApplicationContext::getWindowManager();
   AssetManager* assetMgr = ApplicationContext::getAssetManager();
 
-  ctx = nk_glfw3_init(windowManager->getWindow(), NK_GLFW3_INSTALL_CALLBACKS,
+  ctx = nk_impl_init(windowManager->getWindow(), NK_IMPL_INSTALL_CALLBACKS,
                       MAX_VERTEX_BUFFER, MAX_ELEMENT_BUFFER);
 
   /* Load default fonts */
@@ -25,7 +25,7 @@ void nk_initialize() {
     config.oversample_h = 3;
     config.oversample_v = 3;
 
-    nk_glfw3_font_stash_begin(&atlas);
+    nk_impl_font_stash_begin(&atlas);
 
     assetMgr->getAsset("./fonts/FiraCode-Regular.ttf", fontData);
 
@@ -35,7 +35,7 @@ void nk_initialize() {
     nk_font* roboto = nk_font_atlas_add_from_memory(atlas, fontData.data(),
                                               fontData.size(), 16, &config);
 
-    nk_glfw3_font_stash_end();
+    nk_impl_font_stash_end();
     nk_style_set_font(ctx, &roboto->handle);
   }
 
@@ -43,10 +43,10 @@ void nk_initialize() {
   {
     struct nk_color table[NK_COLOR_COUNT];
     table[NK_COLOR_TEXT] = nk_rgb_hex("d8d8d8");
-    table[NK_COLOR_WINDOW] = nk_rgb_hex("282828");
-    table[NK_COLOR_HEADER] = nk_rgb_hex("212121");
-    table[NK_COLOR_BORDER] = nk_rgb_hex("404040");
-    table[NK_COLOR_BUTTON] = nk_rgb_hex("4a4a4a");
+    table[NK_COLOR_WINDOW] = nk_rgb_hex("303030");
+    table[NK_COLOR_HEADER] = nk_rgb_hex("202020");
+    table[NK_COLOR_BORDER] = nk_rgb_hex("252525");
+    table[NK_COLOR_BUTTON] = nk_rgb_hex("404040");
     table[NK_COLOR_BUTTON_HOVER] = nk_rgb_hex("5a5a5a");
     table[NK_COLOR_BUTTON_ACTIVE] = nk_rgb_hex("7a7a7a");
     table[NK_COLOR_TOGGLE] = nk_rgba(50, 58, 61, 255);
@@ -73,10 +73,12 @@ void nk_initialize() {
     nk_style_from_table(ctx, table);
 
     ctx->style.window.border = 1;
-    ctx->style.button.rounding = 2;
-    ctx->style.window.padding = {5, 5};
+    ctx->style.button.rounding = 4;
+    ctx->style.window.padding = {4, 4};
     ctx->style.window.spacing = {5, 5};
-    ctx->style.window.header.spacing = {1,1};
+    ctx->style.window.header.padding = {0, 2.5};
+    ctx->style.window.header.label_padding = {0, 2.5};
+    ctx->style.window.header.align = NK_HEADER_LEFT;
   }
 }
 

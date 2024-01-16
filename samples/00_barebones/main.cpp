@@ -18,6 +18,8 @@ public:
   }
 };
 
+/* ENTRY POINT */
+
 int main(void) {
   ApplicationContext::registerInterface(new AppInterface());
 

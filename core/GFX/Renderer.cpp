@@ -28,8 +28,8 @@ void Renderer::render() {
    * is not necessary but is considered good practice */
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
-  frameCount++;
+  /* Render UI (After everything else) */
+  nk_impl_render(NK_ANTI_ALIASING_ON);
 }
 
 void Renderer::setSize(int width, int height) {

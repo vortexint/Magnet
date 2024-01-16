@@ -108,11 +108,9 @@ class AppInterface : public ProjectInterface {
 
 There are several [samples](samples/) to learn from:
 
-| Tutorial | Description |
+| Project | Description |
 |-|-|
 |[Barebones](samples/00_barebones/)| As raw as it gets, establishes a minimal project |
 |[Primitives](samples/01_primitives/)| Populating the scenes with simple models |
-
-| Project | Description |
-|-|-|
-|[Sandbox](samples/sandbox/)| Garry's Mod clone |
+|[Native UI](samples/02_native_ui/)| Using Nuklear with Magnet |
+|[Sandbox](samples/sandbox/)| Physics sandbox |
