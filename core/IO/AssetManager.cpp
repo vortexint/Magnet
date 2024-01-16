@@ -32,7 +32,7 @@ std::optional<std::vector<uint8_t>> AssetManager::readAsset(
   archive_read_support_format_tar(a);
 
   if (archive_read_open_filename(a, aPath, BLOCK_SIZE)) {
-    spdlog::error("Failed to open {}: {}", aPath, archive_error_string(a));
+    spdlog::critical("Failed to open {}: {}", aPath, archive_error_string(a));
     archive_read_free(a);
     return std::nullopt;
   }

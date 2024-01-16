@@ -1,6 +1,7 @@
 #pragma once
 #include <GLFW/glfw3.h>
 
+namespace Magnet {
 class InputManager {
   
  public:
@@ -17,3 +18,5 @@ class InputManager {
   static void cursorPositionCallback(GLFWwindow* window, double xpos,
                                      double ypos);
 };
+
+}  // namespace Magnet

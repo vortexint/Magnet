@@ -7,6 +7,7 @@
 #include <magnet/ApplicationContext.hpp>
 #include <magnet/Renderer.hpp>
 #include <magnet/UserInterface.hpp>
+#include <magnet/InputManager.hpp>
 
 namespace Magnet {
 
@@ -29,6 +30,9 @@ WindowManager::WindowManager(const char* windowTitle) {
 
   /* Setup callbacks */
   glfwSetFramebufferSizeCallback(window, resizeCallback);
+  glfwSetKeyCallback(window, InputManager::keyCallback);
+  glfwSetMouseButtonCallback(window, InputManager::mouseButtonCallback);
+  glfwSetCursorPosCallback(window, InputManager::cursorPositionCallback);
 }
 
 WindowManager::~WindowManager() {
