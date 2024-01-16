@@ -26,8 +26,6 @@ class Renderer {
   int width = INIT_WIDTH;
   int height = INIT_HEIGHT;
 
-  uint64_t frameCount = 0;
-
  public:
   Renderer();
 
