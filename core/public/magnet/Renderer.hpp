@@ -35,10 +35,6 @@ class Renderer {
 
   void setActiveCamera(flecs::entity cameraEntity);
   void setSize(int width, int height);
-
-  /* Getters */
-
-  uint64_t getFrameCount() const { return frameCount; }  
 };
 
 } // namespace Magnet
