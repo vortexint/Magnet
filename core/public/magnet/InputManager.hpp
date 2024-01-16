@@ -3,12 +3,9 @@
 
 namespace Magnet {
 class InputManager {
-  
  public:
   InputManager() = default;
   ~InputManager() = default;
-
-  void update();
 
   // Callbacks for GLFW input events
   static void keyCallback(GLFWwindow* window, int key, int scancode, int action,
