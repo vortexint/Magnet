@@ -1,19 +1,32 @@
 #pragma once
 #include <GLFW/glfw3.h>
 
-namespace Magnet {
-class InputManager {
- public:
-  InputManager() = default;
-  ~InputManager() = default;
+#include <memory>
+#include <vector>
 
-  // Callbacks for GLFW input events
-  static void keyCallback(GLFWwindow* window, int key, int scancode, int action,
-                          int mods);
-  static void mouseButtonCallback(GLFWwindow* window, int button, int action,
-                                  int mods);
-  static void cursorPositionCallback(GLFWwindow* window, double xpos,
-                                     double ypos);
+namespace Magnet {
+
+class Observer {
+ public:    
+  Observer();
+  virtual void onKeyEvent(int key, int action, int mods) = 0;
+  virtual void onMouseButtonEvent(int button, int action, int mods) = 0;
+  virtual void onMouseMoveEvent(double xpos, double ypos) = 0;
+  virtual void onMouseScrollEvent(double xoffset, double yoffset) = 0;
+};
+
+class InputManager {
+  std::vector<Observer*> observers;
+
+ public:
+  InputManager();
+
+  void addObserver(Observer* observer);
+
+  void notifyKeyEvent(int key, int action, int mods);
+  void notifyMouseButtonEvent(int button, int action, int mods);
+  void notifyMouseMoveEvent(double xpos, double ypos);
+  void notifyMouseScrollEvent(double xoffset, double yoffset);
 };
 
 }  // namespace Magnet

@@ -20,7 +20,7 @@ void Interface::update() {
   progress_value++;
     
 
-  if (nk_begin(ctx, "Nuklear Demo", nk_rect(50, 50, 300, 200),
+  if (nk_begin(ctx, "Nuklear Test", nk_rect(50, 50, 300, 200),
                NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE |
                  NK_WINDOW_MINIMIZABLE | NK_WINDOW_TITLE |
                  NK_WINDOW_NO_SCROLLBAR)) {

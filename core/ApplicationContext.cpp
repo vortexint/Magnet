@@ -8,6 +8,7 @@
 #include <magnet/ShaderManager.hpp>
 #include <magnet/Time.hpp>
 #include <magnet/WindowManager.hpp>
+#include <magnet/InputManager.hpp>
 
 namespace Magnet {
 
@@ -15,6 +16,7 @@ std::unique_ptr<SceneManager> ApplicationContext::sceneManager = nullptr;
 std::unique_ptr<AssetManager> ApplicationContext::assetManager = nullptr;
 std::unique_ptr<ShaderManager> ApplicationContext::shaderManager = nullptr;
 std::unique_ptr<WindowManager> ApplicationContext::windowManager = nullptr;
+std::unique_ptr<InputManager> ApplicationContext::inputManager = nullptr;
 std::unique_ptr<Renderer> ApplicationContext::renderer = nullptr;
 
 ProjectInterface *registeredInterface = nullptr;
@@ -37,6 +39,7 @@ void ApplicationContext::initialize(const char *windowTitle) {
   assetManager = std::make_unique<AssetManager>(ARCH_core, ARCH_core_KEY);
   shaderManager = std::make_unique<ShaderManager>();
   windowManager = std::make_unique<WindowManager>(windowTitle);
+  inputManager = std::make_unique<InputManager>();
   renderer = std::make_unique<Renderer>();
 
   registeredInterface->init();

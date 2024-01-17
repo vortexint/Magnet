@@ -22,8 +22,9 @@ class ApplicationContext {
   static std::unique_ptr<SceneManager>  sceneManager;
   static std::unique_ptr<AssetManager>  assetManager;
   static std::unique_ptr<ShaderManager> shaderManager;
-  static std::unique_ptr<Renderer>      renderer;
   static std::unique_ptr<WindowManager> windowManager;
+  static std::unique_ptr<InputManager>  inputManager;
+  static std::unique_ptr<Renderer>      renderer;
 
  public:
   ApplicationContext() = delete;
@@ -32,9 +33,11 @@ class ApplicationContext {
   static void registerInterface(ProjectInterface* interface);
   static void initialize(const char *gameTitle);
 
+  static SceneManager* getSceneManager()   { return sceneManager.get(); }
   static AssetManager* getAssetManager()   { return assetManager.get(); }
   static WindowManager* getWindowManager() { return windowManager.get(); }
   static ShaderManager* getShaderManager() { return shaderManager.get(); }
+  static InputManager* getInputManager()   { return inputManager.get(); }
   static Renderer* getRenderer()           { return renderer.get(); }
 };
 

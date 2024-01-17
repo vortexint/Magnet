@@ -11,6 +11,9 @@
 
 namespace Magnet {
 
+void resizeCallback(GLFWwindow*, int width, int height);
+void errorCallback(int error, const char* desc);
+
 WindowManager::WindowManager(const char* windowTitle) {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
@@ -30,9 +33,7 @@ WindowManager::WindowManager(const char* windowTitle) {
 
   /* Setup callbacks */
   glfwSetFramebufferSizeCallback(window, resizeCallback);
-  glfwSetKeyCallback(window, InputManager::keyCallback);
-  glfwSetMouseButtonCallback(window, InputManager::mouseButtonCallback);
-  glfwSetCursorPosCallback(window, InputManager::cursorPositionCallback);
+  glfwSetErrorCallback(errorCallback);
 }
 
 WindowManager::~WindowManager() {
@@ -49,12 +50,16 @@ void WindowManager::pollEvents() {
   nk_impl_new_frame();
 }
 
-void WindowManager::resizeCallback(GLFWwindow*, int width, int height) {
+bool WindowManager::shouldClose() const {
+  return glfwWindowShouldClose(window);
+}
+
+void resizeCallback(GLFWwindow*, int width, int height) {
   ApplicationContext::getRenderer()->setSize(width, height);
 }
 
-bool WindowManager::shouldClose() const {
-  return glfwWindowShouldClose(window);
+void errorCallback(int error, const char* desc) {
+  spdlog::error("GLFW Error {}: {}", error, desc);
 }
 
 }  // namespace Magnet

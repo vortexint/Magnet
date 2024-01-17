@@ -1,10 +1,13 @@
+#include "magnet/UserInterface.hpp"
+
 #include <spdlog/spdlog.h>
 
 #include "magnet/ApplicationContext.hpp"
-#include "magnet/UserInterface.hpp"
 
 #define MAX_VERTEX_BUFFER 512 * 1024
 #define MAX_ELEMENT_BUFFER 128 * 1024
+
+nk_font* firacode;
 
 namespace Magnet {
 nk_context* ctx;
@@ -14,7 +17,7 @@ void nk_initialize() {
   AssetManager* assetMgr = ApplicationContext::getAssetManager();
 
   ctx = nk_impl_init(windowManager->getWindow(), NK_IMPL_INSTALL_CALLBACKS,
-                      MAX_VERTEX_BUFFER, MAX_ELEMENT_BUFFER);
+                     MAX_VERTEX_BUFFER, MAX_ELEMENT_BUFFER);
 
   /* Load default fonts */
   {
@@ -29,11 +32,13 @@ void nk_initialize() {
 
     assetMgr->getAsset("./fonts/FiraCode-Regular.ttf", fontData);
 
-    //nk_font* firacode = nk_font_atlas_add_from_memory(atlas, fontData.data(), fontData.size(), 16, &config);
+    firacode = nk_font_atlas_add_from_memory(
+      atlas, fontData.data(), fontData.size(), 16, &config);
+
     assetMgr->getAsset("./fonts/Roboto-Regular.ttf", fontData);
 
-    nk_font* roboto = nk_font_atlas_add_from_memory(atlas, fontData.data(),
-                                              fontData.size(), 16, &config);
+    nk_font* roboto = nk_font_atlas_add_from_memory(
+      atlas, fontData.data(), fontData.size(), 16, &config);
 
     nk_impl_font_stash_end();
     nk_style_set_font(ctx, &roboto->handle);
@@ -75,7 +80,7 @@ void nk_initialize() {
     ctx->style.window.border = 1;
     ctx->style.button.rounding = 4;
     ctx->style.window.padding = {4, 4};
-    ctx->style.window.spacing = {5, 5};
+    ctx->style.window.spacing = {4, 4};
     ctx->style.window.header.padding = {0, 2.5};
     ctx->style.window.header.label_padding = {0, 2.5};
     ctx->style.window.header.align = NK_HEADER_LEFT;
@@ -84,4 +89,4 @@ void nk_initialize() {
 
 struct nk_context* get_nk_context() { return ctx; }
 
-}  // namespace Magnet::UI
+}  // namespace Magnet

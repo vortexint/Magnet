@@ -11,7 +11,16 @@ class Time {
  public:
   static void Update();
 
+  /**
+   * @brief Get the current time
+   * @return double 
+   */
   static double getTime();
+
+  /**
+   * @brief Get the time between the last frame and the current frame
+   * @return double 
+   */
   static double getDelta();
 };
 

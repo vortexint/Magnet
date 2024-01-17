@@ -16,9 +16,6 @@ class WindowManager {
   void swapBuffers();
   static void pollEvents();
 
-  /* Callbacks */
-  static void resizeCallback(GLFWwindow* window, int width, int height);
-
   /* Getters */
   GLFWwindow* getWindow() const { return window; }
 
