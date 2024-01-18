@@ -17,7 +17,7 @@ class Observer {
 
 class InputManager {
   static std::vector<Observer*> observers;
-
+  
   static void keyCallback(GLFWwindow*, int, int, int, int);
   static void mouseButtonCallback(GLFWwindow*, int, int, int);
   static void cursorPositionCallback(GLFWwindow*, double, double);
@@ -25,7 +25,6 @@ class InputManager {
 
  public:
   InputManager();
-
   static void addObserver(Observer* observer);
 };
 

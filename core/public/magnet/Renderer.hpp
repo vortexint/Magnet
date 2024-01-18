@@ -5,7 +5,6 @@
  */
 
 #include <cstdint>
-#include <glad/glad.h>
 
 #include <magnet/SceneManager.hpp>
 

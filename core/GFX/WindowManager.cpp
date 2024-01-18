@@ -22,10 +22,6 @@ WindowManager::WindowManager(const char* windowTitle) {
 
   glfwWindowHint(GLFW_SAMPLES, 4);
 
-  if (!glfwInit()) {
-    spdlog::critical("Failed to initialize GLFW");
-  }
-
   window =
     glfwCreateWindow(INIT_WIDTH, INIT_HEIGHT, windowTitle, nullptr, nullptr);
 

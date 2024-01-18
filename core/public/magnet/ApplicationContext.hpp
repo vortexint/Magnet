@@ -36,8 +36,6 @@ class ApplicationContext {
   static SceneManager* getSceneManager()   { return sceneManager.get(); }
   static AssetManager* getAssetManager()   { return assetManager.get(); }
   static WindowManager* getWindowManager() { return windowManager.get(); }
-  static ShaderManager* getShaderManager() { return shaderManager.get(); }
-  static InputManager* getInputManager()   { return inputManager.get(); }
   static Renderer* getRenderer()           { return renderer.get(); }
 };
 

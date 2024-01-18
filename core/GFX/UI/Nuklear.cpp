@@ -1,12 +1,12 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "magnet/ApplicationContext.hpp"
-#include "magnet/ShaderManager.hpp"
+#include <magnet/ApplicationContext.hpp>
+#include <magnet/ShaderManager.hpp>
 
 
 #define NK_IMPLEMENTATION
-#include "magnet/UserInterface.hpp"
+#include <magnet/UserInterface.hpp>
 
 #ifndef NK_GLFW_TEXT_MAX
 #define NK_GLFW_TEXT_MAX 256
@@ -64,13 +64,16 @@ static struct nk_glfw {
 } glfw;
 
 NK_API void nk_impl_device_create() {
-  Magnet::ShaderManager *shaderManager = Magnet::ApplicationContext::getShaderManager();
   struct nk_glfw_device *dev = &glfw.ogl;
   nk_buffer_init_default(&dev->cmds);
 
-  dev->prog = shaderManager->genShader("nk",
-                           "shaders/nk.vert",
-                           "shaders/nk.frag");
+  Magnet::AssetManager* assetMgr = Magnet::ApplicationContext::getAssetManager();
+  
+  std::string vertexSource, fragmentSource;
+  assetMgr->getAsset("shaders/nk.vert", vertexSource);
+  assetMgr->getAsset("shaders/nk.frag", fragmentSource);
+
+  dev->prog = Magnet::ShaderManager::genShader(vertexSource, fragmentSource);
 
   dev->uniform_tex = glGetUniformLocation(dev->prog, "Texture");
   dev->uniform_proj = glGetUniformLocation(dev->prog, "ProjMtx");

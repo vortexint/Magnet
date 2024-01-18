@@ -1,29 +1,33 @@
 #include <magnet/ShaderManager.hpp>
 #include <magnet/ApplicationContext.hpp>
 
-#include <glad/glad.h>
 #include <spdlog/spdlog.h>
 
 #include <cstring>
 
 namespace Magnet {
 
-ShaderManager::ShaderManager() {
-  assetManager = ApplicationContext::getAssetManager();
+void ShaderManager::checkCompileErrors(unsigned int shader, const char* type) {
+  GLint success;
+  char infoLog[1024];
+
+  if (strcmp(type, "PROGRAM") != 0) {
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+    if (success) return;
+
+    glGetShaderInfoLog(shader, 1024, NULL, infoLog);
+    spdlog::error("{0} SHADER: {1}", type, infoLog);
+  } else {
+    glGetProgramiv(shader, GL_LINK_STATUS, &success);
+    if (success) return;
+
+    glGetProgramInfoLog(shader, 1024, NULL, infoLog);
+    spdlog::error("SHADER PROGRAM: {0}", infoLog);
+  }
 }
 
-unsigned int ShaderManager::genShader(const char* shaderName,
-                                      const char* vertexPath,
-                                      const char* fragmentPath) {
-
-
-  std::string vertexSource, fragmentSource;
-
-  // Retrieve the vertex shader source
-
-  assetManager->getAsset(vertexPath, vertexSource);
-  assetManager->getAsset(fragmentPath, fragmentSource);
-
+GLuint ShaderManager::genShader(const std::string& vertexSource,
+                                const std::string& fragmentSource) {
   const GLchar* vertData[] = {vertexSource.c_str()};
   const GLchar* fragData[] = {fragmentSource.c_str()};
 
@@ -52,64 +56,30 @@ unsigned int ShaderManager::genShader(const char* shaderName,
   glDeleteShader(vertex);
   glDeleteShader(fragment);
 
-  // Store and return the shader program ID
-  shaders.insert({shaderName, shaderProgram});
-
   return shaderProgram;
 }
-
-unsigned int ShaderManager::getShader(const char* shaderName) const {
-  return shaders.at(shaderName);
-}
-
 /* Setters */
 
-void ShaderManager::setBool(const char* shaderName, const char* name,
-                            bool value) const {
-  glUniform1i(glGetUniformLocation(shaders.at(shaderName), name),
-              static_cast<int>(value));
+void ShaderManager::setBool(GLuint* shaderID, const char* name, bool value) {
+  glUniform1i(glGetUniformLocation(*shaderID, name), (int)value);
 }
 
-void ShaderManager::setInt(const char* shaderName, const char* name,
-                           int value) const {
-  glUniform1i(glGetUniformLocation(shaders.at(shaderName), name), value);
+void ShaderManager::setInt(GLuint* shaderID, const char* name, int value) {
+  glUniform1i(glGetUniformLocation(*shaderID, name), value);
 }
 
-void ShaderManager::setFloat(const char* shaderName, const char* name,
-                             float value) const {
-  glUniform1f(glGetUniformLocation(shaders.at(shaderName), name), value);
+void ShaderManager::setFloat(GLuint* shaderID, const char* name, float value) {
+  glUniform1f(glGetUniformLocation(*shaderID, name), value);
 }
 
-void ShaderManager::setMat4(const char* shaderName, const char* name,
-                            const mat4 matrix) const {
-  unsigned int shader = getShader(shaderName);
-  glUniformMatrix4fv(glGetUniformLocation(shader, name), 1, GL_FALSE,
+void ShaderManager::setMat4(GLuint* shaderID, const char* name,
+                            const mat4 matrix) {
+  glUniformMatrix4fv(glGetUniformLocation(*shaderID, name), 1, GL_FALSE,
                      (const GLfloat*)matrix);
 }
 
-void ShaderManager::deleteShader(const char* shaderName) {
-  glDeleteProgram(shaders.at(shaderName));
-  shaders.erase(shaderName);
-}
-
-void ShaderManager::checkCompileErrors(unsigned int shader, const char* type) {
-  int success;
-  char infoLog[1024];
-
-  if (strcmp(type, "PROGRAM") != 0) {
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-
-    if (success) return;  // Compilation successful, no need to proceed.
-
-    glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-    spdlog::error("{0} SHADER: {1}", type, infoLog);
-  } else {
-    glGetProgramiv(shader, GL_LINK_STATUS, &success);
-    if (success) return;  // Linking successful, no need to proceed.
-
-    glGetProgramInfoLog(shader, 1024, NULL, infoLog);
-    spdlog::error("SHADER PROGRAM: {0}", infoLog);
-  }
+void ShaderManager::deleteShader(GLuint* shaderID) {
+  glDeleteProgram(*shaderID);
 }
 
 }  // namespace Magnet
