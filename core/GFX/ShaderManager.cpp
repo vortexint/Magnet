@@ -60,26 +60,44 @@ GLuint ShaderManager::genShader(const std::string& vertexSource,
 }
 /* Setters */
 
-void ShaderManager::setBool(GLuint* shaderID, const char* name, bool value) {
-  glUniform1i(glGetUniformLocation(*shaderID, name), (int)value);
+GLuint ShaderManager::createUniformBuffer(GLsizeiptr size) {
+  GLuint ubo;
+  glGenBuffers(1, &ubo);
+  glBindBuffer(GL_UNIFORM_BUFFER, ubo);
+  glBufferData(GL_UNIFORM_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
+  return ubo;
 }
 
-void ShaderManager::setInt(GLuint* shaderID, const char* name, int value) {
-  glUniform1i(glGetUniformLocation(*shaderID, name), value);
+void ShaderManager::updateUniformBuffer(GLuint ubo, GLintptr offset,
+                                        GLsizeiptr size, const void* data) {
+  glBindBuffer(GL_UNIFORM_BUFFER, ubo);
+  glBufferSubData(GL_UNIFORM_BUFFER, offset, size, data);
 }
 
-void ShaderManager::setFloat(GLuint* shaderID, const char* name, float value) {
-  glUniform1f(glGetUniformLocation(*shaderID, name), value);
+void ShaderManager::bindUniformBuffer(GLuint ubo, GLuint bindingPoint) {
+  glBindBufferBase(GL_UNIFORM_BUFFER, bindingPoint, ubo);
 }
 
-void ShaderManager::setMat4(GLuint* shaderID, const char* name,
+void ShaderManager::setBool(GLuint shaderID, const char* name, bool value) {
+  glUniform1i(glGetUniformLocation(shaderID, name), (int)value);
+}
+
+void ShaderManager::setInt(GLuint shaderID, const char* name, int value) {
+  glUniform1i(glGetUniformLocation(shaderID, name), value);
+}
+
+void ShaderManager::setFloat(GLuint shaderID, const char* name, float value) {
+  glUniform1f(glGetUniformLocation(shaderID, name), value);
+}
+
+void ShaderManager::setMat4(GLuint shaderID, const char* name,
                             const mat4 matrix) {
-  glUniformMatrix4fv(glGetUniformLocation(*shaderID, name), 1, GL_FALSE,
+  glUniformMatrix4fv(glGetUniformLocation(shaderID, name), 1, GL_FALSE,
                      (const GLfloat*)matrix);
 }
 
-void ShaderManager::deleteShader(GLuint* shaderID) {
-  glDeleteProgram(*shaderID);
+void ShaderManager::deleteShader(GLuint shaderID) {
+  glDeleteProgram(shaderID);
 }
 
 }  // namespace Magnet
