@@ -9,24 +9,24 @@ namespace Magnet {
 class Observer {
  public:    
   Observer();
-  virtual void onKeyEvent(int key, int action, int mods) = 0;
-  virtual void onMouseButtonEvent(int button, int action, int mods) = 0;
-  virtual void onMouseMoveEvent(double xpos, double ypos) = 0;
-  virtual void onMouseScrollEvent(double xoffset, double yoffset) = 0;
+  virtual void onKeyEvent(int key, int action, int mods);
+  virtual void onMouseButtonEvent(int button, int action, int mods);
+  virtual void onMouseMoveEvent(double xpos, double ypos);
+  virtual void onMouseScrollEvent(double xoffset, double yoffset);
 };
 
 class InputManager {
-  std::vector<Observer*> observers;
+  static std::vector<Observer*> observers;
+
+  static void keyCallback(GLFWwindow*, int, int, int, int);
+  static void mouseButtonCallback(GLFWwindow*, int, int, int);
+  static void cursorPositionCallback(GLFWwindow*, double, double);
+  static void scrollCallback(GLFWwindow*, double, double);
 
  public:
   InputManager();
 
-  void addObserver(Observer* observer);
-
-  void notifyKeyEvent(int key, int action, int mods);
-  void notifyMouseButtonEvent(int button, int action, int mods);
-  void notifyMouseMoveEvent(double xpos, double ypos);
-  void notifyMouseScrollEvent(double xoffset, double yoffset);
+  static void addObserver(Observer* observer);
 };
 
 }  // namespace Magnet
