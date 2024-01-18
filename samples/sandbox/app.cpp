@@ -17,7 +17,7 @@ void Interface::init() {
   // Load icon
   {
     std::vector<unsigned char> imageData;
-    assetMgr.getAsset("./icon.png", imageData);
+    assetMgr.getAsset("icon.png", imageData);
 
     GLFWimage icons[1] = {};
     icons[0].pixels =

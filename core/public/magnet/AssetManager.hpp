@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdint>
-#include <optional>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -14,14 +14,14 @@ class AssetManager {
   archive* a = nullptr;
   const char* aPath;
 
-  std::optional<std::vector<uint8_t>> readAsset(std::string_view assetName);
+  std::unique_ptr<std::vector<uint8_t>> readAsset(const std::string& assetName);
 
  public:
   AssetManager(const char* archivePath, const char* key = nullptr);
   ~AssetManager();
 
-  void getAsset(std::string_view assetName, std::vector<uint8_t>& buffer);
-  void getAsset(std::string_view assetName, std::string& buffer);
+  void getAsset(const std::string&, std::vector<uint8_t>& buffer);
+  void getAsset(const std::string&, std::string& buffer);
 };
 
 } // namespace Magnet

@@ -1,8 +1,7 @@
-#include "magnet/UserInterface.hpp"
-
 #include <spdlog/spdlog.h>
 
-#include "magnet/ApplicationContext.hpp"
+#include <magnet/ApplicationContext.hpp>
+#include <magnet/UserInterface.hpp>
 
 #define MAX_VERTEX_BUFFER 512 * 1024
 #define MAX_ELEMENT_BUFFER 128 * 1024
@@ -30,12 +29,12 @@ void nk_initialize() {
 
     nk_impl_font_stash_begin(&atlas);
 
-    assetMgr->getAsset("./fonts/FiraCode-Regular.ttf", fontData);
+    assetMgr->getAsset("fonts/FiraCode-Regular.ttf", fontData);
 
-    firacode = nk_font_atlas_add_from_memory(
-      atlas, fontData.data(), fontData.size(), 16, &config);
+    firacode = nk_font_atlas_add_from_memory(atlas, fontData.data(),
+                                             fontData.size(), 16, &config);
 
-    assetMgr->getAsset("./fonts/Roboto-Regular.ttf", fontData);
+    assetMgr->getAsset("fonts/Roboto-Regular.ttf", fontData);
 
     nk_font* roboto = nk_font_atlas_add_from_memory(
       atlas, fontData.data(), fontData.size(), 16, &config);

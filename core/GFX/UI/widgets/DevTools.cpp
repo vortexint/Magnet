@@ -20,9 +20,6 @@ class dt_observer : public Observer {
       show_debug_info = !show_debug_info;
     }
   }
-  void onMouseButtonEvent(int, int, int) override {}
-  void onMouseMoveEvent(double, double) override {}
-  void onMouseScrollEvent(double, double) override {}
 };
 
 void DevTools(nk_context* ctx) {
