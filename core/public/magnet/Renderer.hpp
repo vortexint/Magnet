@@ -13,14 +13,9 @@ namespace Magnet {
 // Used by Window Manager
 const uint32_t INIT_WIDTH = 1280;
 const uint32_t INIT_HEIGHT = 720;
-
-// forward declarations
-class ShaderManager;
 class Renderer {
   flecs::world* ecs;
   flecs::entity activeCamera;
-
-  ShaderManager* shaderManager;
 
   int width = INIT_WIDTH;
   int height = INIT_HEIGHT;

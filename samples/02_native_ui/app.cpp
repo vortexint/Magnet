@@ -3,6 +3,8 @@
 #include <GLFW/glfw3.h>
 #include <spdlog/spdlog.h>
 
+#include <magnet/Time.hpp>
+
 void Interface::init() {
   ctx = Magnet::get_nk_context();
 
@@ -14,13 +16,11 @@ void Interface::update() {
   static float slider_value = 0.6f;
   static nk_size progress_value = 0;
 
-  if (progress_value == 100)
-    progress_value = 0;
+  progress_value += Magnet::Time::getDelta() * 100;
 
-  progress_value++;
-    
+  if (progress_value >= 100) progress_value -= 100;
 
-  if (nk_begin(ctx, "Nuklear Test", nk_rect(50, 50, 300, 200),
+  if (nk_begin(ctx, "Window Test", nk_rect(50, 50, 300, 200),
                NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE |
                  NK_WINDOW_MINIMIZABLE | NK_WINDOW_TITLE |
                  NK_WINDOW_NO_SCROLLBAR)) {

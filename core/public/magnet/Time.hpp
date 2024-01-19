@@ -1,27 +1,22 @@
 #pragma once
 
-#include <chrono>
-
 namespace Magnet {
 
-class Time {
-  static std::chrono::high_resolution_clock::time_point currentTime, lastTime;
-  static double deltaTime;
-
- public:
-  static void Update();
+namespace Time {
+  void Update();
 
   /**
-   * @brief Get the current time
+   * @brief Get the current time in seconds
    * @return double 
    */
-  static double getTime();
+  double getTime();
 
   /**
-   * @brief Get the time between the last frame and the current frame
+   * @brief Get the interval in seconds between the last frame and the current frame
    * @return double 
    */
-  static double getDelta();
-};
+  double getDelta();
+
+} // namespace Time
 
 } // namespace Magnet

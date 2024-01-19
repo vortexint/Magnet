@@ -10,7 +10,6 @@ namespace Magnet {
 class InputManager;
 class Renderer;
 class SceneManager;
-class ShaderManager;
 
 class ProjectInterface {
  public:
@@ -21,7 +20,6 @@ class ProjectInterface {
 class ApplicationContext {
   static std::unique_ptr<SceneManager>  sceneManager;
   static std::unique_ptr<AssetManager>  assetManager;
-  static std::unique_ptr<ShaderManager> shaderManager;
   static std::unique_ptr<WindowManager> windowManager;
   static std::unique_ptr<InputManager>  inputManager;
   static std::unique_ptr<Renderer>      renderer;

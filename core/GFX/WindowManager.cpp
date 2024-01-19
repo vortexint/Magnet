@@ -26,6 +26,7 @@ WindowManager::WindowManager(const char* windowTitle) {
     glfwCreateWindow(INIT_WIDTH, INIT_HEIGHT, windowTitle, nullptr, nullptr);
 
   glfwMakeContextCurrent(window);
+  //glfwSwapInterval(0);
 
   /* Setup callbacks */
   glfwSetFramebufferSizeCallback(window, resizeCallback);

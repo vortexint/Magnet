@@ -17,7 +17,6 @@ namespace Magnet {
 
 std::unique_ptr<SceneManager> ApplicationContext::sceneManager = nullptr;
 std::unique_ptr<AssetManager> ApplicationContext::assetManager = nullptr;
-std::unique_ptr<ShaderManager> ApplicationContext::shaderManager = nullptr;
 std::unique_ptr<WindowManager> ApplicationContext::windowManager = nullptr;
 std::unique_ptr<InputManager> ApplicationContext::inputManager = nullptr;
 std::unique_ptr<Renderer> ApplicationContext::renderer = nullptr;

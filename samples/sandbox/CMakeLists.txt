@@ -1,15 +1,13 @@
-project(sandbox LANGUAGES C CXX)
+add_executable(sandbox main.cpp)
 
-add_executable(${PROJECT_NAME} main.cpp)
-
-target_sources(${PROJECT_NAME} PRIVATE 
+target_sources(sandbox PRIVATE 
   app.cpp
 )
 
-#target_precompile_headers(${PROJECT_NAME} PRIVATE app.hpp)
+#target_precompile_headers(sandbox PRIVATE app.hpp)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE magnet-core tweeny)
+target_link_libraries(sandbox PRIVATE magnet-core tweeny)
 
 
-magnet_package_core(${PROJECT_NAME})
-magnet_package(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/assets data)
+magnet_package_core(sandbox)
+magnet_package(sandbox ${CMAKE_CURRENT_SOURCE_DIR}/assets data)
