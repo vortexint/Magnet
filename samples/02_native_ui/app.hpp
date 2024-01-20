@@ -6,7 +6,6 @@
 using namespace Magnet;
 
 class Interface : public ProjectInterface {
-  nk_context* ctx;
 
  public:
   void init() override;

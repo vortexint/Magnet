@@ -1,15 +1,13 @@
 #include <chrono>
 #include <magnet/Time.hpp>
 
-namespace Magnet {
-
-namespace Time {
+namespace Magnet::Time {
 
 std::chrono::system_clock::time_point currentTime = std::chrono::system_clock::now();
 std::chrono::system_clock::time_point lastTime = std::chrono::system_clock::now();
 double deltaTime = 0.0;
 
-void Update() {
+void update() {
   currentTime = std::chrono::system_clock::now();
   std::chrono::duration<double> elapsed = currentTime - lastTime;
   deltaTime = elapsed.count();
@@ -25,5 +23,4 @@ double getTime() {
 
 double getDelta() { return deltaTime; }
 
-}  // namespace Time
-}  // namespace Magnet
+}  // namespace Magnet::Time

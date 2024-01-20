@@ -4,40 +4,33 @@
 #include <magnet/ShaderManager.hpp>
 #include <magnet/UserInterface.hpp>
 
-namespace Magnet {
+namespace Magnet::Renderer {
 
-void SetupState() {
+void initialize() {
   /* OpenGL State configuration */
   glClearColor(0.f, 0.f, 0.f, 1.0f);
   glEnable(GL_DEPTH_TEST);
-  glEnable(GL_MULTISAMPLE);
+  //glEnable(GL_MULTISAMPLE);
 }
 
-Renderer::Renderer() {
-  /* GLAD manages function pointers for OpenGL so initialize GLAD
-   * before any OpenGL function is called */
-  gladLoadGL();
-
-  SetupState();
-
-  Magnet::nk_initialize();
+void terminate() {
+  UI::destroy();
 }
 
-void Renderer::render() {
+void drawFrame() {
   /* Assuming that we'll always render something to all pixels, this
    * is not necessary but is considered good practice */
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  /* Render UI (After everything else) */
-  nk_impl_render(NK_ANTI_ALIASING_ON);
+  /* Render scene */
+
+  /* Render UI */
+  UI::draw();
 }
 
-void Renderer::setSize(int width, int height) {
-  this->width = width;
-  this->height = height;
-
+void setSize(int width, int height) {
   /* Set the viewport to be the entire window */
   glViewport(0, 0, width, height);
 }
 
-}  // namespace Magnet
+}  // namespace Magnet::Renderer

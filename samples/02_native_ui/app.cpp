@@ -5,39 +5,39 @@
 
 #include <magnet/Time.hpp>
 
+
 void Interface::init() {
-  ctx = Magnet::get_nk_context();
+
 
 }
 
 void Interface::update() {
-  Magnet::DevTools(ctx);
 
-  static float slider_value = 0.6f;
-  static nk_size progress_value = 0;
+  static float value = 0.0f;
+  static bool show_demo_window = true;
+  if (show_demo_window) ImGui::ShowDemoWindow(&show_demo_window);
 
-  progress_value += Magnet::Time::getDelta() * 100;
+  if (value > 100.0f) value = 0.0f;
+  value += Time::getDelta() * 10.0f;
 
-  if (progress_value >= 100) progress_value -= 100;
 
-  if (nk_begin(ctx, "Window Test", nk_rect(50, 50, 300, 200),
-               NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE |
-                 NK_WINDOW_MINIMIZABLE | NK_WINDOW_TITLE |
-                 NK_WINDOW_NO_SCROLLBAR)) {
-    nk_layout_row_dynamic(ctx, 0, 2);
+  if (ImGui::Begin("Window Test")) {
+    ImGui::Text("Value:");
+    ImGui::SameLine();
+    ImGui::SliderFloat("##Value", &value, 0.0f, 100.0f, "%.1f");
 
-    nk_button_label(ctx, "No-op");
-    if (nk_button_label(ctx, "Button")) {
-      spdlog::info("Button clicked");
+    ImGui::Text("Animated Progress bar");
+    ImGui::ProgressBar(value / 100.0f, ImVec2(-1.0f, 0.0f));
+
+    if (ImGui::Button("No-op")) {
+      // No operation
     }
 
-    nk_layout_row(ctx, NK_DYNAMIC, 0, 2, (float[]){.15f, .85f});
-    nk_label(ctx, "Value:", NK_TEXT_LEFT);
-    nk_slider_float(ctx, 0, &slider_value, 100.0f, 1.f);
+    ImGui::SameLine();
 
-    nk_layout_row_dynamic(ctx, 0, 1);
-    nk_label(ctx, "Animated Progress bar", NK_TEXT_LEFT);
-    nk_progress(ctx, &progress_value, 100, NK_FIXED);
+    if (ImGui::Button("Button")) {
+      spdlog::info("Button clicked");
+    }
   }
-  nk_end(ctx);
+  ImGui::End();
 }

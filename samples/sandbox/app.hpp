@@ -9,7 +9,6 @@ using namespace Magnet;
 
 class Interface : public ProjectInterface {
   GLFWwindow* window;
-  nk_context* ctx;
 
  public:
   void init() override;

@@ -1,9 +1,7 @@
 #pragma once
 
-namespace Magnet {
-
-namespace Time {
-  void Update();
+namespace Magnet::Time {
+  void update();
 
   /**
    * @brief Get the current time in seconds
@@ -16,7 +14,4 @@ namespace Time {
    * @return double 
    */
   double getDelta();
-
-} // namespace Time
-
-} // namespace Magnet
+} // namespace Magnet::Time

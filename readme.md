@@ -112,5 +112,5 @@ There are several [samples](samples/) to learn from:
 |-|-|
 |[Barebones](samples/00_barebones/)| As raw as it gets, establishes a minimal project |
 |[Primitives](samples/01_primitives/)| Populating the scenes with simple models |
-|[Native UI](samples/02_native_ui/)| Using Nuklear with Magnet |
+|[Native UI](samples/02_native_ui/)| Using Magnet's native UI |
 |[Sandbox](samples/sandbox/)| Physics sandbox |

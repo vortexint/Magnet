@@ -12,7 +12,6 @@ void Interface::init() {
   WindowManager* windowMgr = ApplicationContext::getWindowManager();
 
   window = windowMgr->getWindow();
-  ctx = Magnet::get_nk_context();
 
   // Load icon
   {
@@ -32,6 +31,5 @@ void Interface::init() {
 }
 
 void Interface::update() {
-  Magnet::DevTools(ctx);
 
 }

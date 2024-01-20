@@ -5,7 +5,9 @@
 // forward declarations
 struct GLFWwindow;
 namespace Magnet {
-class Renderer;
+
+const uint32_t INIT_WIDTH = 1280;
+const uint32_t INIT_HEIGHT = 720;
 class WindowManager {
   GLFWwindow* window;
 

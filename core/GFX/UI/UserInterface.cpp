@@ -3,89 +3,52 @@
 #include <magnet/ApplicationContext.hpp>
 #include <magnet/UserInterface.hpp>
 
-#define MAX_VERTEX_BUFFER 512 * 1024
-#define MAX_ELEMENT_BUFFER 128 * 1024
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
 
-nk_font* firacode;
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 
-namespace Magnet {
-nk_context* ctx;
+// This is a small wrapper over Dear ImGui to detach backend
+// functionality from the WindowManager and Renderer
 
-void nk_initialize() {
-  WindowManager* windowManager = ApplicationContext::getWindowManager();
-  AssetManager* assetMgr = ApplicationContext::getAssetManager();
+namespace Magnet::UI {
 
-  ctx = nk_impl_init(windowManager->getWindow(), NK_IMPL_INSTALL_CALLBACKS,
-                     MAX_VERTEX_BUFFER, MAX_ELEMENT_BUFFER);
+void init() {
+  // Setup Dear ImGui context
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  ImGuiIO& io = ImGui::GetIO();
+  (void)io;
+  io.ConfigFlags |=
+    ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
+  io.ConfigFlags |=
+    ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
+ 
+  ImGui_ImplGlfw_InitForOpenGL(glfwGetCurrentContext(), false);
+  ImGui_ImplOpenGL3_Init("#version 450");
 
   /* Load default fonts */
-  {
-    nk_font_atlas* atlas;
-    std::vector<unsigned char> fontData;
-
-    struct nk_font_config config = nk_font_config(13);
-    config.oversample_h = 3;
-    config.oversample_v = 3;
-
-    nk_impl_font_stash_begin(&atlas);
-
-    assetMgr->getAsset("fonts/FiraCode-Regular.ttf", fontData);
-
-    firacode = nk_font_atlas_add_from_memory(atlas, fontData.data(),
-                                             fontData.size(), 16, &config);
-
-    assetMgr->getAsset("fonts/Roboto-Regular.ttf", fontData);
-
-    nk_font* roboto = nk_font_atlas_add_from_memory(
-      atlas, fontData.data(), fontData.size(), 16, &config);
-
-    nk_impl_font_stash_end();
-    nk_style_set_font(ctx, &roboto->handle);
-  }
 
   /* Set theme */
-  {
-    struct nk_color table[NK_COLOR_COUNT];
-    table[NK_COLOR_TEXT] = nk_rgb_hex("d8d8d8");
-    table[NK_COLOR_WINDOW] = nk_rgb_hex("303030");
-    table[NK_COLOR_HEADER] = nk_rgb_hex("202020");
-    table[NK_COLOR_BORDER] = nk_rgb_hex("252525");
-    table[NK_COLOR_BUTTON] = nk_rgb_hex("404040");
-    table[NK_COLOR_BUTTON_HOVER] = nk_rgb_hex("5a5a5a");
-    table[NK_COLOR_BUTTON_ACTIVE] = nk_rgb_hex("7a7a7a");
-    table[NK_COLOR_TOGGLE] = nk_rgba(50, 58, 61, 255);
-    table[NK_COLOR_TOGGLE_HOVER] = nk_rgba(45, 53, 56, 255);
-    table[NK_COLOR_TOGGLE_CURSOR] = nk_rgba(48, 83, 111, 255);
-    table[NK_COLOR_SELECT] = nk_rgba(57, 67, 61, 255);
-    table[NK_COLOR_SELECT_ACTIVE] = nk_rgba(48, 83, 111, 255);
-    table[NK_COLOR_SLIDER] = nk_rgba(50, 58, 61, 255);
-    table[NK_COLOR_SLIDER_CURSOR] = nk_rgba(48, 83, 111, 245);
-    table[NK_COLOR_SLIDER_CURSOR_HOVER] = nk_rgba(53, 88, 116, 255);
-    table[NK_COLOR_SLIDER_CURSOR_ACTIVE] = nk_rgba(58, 93, 121, 255);
-    table[NK_COLOR_PROPERTY] = nk_rgba(50, 58, 61, 255);
-    table[NK_COLOR_EDIT] = nk_rgba(50, 58, 61, 225);
-    table[NK_COLOR_EDIT_CURSOR] = nk_rgba(210, 210, 210, 255);
-    table[NK_COLOR_COMBO] = nk_rgba(50, 58, 61, 255);
-    table[NK_COLOR_CHART] = nk_rgba(50, 58, 61, 255);
-    table[NK_COLOR_CHART_COLOR] = nk_rgba(48, 83, 111, 255);
-    table[NK_COLOR_CHART_COLOR_HIGHLIGHT] = nk_rgba(255, 0, 0, 255);
-    table[NK_COLOR_SCROLLBAR] = nk_rgba(50, 58, 61, 255);
-    table[NK_COLOR_SCROLLBAR_CURSOR] = nk_rgba(48, 83, 111, 255);
-    table[NK_COLOR_SCROLLBAR_CURSOR_HOVER] = nk_rgba(53, 88, 116, 255);
-    table[NK_COLOR_SCROLLBAR_CURSOR_ACTIVE] = nk_rgba(58, 93, 121, 255);
-    table[NK_COLOR_TAB_HEADER] = nk_rgba(48, 83, 111, 255);
-    nk_style_from_table(ctx, table);
-
-    ctx->style.window.border = 1;
-    ctx->style.button.rounding = 4;
-    ctx->style.window.padding = {4, 4};
-    ctx->style.window.spacing = {4, 4};
-    ctx->style.window.header.padding = {0, 2.5};
-    ctx->style.window.header.label_padding = {0, 2.5};
-    ctx->style.window.header.align = NK_HEADER_LEFT;
-  }
 }
 
-struct nk_context* get_nk_context() { return ctx; }
+void destroy() {
+  ImGui_ImplOpenGL3_Shutdown();
+  ImGui_ImplGlfw_Shutdown();
+  ImGui::DestroyContext();
+}
 
-}  // namespace Magnet
+void newFrame() {
+  ImGui_ImplOpenGL3_NewFrame();
+  ImGui_ImplGlfw_NewFrame();
+  ImGui::NewFrame();
+}
+
+void draw() {
+  ImGui::Render();
+  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+}  // namespace Magnet::UI
