@@ -3,12 +3,12 @@ add_library(magnet::core ALIAS magnet-core)
 
 target_sources(magnet-core PRIVATE
   ApplicationContext.cpp
-  AudioManager.cpp
   SceneManager.cpp
   Time.cpp
 )
 
 add_subdirectory(GFX) # Graphics
+add_subdirectory(SFX) # Sound
 add_subdirectory(IO)  # Input/Output
 
 if(MSVC)
@@ -46,6 +46,7 @@ target_link_libraries(magnet-core PUBLIC
                       archive_static
                       cglm
                       flecs_static
+                      freetype
                       glfw
                       lua_static
                       spdlog

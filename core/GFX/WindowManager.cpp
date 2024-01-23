@@ -19,13 +19,11 @@ WindowManager::WindowManager(const char* windowTitle) {
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-  glfwWindowHint(GLFW_SAMPLES, 4);
-
   window =
     glfwCreateWindow(INIT_WIDTH, INIT_HEIGHT, windowTitle, nullptr, nullptr);
 
   glfwMakeContextCurrent(window);
-  //glfwSwapInterval(0);
+  glfwSwapInterval(0);
 
   /* GLAD manages function pointers for OpenGL so initialize GLAD
    * before any OpenGL function is called */
@@ -57,7 +55,8 @@ bool WindowManager::shouldClose() const {
 }
 
 void resizeCallback(GLFWwindow*, int width, int height) {
-  Renderer::setSize(width, height);
+  static Renderer& renderer = Renderer::getInstance();
+  renderer.setViewportSize(width, height);
 }
 
 void errorCallback(int error, const char* desc) {

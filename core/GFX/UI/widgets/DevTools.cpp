@@ -2,7 +2,6 @@
 
 #include <magnet/ApplicationContext.hpp>
 #include <magnet/Time.hpp>
-#include <magnet/UserInterface.hpp>
 #include <magnet/Input.hpp>
 
 

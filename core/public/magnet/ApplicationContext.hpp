@@ -2,11 +2,10 @@
 
 #include <memory>
 
-#include <magnet/AssetManager.hpp>
 #include <magnet/WindowManager.hpp>
+#include <magnet/AssetManager.hpp>
 
 namespace Magnet {
-class SceneManager;
 
 class ProjectInterface {
  public:
@@ -15,7 +14,6 @@ class ProjectInterface {
 };
 
 class ApplicationContext {
-  static std::unique_ptr<SceneManager>  sceneManager;
   static std::unique_ptr<AssetManager>  assetManager;
   static std::unique_ptr<WindowManager> windowManager;
 
@@ -26,7 +24,6 @@ class ApplicationContext {
   static void registerInterface(ProjectInterface* interface);
   static void initialize(const char *gameTitle);
 
-  static SceneManager* getSceneManager()   { return sceneManager.get(); }
   static AssetManager* getAssetManager()   { return assetManager.get(); }
   static WindowManager* getWindowManager() { return windowManager.get(); }
 };

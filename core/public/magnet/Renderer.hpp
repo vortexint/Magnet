@@ -6,19 +6,22 @@
 
 #include <cstdint>
 
-#include <magnet/SceneManager.hpp>
-
 namespace Magnet {
-namespace Renderer {
-  void initialize();
-  void terminate();
+class Renderer {
+  Renderer();
+  Renderer(const Renderer&) = delete;
+  void operator=(const Renderer&) = delete;
 
-  void drawFrame();
+ public:
+  static Renderer& getInstance() {
+    static Renderer instance;
+    return instance;
+  }
+  void drawFrame() const;
 
   /* Setters */
 
-  void setActiveCamera(flecs::entity cameraEntity);
-  void setSize(int width, int height);
-} // namespace Renderer
+  static void setViewportSize(int width, int height);
+};
 
-} // namespace Magnet
+}  // namespace Magnet
