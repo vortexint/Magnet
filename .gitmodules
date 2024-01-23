@@ -19,3 +19,6 @@
 [submodule "submodules/libarchive"]
 	path = submodules/libarchive
 	url = https://github.com/libarchive/libarchive.git
+[submodule "submodules/freetype"]
+	path = submodules/freetype
+	url = https://github.com/freetype/freetype.git
