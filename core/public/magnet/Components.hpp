@@ -18,7 +18,7 @@ struct Transform {
 /* RENDERING */
 
 struct Skybox {
-  uint textureID;  // ID of the skybox texture.
+  uint32_t textureID;  // ID of the skybox texture.
 };
 
 /**
