@@ -26,8 +26,8 @@ class ApplicationContext {
     return instance;
   }
 
-  void registerInterface(ProjectInterface* interface);
-  void initialize(const char* gameTitle);
+  static void registerInterface(ProjectInterface* interface);
+  static void initialize(const char* gameTitle);
 
   /* Getters */
   
