@@ -26,7 +26,7 @@ void DevTools() {
 
   ImGuiIO& io = ImGui::GetIO();
 
-  /* Debug Info overlay*/
+  /* Debug overlay*/
   if (show_debug_info) {
     ImGuiWindowFlags window_flags =
       ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize |
@@ -50,7 +50,20 @@ void DevTools() {
       ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
       ImGui::Separator();
       ImGui::Text("Cursor: (%d,%d)", (int)io.MousePos.x, (int)io.MousePos.y);
-      ImGui::Separator();
+    }
+    ImGui::End();
+
+    // Vendor Info window
+    ImGui::SetNextWindowPos(
+      {
+        (viewport->WorkPos.x + viewport->WorkSize.x - PAD),
+        (viewport->WorkPos.y + PAD),
+      },
+      ImGuiCond_Always, {1.0f, 0.0f});
+    ImGui::SetNextWindowBgAlpha(0.35f);
+
+    ImGui::Begin("Vendor Info", &show_debug_info, window_flags);
+    {
       static const GLubyte* renderer = glGetString(GL_RENDERER);
       static const GLubyte* version = glGetString(GL_VERSION);
       ImGui::Text("%s", renderer);
