@@ -17,11 +17,12 @@ Renderer::Renderer() {
   glEnable(GL_DEPTH_TEST);
 
   /* Generate default Shader(s)*/
-  AssetManager* assetMgr = ApplicationContext::getAssetManager();
+  ApplicationContext& appCtx = ApplicationContext::getInstance();
+  AssetManager& assetMgr = appCtx.getAssetManager();
 
   std::string vertexSource, fragmentSource;
-  assetMgr->getAsset("shaders/base.vert", vertexSource);
-  assetMgr->getAsset("shaders/base.frag", fragmentSource);
+  assetMgr.getAsset("shaders/base.vert", vertexSource);
+  assetMgr.getAsset("shaders/base.frag", fragmentSource);
 
   ShaderManager& shaderMgr = ShaderManager::getInstance();
   baseID = shaderMgr.genShader(vertexSource, fragmentSource);

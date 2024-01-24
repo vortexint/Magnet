@@ -5,7 +5,8 @@
 namespace Magnet {
 
 class UI {
-  std::vector<unsigned char> fontData;
+  UI(const UI&) = delete;
+  UI& operator=(const UI&) = delete;
  public:
   UI();
   ~UI();

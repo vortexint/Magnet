@@ -1,10 +1,10 @@
 #pragma once
 
+#include <magnet/AssetManager.hpp>
 #include <memory>
 
-#include <magnet/WindowManager.hpp>
-#include <magnet/AssetManager.hpp>
-
+// forward declarations
+struct GLFWwindow;
 namespace Magnet {
 
 class ProjectInterface {
@@ -14,18 +14,24 @@ class ProjectInterface {
 };
 
 class ApplicationContext {
-  static std::unique_ptr<AssetManager>  assetManager;
-  static std::unique_ptr<WindowManager> windowManager;
+  AssetManager assetManager;
+
+  ApplicationContext();
+  ApplicationContext(const ApplicationContext&) = delete;
+  void operator=(const ApplicationContext&) = delete;
 
  public:
-  ApplicationContext() = delete;
-  ~ApplicationContext();
+  static ApplicationContext& getInstance() {
+    static ApplicationContext instance;
+    return instance;
+  }
 
-  static void registerInterface(ProjectInterface* interface);
-  static void initialize(const char *gameTitle);
+  void registerInterface(ProjectInterface* interface);
+  void initialize(const char* gameTitle);
 
-  static AssetManager* getAssetManager()   { return assetManager.get(); }
-  static WindowManager* getWindowManager() { return windowManager.get(); }
+  /* Getters */
+  
+  AssetManager& getAssetManager();
 };
 
 }  // namespace Magnet

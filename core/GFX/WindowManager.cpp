@@ -1,4 +1,4 @@
-#include <magnet/WindowManager.hpp>
+#include "WindowManager.hpp"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -13,14 +13,14 @@ namespace Magnet {
 void resizeCallback(GLFWwindow*, int width, int height);
 void errorCallback(int error, const char* desc);
 
-WindowManager::WindowManager(const char* windowTitle) {
+WindowManager::WindowManager() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
   window =
-    glfwCreateWindow(INIT_WIDTH, INIT_HEIGHT, windowTitle, nullptr, nullptr);
+    glfwCreateWindow(INIT_WIDTH, INIT_HEIGHT, "Application", nullptr, nullptr);
 
   glfwMakeContextCurrent(window);
   glfwSwapInterval(0);
@@ -40,6 +40,10 @@ WindowManager::WindowManager(const char* windowTitle) {
 WindowManager::~WindowManager() {
   glfwDestroyWindow(window);
   glfwTerminate();
+}
+
+void WindowManager::setTitle(const char* title) {
+  glfwSetWindowTitle(window, title);
 }
 
 void WindowManager::swapBuffers() {

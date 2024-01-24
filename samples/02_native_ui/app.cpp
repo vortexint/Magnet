@@ -20,11 +20,9 @@ void Interface::update() {
   if (value > 100.0f) value = 0.0f;
   value += Time::getDelta() * 10.0f;
 
-
+  ImGui::SetNextWindowSize(ImVec2(300, 150), ImGuiCond_FirstUseEver);
   if (ImGui::Begin("Window Test")) {
-    ImGui::Text("Value:");
-    ImGui::SameLine();
-    ImGui::SliderFloat("##Value", &value, 0.0f, 100.0f, "%.1f");
+    ImGui::SliderFloat("Value", &value, 0.0f, 100.0f, "%.1f");
 
     ImGui::Text("Animated Progress bar");
     ImGui::ProgressBar(value / 100.0f, ImVec2(-1.0f, 0.0f));

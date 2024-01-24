@@ -9,14 +9,11 @@
 #include <magnet/Renderer.hpp>
 #include <magnet/SceneManager.hpp>
 #include <magnet/Time.hpp>
-#include <magnet/WindowManager.hpp>
 
+#include "GFX/WindowManager.hpp"
 #include "GFX/UI/UserInterface.hpp"
 
 namespace Magnet {
-
-std::unique_ptr<AssetManager> ApplicationContext::assetManager = nullptr;
-std::unique_ptr<WindowManager> ApplicationContext::windowManager = nullptr;
 
 ProjectInterface *registeredInterface = nullptr;
 
@@ -24,7 +21,8 @@ void ApplicationContext::registerInterface(ProjectInterface *interface) {
   registeredInterface = interface;
 }
 
-void ApplicationContext::initialize(const char *windowTitle) {
+
+ApplicationContext::ApplicationContext() : assetManager(ARCH_core, ARCH_core_KEY) {
   /* Logging */
   auto consoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
   auto fileSink =
@@ -32,29 +30,27 @@ void ApplicationContext::initialize(const char *windowTitle) {
   auto logger = std::make_shared<spdlog::logger>(
     "multi_sink", spdlog::sinks_init_list{consoleSink, fileSink});
   spdlog::set_default_logger(logger);
+}
 
-  /* Initialization */
-
+void ApplicationContext::initialize(const char *windowTitle) {
   if (!glfwInit()) {
     spdlog::critical("Failed to initialize GLFW");
   }
 
-  assetManager = std::make_unique<AssetManager>(ARCH_core, ARCH_core_KEY);
+  WindowManager& windowMgr = WindowManager::getInstance();
+  SceneManager&   sceneMgr = SceneManager::getInstance();
+  Renderer&       renderer = Renderer::getInstance();
+  static UI ui;
 
-  
-  windowManager = std::make_unique<WindowManager>(windowTitle);
-  SceneManager& sceneMgr = SceneManager::getInstance();
-  Renderer& renderer     = Renderer::getInstance();
-  UI ui;
-
+  windowMgr.setTitle(windowTitle);
   registeredInterface->init();
 
   /* Main loop */
-  while (!windowManager->shouldClose()) {
+  while (!windowMgr.shouldClose()) {
     /* Poll for and process events */
-    windowManager->pollEvents();
+    windowMgr.pollEvents();
 
-    /* Update deltaTime */
+    /* Update time calculations */
     Time::update();
 
     /* Update all active systems and subsystems */
@@ -68,8 +64,12 @@ void ApplicationContext::initialize(const char *windowTitle) {
     renderer.drawFrame();
     ui.draw();
 
-    windowManager->swapBuffers();
+    windowMgr.swapBuffers();
   }
+  // Deconstruct order (Last In, First Out):
+  // UI -> Renderer -> SceneManager -> WindowManager
 }
+
+AssetManager& ApplicationContext::getAssetManager() { return assetManager; }
 
 }  // namespace Magnet

@@ -11,12 +11,20 @@ const uint32_t INIT_HEIGHT = 720;
 class WindowManager {
   GLFWwindow* window;
 
+  WindowManager();
+  WindowManager(const WindowManager&) = delete;
+  void operator=(const WindowManager&) = delete;
+
  public:
-  WindowManager(const char* windowTitle);
+  static WindowManager& getInstance() {
+    static WindowManager instance;
+    return instance;
+  }
   ~WindowManager();
 
+  void setTitle(const char* title);
   void swapBuffers();
-  static void pollEvents();
+  void pollEvents();
 
   /* Getters */
   GLFWwindow* getWindow() const { return window; }

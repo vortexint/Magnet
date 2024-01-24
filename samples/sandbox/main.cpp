@@ -3,9 +3,10 @@
 /* ENTRY POINT */
 
 int main(void) {
-  ApplicationContext::registerInterface(new Interface());
+  ApplicationContext& appCtx = ApplicationContext::getInstance();
+  appCtx.registerInterface(new Interface());
 
-  ApplicationContext::initialize(GAME_TITLE);
+  appCtx.initialize(GAME_TITLE);
 
   return 0;
 }
