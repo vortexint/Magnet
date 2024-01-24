@@ -4,7 +4,7 @@
 #include <spdlog/spdlog.h>
 
 #include <magnet/Time.hpp>
-
+#include <magnet/Widgets.hpp>
 
 void Interface::init() {
 
@@ -38,4 +38,6 @@ void Interface::update() {
     }
   }
   ImGui::End();
+
+  Widgets::DevTools();
 }

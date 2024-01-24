@@ -3,27 +3,27 @@
 #include <spdlog/spdlog.h>
 
 #include <magnet/ApplicationContext.hpp>
-#include <magnet/Input.hpp>
+#include <magnet/InputManager.hpp>
 
 #include "imgui_impl_glfw.h"
 
-namespace Magnet::Input {
+namespace Magnet {
 
-Observer::Observer() { addObserver(this); }
+Observer::Observer() { InputManager::getInstance().addObserver(this); }
 
 void Observer::onKeyEvent(int, int, int) {}
 void Observer::onMouseButtonEvent(int, int, int) {}
 void Observer::onMouseMoveEvent(double, double) {}
 void Observer::onMouseScrollEvent(double, double) {}
 
-std::vector<Observer*> observers;
+std::vector<Observer*> Magnet::InputManager::observers;
 
 /* Callbacks */
 
-static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-
+void InputManager::keyCallback(GLFWwindow* window, int key, int scancode,
+                             int action, int mods) {
   ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
-
+  
   if (ImGui::GetIO().WantCaptureKeyboard) return;
 
   for (Observer* observer : observers) {
@@ -31,8 +31,8 @@ static void keyCallback(GLFWwindow* window, int key, int scancode, int action, i
   }
 }
 
-static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
-
+void InputManager::mouseButtonCallback(GLFWwindow* window, int button,
+                                       int action, int mods) {
   ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
 
   if (ImGui::GetIO().WantCaptureMouse) return;
@@ -42,8 +42,8 @@ static void mouseButtonCallback(GLFWwindow* window, int button, int action, int 
   }
 }
 
-static void cursorPositionCallback(GLFWwindow* window, double xpos, double ypos) {
-
+void InputManager::cursorPositionCallback(GLFWwindow* window, double xpos,
+                                          double ypos) {
   ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
 
   if (ImGui::GetIO().WantCaptureMouse) return;
@@ -53,8 +53,8 @@ static void cursorPositionCallback(GLFWwindow* window, double xpos, double ypos)
   }
 }
 
-static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
-
+void InputManager::scrollCallback(GLFWwindow* window, double xoffset,
+                                  double yoffset) {
   ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
 
   if (ImGui::GetIO().WantCaptureMouse) return;
@@ -64,7 +64,7 @@ static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
   }
 }
 
-void init() {
+InputManager::InputManager() {
   GLFWwindow* window = glfwGetCurrentContext();
 
   glfwSetKeyCallback(window, keyCallback);
@@ -73,6 +73,13 @@ void init() {
   glfwSetScrollCallback(window, scrollCallback);
 }
 
-void addObserver(Observer* observer) { observers.emplace_back(observer); }
+void InputManager::addObserver(Observer* observer) {
+  observers.emplace_back(observer);
+}
 
-}  // namespace Magnet::Input
+void InputManager::removeObserver(Observer *observer) {
+  observers.erase(std::remove(observers.begin(), observers.end(), observer),
+                  observers.end());
+}
+
+}  // namespace Magnet

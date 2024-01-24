@@ -10,19 +10,19 @@
 #include <magnet/SceneManager.hpp>
 #include <magnet/Time.hpp>
 
-#include "GFX/WindowManager.hpp"
 #include "GFX/UI/UserInterface.hpp"
+#include "GFX/WindowManager.hpp"
 
 namespace Magnet {
 
-ProjectInterface *registeredInterface = nullptr;
+ProjectInterface* registeredInterface = nullptr;
 
-void ApplicationContext::registerInterface(ProjectInterface *interface) {
+void ApplicationContext::registerInterface(ProjectInterface* interface) {
   registeredInterface = interface;
 }
 
-
-ApplicationContext::ApplicationContext() : assetManager(ARCH_core, ARCH_core_KEY) {
+ApplicationContext::ApplicationContext()
+  : assetManager(ARCH_core, ARCH_core_KEY) {
   /* Logging */
   auto consoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
   auto fileSink =
@@ -32,15 +32,15 @@ ApplicationContext::ApplicationContext() : assetManager(ARCH_core, ARCH_core_KEY
   spdlog::set_default_logger(logger);
 }
 
-void ApplicationContext::initialize(const char *windowTitle) {
+void ApplicationContext::initialize(const char* windowTitle) {
   if (!glfwInit()) {
     spdlog::critical("Failed to initialize GLFW");
   }
 
   WindowManager& windowMgr = WindowManager::getInstance();
-  SceneManager&   sceneMgr = SceneManager::getInstance();
-  Renderer&       renderer = Renderer::getInstance();
-  static UI ui;
+  SceneManager& sceneMgr = SceneManager::getInstance();
+  Renderer& renderer = Renderer::getInstance();
+  UI ui;
 
   windowMgr.setTitle(windowTitle);
   registeredInterface->init();

@@ -5,7 +5,7 @@
 #include <spdlog/spdlog.h>
 
 #include <magnet/ApplicationContext.hpp>
-#include <magnet/Input.hpp>
+#include <magnet/InputManager.hpp>
 #include <magnet/Renderer.hpp>
 
 namespace Magnet {
@@ -33,8 +33,8 @@ WindowManager::WindowManager() {
   glfwSetFramebufferSizeCallback(window, resizeCallback);
   glfwSetErrorCallback(errorCallback);
 
-  /* Initialize input management */
-  Input::init();
+  /* Initialize InputManager */
+  InputManager::getInstance();
 }
 
 WindowManager::~WindowManager() {
