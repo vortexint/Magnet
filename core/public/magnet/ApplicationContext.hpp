@@ -1,6 +1,7 @@
 #pragma once
 
 #include <magnet/AssetManager.hpp>
+#include <magnet/AudioManager.hpp>
 #include <memory>
 
 // forward declarations
@@ -26,8 +27,8 @@ class ApplicationContext {
     return instance;
   }
 
-  static void registerInterface(ProjectInterface* interface);
-  static void initialize(const char* gameTitle);
+  void registerInterface(ProjectInterface* interface);
+  void initialize(const char* gameTitle);
 
   /* Getters */
   
