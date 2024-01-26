@@ -17,6 +17,8 @@ class SceneManager {
     static SceneManager instance;
     return instance;
   }
+  flecs::world& getECS() { return *ecs;  }
+
   void progress();
 
   void setActiveCamera(flecs::entity camera);
