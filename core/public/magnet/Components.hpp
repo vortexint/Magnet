@@ -1,5 +1,9 @@
 #pragma once
 
+#include <magnet/AudioManager.hpp>
+
+#include <array>
+
 #include <cglm/cglm.h>
 namespace Magnet::Components {
 
@@ -18,7 +22,7 @@ struct Transform {
 /* RENDERING */
 
 struct Skybox {
-  uint textureID;  // ID of the skybox texture.
+  uint32_t textureID;  // ID of the skybox texture.
 };
 
 /**
@@ -40,11 +44,23 @@ struct MeshRenderer {
 
 /* AUDIO */
 
+
 struct AudioSource {
-  uint32_t sourceID;
-  float volume = 1.0f;
-  bool loop = false;
+  std::array<std::optional<SpatialAudioRequest>, 8> requests;
+
+  std::optional<size_t> play_sound(
+    const char* name, AudioTag tag = AudioTag::NONE, 
+    bool looping = false, float volume = 1.f
+  );
+  SpatialAudioRequest* getRequest(size_t requestId);
+  bool isRequestIdValid(size_t requestId);
 };
+
+struct AudioListener {
+  uint32_t padding = 0; 
+  // A component can't have zero size in flecs
+};
+
 
 /* PHYSICS */
 

@@ -5,6 +5,7 @@ target_sources(magnet-core PRIVATE
   ApplicationContext.cpp
   SceneManager.cpp
   Time.cpp
+  Components.cpp
 )
 
 add_subdirectory(GFX) # Graphics
@@ -50,6 +51,7 @@ target_link_libraries(magnet-core PUBLIC
                       glfw
                       lua_static
                       spdlog
+                      OpenAL::OpenAL
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")

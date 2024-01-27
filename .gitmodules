@@ -22,3 +22,6 @@
 [submodule "submodules/freetype"]
 	path = submodules/freetype
 	url = https://github.com/freetype/freetype.git
+[submodule "submodules/openal-soft"]
+	path = submodules/openal-soft
+	url = https://github.com/kcat/openal-soft

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <magnet/AssetManager.hpp>
+#include <magnet/AudioManager.hpp>
 #include <memory>
 
 // forward declarations

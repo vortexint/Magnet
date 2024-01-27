@@ -18,6 +18,13 @@ SceneManager::SceneManager() {
                              .add<Transform>();
 
   renderer.setActiveCamera(camera);
+
+  ecs->component<AudioListener>();
+  ecs->component<AudioSource>();
+  ecs->system<Transform, AudioSource>()
+    .iter(AudioManager::AudioSourceSystem);
+  ecs->system<Components::Transform, AudioListener>()
+    .iter(AudioManager::AudioListenerSystem);
 }
 
 void SceneManager::progress() { ecs->progress(Time::getDelta()); }
