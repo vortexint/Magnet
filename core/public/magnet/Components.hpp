@@ -1,5 +1,9 @@
 #pragma once
 
+#include <magnet/AudioManager.hpp>
+
+#include <array>
+
 #include <cglm/cglm.h>
 namespace Magnet::Components {
 
@@ -11,7 +15,7 @@ namespace Magnet::Components {
  */
 struct Transform {
   vec3 translation{0.0f, 0.0f, 0.0f};
-  versor rotation{0.0f, 0.0f, 0.0f};
+  versor rotation{0.0f, 0.0f, 0.0f, 1.0f};
   vec3 scale{1.0f, 1.0f, 1.0f};
 };
 
@@ -41,11 +45,23 @@ struct MeshRenderer {
 
 /* AUDIO */
 
+
 struct AudioSource {
-  uint32_t sourceID;
-  float volume = 1.0f;
-  bool loop = false;
+  std::array<std::optional<SpatialAudioRequest>, 8> requests;
+
+  std::optional<size_t> play_sound(
+    const char* name, AudioTag tag = AudioTag::NONE, 
+    bool looping = false, float volume = 1.f
+  );
+  SpatialAudioRequest* getRequest(size_t requestId);
+  bool isRequestIdValid(size_t requestId);
 };
+
+struct AudioListener {
+  uint32_t padding = 0; 
+  // A component can't have zero size in flecs
+};
+
 
 /* PHYSICS */
 
