@@ -1,29 +1,32 @@
 #include <magnet/Components.hpp>
+#include <magnet/Renderer.hpp>
 #include <magnet/SceneManager.hpp>
 #include <magnet/Time.hpp>
+
+#include <spdlog/spdlog.h>
 
 namespace Magnet {
 using namespace Magnet::Components;
 
 SceneManager::SceneManager() {
   ecs = std::make_unique<flecs::world>();
+  Renderer& renderer = Renderer::getInstance();
 
   /* Scene setup */
-  activeCamera = ecs->entity();
-  activeCamera.set<Transform>({}).set<Camera>({});
+  flecs::entity camera = ecs->entity("Camera")
+                             .add<Camera>()
+                             .add<Transform>();
 
-  ecs->component<Components::AudioListener>();
-  ecs->component<Components::AudioSource>();
-  ecs->system<Components::Transform, Components::AudioSource>()
+  renderer.setActiveCamera(camera);
+
+  ecs->component<AudioListener>();
+  ecs->component<AudioSource>();
+  ecs->system<Transform, AudioSource>()
     .iter(AudioManager::AudioSourceSystem);
-  ecs->system<Components::Transform, Components::AudioListener>()
+  ecs->system<Components::Transform, AudioListener>()
     .iter(AudioManager::AudioListenerSystem);
 }
 
 void SceneManager::progress() { ecs->progress(Time::getDelta()); }
-
-void SceneManager::setActiveCamera(flecs::entity camera) {
-  activeCamera = camera;
-}
 
 }  // namespace Magnet

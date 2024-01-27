@@ -5,6 +5,7 @@
 #include <magnet/InputManager.hpp>
 #include <magnet/Time.hpp>
 #include <magnet/Widgets.hpp>
+#include <magnet/SceneManager.hpp>
 
 #include "imgui.h"
 
@@ -12,29 +13,38 @@ namespace Magnet::Widgets {
 
 bool show_console = false;
 bool show_debug_info = false;
+bool show_manipulate = false;
 class DevToolsObserver : public Observer {
  public:
-  void onKeyEvent(int key, int action, int) override {
+  void onKeyEvent(int key, int, int action, int mods) override {
+    // F3: Debug Info
     if (key == GLFW_KEY_F3 && action == GLFW_PRESS) {
       show_debug_info = !show_debug_info;
+    }
+    // Shift + F10: Manipulate
+    if (key == GLFW_KEY_F10 && action == GLFW_PRESS && mods == GLFW_MOD_SHIFT) {
+      show_manipulate = !show_manipulate;
     }
   }
 };
 
 void DevTools() {
   static DevToolsObserver observer;
+  static ImGuiIO& io = ImGui::GetIO();
 
-  ImGuiIO& io = ImGui::GetIO();
+  /* Layout info */
+  static const float PAD = 10.0f;
+  static const ImGuiViewport* viewport = ImGui::GetMainViewport();
+  ImVec2 work_pos = viewport->WorkPos;
+  ImVec2 work_size = viewport->WorkSize;
 
   /* Debug overlay*/
   if (show_debug_info) {
-    ImGuiWindowFlags window_flags =
+    static ImGuiWindowFlags window_flags =
       ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize |
       ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing |
       ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoMove;
-    const float PAD = 10.0f;
-    const ImGuiViewport* viewport = ImGui::GetMainViewport();
-    ImVec2 work_pos = viewport->WorkPos;
+    
     ImGui::SetNextWindowPos(
       {
         (work_pos.x + PAD),
@@ -59,7 +69,7 @@ void DevTools() {
         (viewport->WorkPos.x + viewport->WorkSize.x - PAD),
         (viewport->WorkPos.y + PAD),
       },
-      ImGuiCond_Always, {1.0f, 0.0f});
+      ImGuiCond_Always, {1.0f, .0f});
     ImGui::SetNextWindowBgAlpha(0.35f);
 
     ImGui::Begin("Vendor Info", &show_debug_info, window_flags);
@@ -68,6 +78,39 @@ void DevTools() {
       static const GLubyte* version = glGetString(GL_VERSION);
       ImGui::Text("%s", renderer);
       ImGui::Text("GL %s", version);
+    }
+    ImGui::End();
+  }
+
+  /* Manipulate (Entity list and Property Editor) */
+  if (show_manipulate) {
+    static SceneManager& sceneMgr = SceneManager::getInstance();
+    static flecs::entity selectedEntity;
+    static flecs::world& ecs = sceneMgr.getECS();
+
+    static ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration;
+    ImGui::SetNextWindowPos(
+      {
+        (work_pos.x + PAD),
+        (work_pos.y + work_size.y - PAD),
+      },
+      ImGuiCond_Always, {.0f, 1.0f});
+
+    ImGui::Begin("Manipulate", &show_manipulate);
+    {
+      ImGui::BeginChild("Entity List", {200, 200}, true);
+      {
+
+      }
+      ImGui::EndChild();
+      ImGui::BeginChild("Property Editor", {200, 200}, true);
+      {
+        if (selectedEntity) {
+          // get all of the entity's components
+
+        }
+      }
+      ImGui::EndChild();
     }
     ImGui::End();
   }
