@@ -11,7 +11,7 @@ namespace Magnet {
 class Observer {
  public:
   Observer();
-  virtual void onKeyEvent(int key, int action, int mods);
+  virtual void onKeyEvent(int key, int scancode, int action, int mods);
   virtual void onMouseButtonEvent(int button, int action, int mods);
   virtual void onMouseMoveEvent(double xpos, double ypos);
   virtual void onMouseScrollEvent(double xoffset, double yoffset);

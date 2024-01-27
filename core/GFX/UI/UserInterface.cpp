@@ -25,7 +25,7 @@ UI::UI() {
   io.IniFilename = nullptr;
   io.LogFilename = nullptr;
 
-  ImGui_ImplGlfw_InitForOpenGL(glfwGetCurrentContext(), false);
+  ImGui_ImplGlfw_InitForOpenGL(glfwGetCurrentContext(), true);
   ImGui_ImplOpenGL3_Init("#version 450");
 
   /* Load fonts */
