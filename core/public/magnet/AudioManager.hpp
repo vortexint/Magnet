@@ -147,6 +147,27 @@ struct AudioTagParameters {
   float volume = 1.f;
 };
 
+struct AudioFilter {
+  uint32_t filter = 0;
+
+  std::optional<AudioFilter> create();
+  void destroy();
+};
+
+struct AudioEffect {
+  uint32_t effect = 0;
+
+  std::optional<AudioEffect> create();
+  void destroy();
+};
+
+struct AuxiliaryEffectSlot {
+  uint32_t slot;
+
+  std::optional<AuxiliaryEffectSlot> create();
+  void destroy();
+};
+
 class AudioManager {
   AssetManager* assetManager;
   std::unordered_map<std::string, AudioBuffer> tracks;
@@ -165,7 +186,8 @@ class AudioManager {
   int32_t AUDIO_CHANNELS = 0;
   int32_t SPATIAL_AUDIO_CHANNELS = 0;
 
- public:
+  static void InitializeOpenAL_EFX(ALCdevice*);
+public:
   static AudioManager& getInstance() {
     static AudioManager audioManager;
     return audioManager;
@@ -194,6 +216,10 @@ class AudioManager {
 
   AudioTagParameters& getTagModifier(AudioTag);
   AudioTagParameters& getMaster() { return masterTagModifier; }
+
+
+  static void AudioSourceSystem(flecs::iter&, Components::Transform*, Components::AudioSource*);
+  static void AudioListenerSystem(flecs::iter&, Components::Transform*, Components::AudioListener*);
 };
 
 std::string to_string(Magnet::AudioTag);

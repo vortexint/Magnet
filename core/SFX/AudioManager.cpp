@@ -15,6 +15,14 @@
 
 #include "GFX/Viewport.hpp"
 
+#define AL_ALEXT_PROTOTYPES
+#include <AL/efx.h>
+
+#include <cglm/cglm.h>
+
+
+
+
 namespace Magnet {
 using namespace Components;
 
@@ -33,6 +41,7 @@ const char* alGetErrorString(int err) {
   }
 }
 AudioTagParameters& AudioManager::getTagModifier(AudioTag tag) {
+  assert(tagModifier.contains(tag));
   return tagModifier[tag];
 }
 void AudioManager::AudioSourceSystem(flecs::iter& iter, Transform* transforms,
@@ -501,7 +510,74 @@ void SpatialAudioChannel::set_cone(float angleDeg, float outerVolume) {
   alSourcef(source, AL_CONE_OUTER_GAIN, outerVolume);
 }
 
-AudioManager::AudioManager() : assetManager(nullptr) {
+std::optional<AudioFilter> AudioFilter::create() {
+  AudioFilter filter;
+  alGenFilters(1, &filter.filter);
+  if (alGetError() != AL_NO_ERROR) {
+    spdlog::error("Failed to create OpenAL EFX filter");
+    return std::nullopt;
+  }
+
+  return filter;
+}
+void AudioFilter::destroy() {
+  alDeleteFilters(1, &filter);
+}
+
+std::optional<AudioEffect> AudioEffect::create() {
+  AudioEffect effect;
+  alGenEffects(1, &effect.effect);
+  if (alGetError() != AL_NO_ERROR) {
+    spdlog::error("Failed to create OpenAL EFX effect");
+    return std::nullopt;
+  }
+
+  return effect;
+}
+void AudioEffect::destroy() {
+  alDeleteEffects(1, &effect);
+}
+
+std::optional<AuxiliaryEffectSlot> AuxiliaryEffectSlot::create() {
+  AuxiliaryEffectSlot slot;
+  alGenAuxiliaryEffectSlots(1, &slot.slot);
+  if (alGetError() != AL_NO_ERROR) {
+    spdlog::error("Failed to create OpenAL EFX AuxiliaryEffectSlot");
+    return std::nullopt;
+  }
+
+  return slot;
+}
+void AuxiliaryEffectSlot::destroy() {
+  alDeleteAuxiliaryEffectSlots(1, &slot);
+}
+
+void AudioManager::InitializeOpenAL_EFX(ALCdevice *audioDevice) {
+  if (alcIsExtensionPresent(audioDevice, ALC_EXT_EFX_NAME) == AL_FALSE) {
+    spdlog::error("EFX extension is not present on device");
+    throw std::runtime_error("EFX extension is not present on device");
+  }
+
+  uint32_t ui = 0;
+  alGenEffects(1, &ui);
+
+  assert(alIsEffect(ui));
+  /* Check if you can void manually loading all these functions
+  alGenEffects = (LPALGENEFFECTS) alGetProcAddress("alGenEffects");
+  alDeleteEffects = (LPALDELETEEFFECTS)alGetProcAddress("alDeleteEffects");
+  alIsEffect = (LPALISEFFECT) alGetProcAddress("alIsEffect");
+  alGenAuxiliaryEffectsSlots = (LPALGENAUXILIARYEFFECTSLOTS)alGetProcAddress("alGenAuxiliaryEffectSlots");
+ 
+
+  if (!alGenEffects || !alDeleteEffects || !alIsEffect) {
+    spdlog::error("Failed to load OpenAL extension functions");
+    throw std::runtime_error("OpenAL EFX extension functions failed to load");
+  }
+  */
+}
+
+AudioManager::AudioManager()
+  : assetManager(nullptr) {
   assetManager = new AssetManager("data.magnet", nullptr);
   audioDevice = alcOpenDevice(nullptr);
   alContext = alcCreateContext(audioDevice, nullptr);
@@ -531,6 +607,7 @@ AudioManager::AudioManager() : assetManager(nullptr) {
                    AudioTag::MUSIC}) {
     tagModifier[tag] = AudioTagParameters{};
   }
+
 }
 AudioManager::~AudioManager() {
   for (auto& spatialAudioChannel : freeSpatialAudioChannels) {
