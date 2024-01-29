@@ -19,9 +19,19 @@ namespace Magnet {
 struct SpatialAudioChannel;
 
 namespace Components {
-struct AudioSource;
-struct Transform;
-}  // namespace Components
+  struct AudioSource;
+  struct AudioListener;
+  struct Transform;
+}
+
+struct GlobalAudioListener {
+  static void setPosition(vec3);
+  static void setVelocity(vec3);
+  static void set_orientation_versor(versor v);
+  static void set_orientation_forward_up(vec3 forward, vec3 up);
+
+  // AL_METERS_PER_UNIT
+};
 
 enum class AudioFormat {
   AUDIO_FORMAT_MONO8,
@@ -70,21 +80,23 @@ struct AudioChannel {
   */
   virtual void assign(const AudioBuffer&);
   void play();
-  bool is_currently_playing();
+  bool isCurrentlyPlaying();
   void pause();
   void stop();
   // Resets the channel to have no settings applied to it
   // also stops the audio
   void reset();
-  bool is_stopped();
-  bool is_looping();
-  void set_looping(bool);
+  bool isStopped();
+  bool isLooping();
+  void setLooping(bool);
   void destroy() const;
-  void set_volume(float vol = 1.f);
-  void set_pitch(float pitch = 1.f);
+  void setVolume(float vol = 1.f);
+  void setPitch(float pitch = 1.f);
 
-  void check_if_initialized() const;
+  void checkIfInitialized() const;
 };
+
+struct AudioFilter;
 
 struct SpatialAudioChannel {
   uint32_t source = 0;
@@ -94,25 +106,25 @@ struct SpatialAudioChannel {
   static std::optional<SpatialAudioChannel> create();
 
   void play();
-  bool is_currently_playing();
+  bool isCurrentlyPlaying();
   void pause();
   void stop();
   // Resets the channel to have no settings applied to it
   // also stops the audio
   void reset();
-  bool is_stopped();
-  bool is_looping();
-  void set_looping(bool);
+  bool isStopped();
+  bool isLooping();
+  void setLooping(bool);
   void destroy() const;
-  void set_volume(float vol = 1.f);
-  void set_pitch(float pitch = 1.f);
+  void setVolume(float vol = 1.f);
+  void setPitch(float pitch = 1.f);
 
   void assign(const AudioBuffer&);
-  void set_position(vec3 pos);
-  void set_velocity(vec3 vel);
-  void set_direction(vec3 dir);
+  void setPosition(vec3 pos);
+  void setVelocity(vec3 vel);
+  void setDirection(vec3 dir);
 
-  void check_if_initialized() const;
+  void checkIfInitialized() const;
 
   /*
     Creates a cone pointing in the previously set direction,
@@ -120,8 +132,13 @@ struct SpatialAudioChannel {
     The outerVolume sets how much a listener would hear if they
     were outside the cone
   */
-  void set_cone(float angleDeg = 180.f, float outerVolume = 0.f);
+  void setCone(float angleDeg = 180.f, float outerVolume = 0.f);
+
+
+  void setFilter(AudioFilter&);
 };
+
+struct AudioFilter;
 
 struct SpatialAudioRequest {
   const char* trackName = nullptr;
@@ -133,6 +150,8 @@ struct SpatialAudioRequest {
   std::optional<Cone> coneSettings;
   bool looping = false;
   bool user_requests_stop = false;
+  std::optional<AudioFilterDescription> filterDescription;
+  std::optional<AudioFilter> filter;
 
   size_t hash() const;
   void stop();
@@ -141,17 +160,55 @@ struct SpatialAudioRequest {
   float getPitch() const;
   float getVolume() const;
   std::optional<SpatialAudioChannel>& getChannel();
+
+  void setFilter(AudioFilter&);
+
+
+  // AL_AIR_ABSORBTION_FACTOR
+  // AL_ROOM_ROLLOFF_FACTOR
+  // AL_CONE_OUTER_GAINHF
+  // AL_DIRECT_FILTER_GAINHF_AUDIO
+  // AL_AUXILIARY_SEND_FILTER_GAIN_AUTO
+  // AL_AUXILIARY_SEND_FILTER_GAINHF_AUTO
+  // 
 };
 
 struct AudioTagParameters {
   float volume = 1.f;
 };
 
+enum class AudioFilterType {
+  LOWPASS,
+  HIGHPASS,
+  BANDPASS
+};
+
+struct AudioFilterDescription {
+  AudioFilterType filterType;
+  std::optional<float> gain;
+  std::optional<float> gainHighFrequency;
+  std::optional<float> gainLowFrequency;
+};
+
 struct AudioFilter {
   uint32_t filter = 0;
 
-  std::optional<AudioFilter> create();
+  static std::optional<AudioFilter> create(AudioFilterType, std::optional<AudioFilterDescription>);
   void destroy();
+
+  void setGain(float);
+  /*
+    Sets the volume of sound in high frequency
+    Only can be used with low or band pass filter
+  */
+  void setGainHighFrequency(float);
+  /*
+    Set the volume of sound in low frequency
+    Can only be used with high or band pass filter
+  */
+  void setGainLowFrequency(float);
+
+  AudioFilterType filterType();
 };
 
 struct AudioEffect {
@@ -159,6 +216,21 @@ struct AudioEffect {
 
   std::optional<AudioEffect> create();
   void destroy();
+
+  // AL_EFFECT_NULL
+  // AL_EFFECT_EAXREVERB
+  // AL_EFFECT_REVERB
+  // AL_EFFECT_CHORUS
+  // AL_EFFECT_DISTORTION
+  // AL_EFFECT_ECHO
+  // AL_EFFECT_FLANGER
+  // AL_EFFECT_FREQUENCY_SHITER
+  // AL_EFFECT_VOCAL_MORPHER
+  // AL_EFFECT_PITCH_SHIFTER
+  // AL_EFFECT_RING_MODULATOR
+  // AL_EFFECT_AUTOWAH
+  // AL_EFFECT_COMPRESSOR
+  // AL_EFFECT_EQUALIZER
 };
 
 struct AuxiliaryEffectSlot {
@@ -166,6 +238,13 @@ struct AuxiliaryEffectSlot {
 
   std::optional<AuxiliaryEffectSlot> create();
   void destroy();
+
+  // TODO: Implement AL_AUXILIARY_SEND_FILTER
+
+  // TODO: Check the maximum number of auxiliary sends
+  // ALC_MAX_AUXILIARY_SENDS
+
+
 };
 
 class AudioManager {
@@ -203,8 +282,7 @@ public:
   void returnChannel(SpatialAudioChannel channel);
 
   std::optional<AudioBuffer> getTrack(const char* track);
-  
-  
+
   void playTrackBackground(const char* track);
   void deleteTrack(const char* track);
 
