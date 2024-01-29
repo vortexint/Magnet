@@ -24,15 +24,6 @@ namespace Components {
   struct Transform;
 }
 
-struct GlobalAudioListener {
-  static void setPosition(vec3);
-  static void setVelocity(vec3);
-  static void set_orientation_versor(versor v);
-  static void set_orientation_forward_up(vec3 forward, vec3 up);
-
-  // AL_METERS_PER_UNIT
-};
-
 enum class AudioFormat {
   AUDIO_FORMAT_MONO8,
   AUDIO_FORMAT_MONO16,
@@ -140,38 +131,13 @@ struct SpatialAudioChannel {
 
 struct AudioFilter;
 
-struct SpatialAudioRequest {
-  const char* trackName = nullptr;
-  AudioTag tag = AudioTag::NONE;
-  double timestampStartedS = 0;
-  float volume = 1.f;
-  float pitch = 1.f;
-  std::optional<SpatialAudioChannel> channel;
-  std::optional<Cone> coneSettings;
-  bool looping = false;
-  bool user_requests_stop = false;
-  std::optional<AudioFilterDescription> filterDescription;
-  std::optional<AudioFilter> filter;
-
-  size_t hash() const;
-  void stop();
-  void setPitch(float pitch = 1.f);
-  void setVolume(float volume = 1.f);
-  float getPitch() const;
-  float getVolume() const;
-  std::optional<SpatialAudioChannel>& getChannel();
-
-  void setFilter(AudioFilter&);
-
-
-  // AL_AIR_ABSORBTION_FACTOR
-  // AL_ROOM_ROLLOFF_FACTOR
-  // AL_CONE_OUTER_GAINHF
-  // AL_DIRECT_FILTER_GAINHF_AUDIO
-  // AL_AUXILIARY_SEND_FILTER_GAIN_AUTO
-  // AL_AUXILIARY_SEND_FILTER_GAINHF_AUTO
-  // 
-};
+// AL_AIR_ABSORBTION_FACTOR
+// AL_ROOM_ROLLOFF_FACTOR
+// AL_CONE_OUTER_GAINHF
+// AL_DIRECT_FILTER_GAINHF_AUDIO
+// AL_AUXILIARY_SEND_FILTER_GAIN_AUTO
+// AL_AUXILIARY_SEND_FILTER_GAINHF_AUTO
+//
 
 struct AudioTagParameters {
   float volume = 1.f;
@@ -287,10 +253,6 @@ public:
   void deleteTrack(const char* track);
 
   static void updateListener();
-
-  static void AudioSourceSystem(flecs::iter&, Components::Transform*,
-                                Components::AudioSource*);
-
 
   AudioTagParameters& getTagModifier(AudioTag);
   AudioTagParameters& getMaster() { return masterTagModifier; }

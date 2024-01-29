@@ -111,7 +111,7 @@ void Interface::update() {
     }
     ImGui::EndCombo();
   }
-  ImGui::DragFloat("");
+  //ImGui::DragFloat("");
   
 
   if (ImGui::CollapsingHeader("Sounds")) {
