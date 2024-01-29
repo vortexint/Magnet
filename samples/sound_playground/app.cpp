@@ -98,6 +98,22 @@ void Interface::update() {
     mainAudioSource->stop();
   }
 
+  static int selectedFilterType = 0;
+  AudioFilterDescription desc = {};
+  const char* FILTER_TYPES[] = { "None", "Lowpass", "Highpass", "Bandpass" };
+  std::optional<AudioFilterType> FILTER_TYPE_ENUMS[] = { std::nullopt, AudioFilterType::LOWPASS, AudioFilterType::HIGHPASS, AudioFilterType::BANDPASS };
+
+  if (ImGui::BeginCombo("Filter Settings", "None")) {
+    for (int i = 0; i < IM_ARRAYSIZE(FILTER_TYPES); ++i) {
+      if (ImGui::Selectable(FILTER_TYPES[i], selectedFilterType == i)) {
+        selectedFilterType = i;
+      }
+    }
+    ImGui::EndCombo();
+  }
+  ImGui::DragFloat("");
+  
+
   if (ImGui::CollapsingHeader("Sounds")) {
     for (size_t i = 0; i < sizeof(TEST_AUDIO_FILES) / sizeof(TEST_AUDIO_FILES[0]); ++i) {
       auto testAudioFile = TEST_AUDIO_FILES[i];
