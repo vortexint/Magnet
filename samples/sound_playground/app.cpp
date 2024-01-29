@@ -81,6 +81,9 @@ void Interface::init() {
 }
 
 void Interface::update() {
+
+  ImGui::Begin("Sound Editor");
+
   auto& audioManager = AudioManager::getInstance();
   auto& ecs = SceneManager::getInstance().getECS();
   auto* mainAudioSource = ecs.entity(this->mainEntityId)
@@ -88,61 +91,21 @@ void Interface::update() {
   auto* mainTransform = ecs.entity(this->mainEntityId)
     .get_mut<Magnet::Components::Transform>();
 
-  static std::vector<size_t> requestIds;
-  static std::optional<size_t> selectedRequestId;
+  ImGui::DragFloat("volume", &mainAudioSource->volume, 0.01f, 0.f, 1.f);
 
-  ImGui::Begin("Requests List");
+  ImGui::DragFloat("pitch", &mainAudioSource->pitch, 0.01f, 0.5f, 2.f);
 
-  if (selectedRequestId != std::nullopt) {
-    if (auto request = mainAudioSource->getRequest(*selectedRequestId)) {
-      float volume = request->getVolume();
-      ImGui::DragFloat("volume", &volume, 0.01f, 0.f, 1.f);
-      request->setVolume(volume);
 
-      float pitch = request->getPitch();
-      ImGui::DragFloat("pitch", &pitch, 0.01f, 0.5f, 2.f);
-      request->setPitch(pitch);
-    }
+  if (ImGui::Button("Stop Request")) {
+    mainAudioSource->stop();
   }
-
-  for (auto requestId : requestIds) {
-    std::string requestName =
-      // Only show a small part of the actual id in the interface
-      "Request ID:" + std::to_string(requestId % 1000)
-      + "##RequestId_" + std::to_string(requestId);
-    if (ImGui::Selectable(requestName.c_str(), selectedRequestId == requestId)) {
-      selectedRequestId = requestId;
-    }
-  }
-  if (ImGui::Button("Stop Request") && selectedRequestId != std::nullopt) {
-    if (auto* request = mainAudioSource->getRequest(*selectedRequestId)) {
-      request->stop();
-    }
-  }
-
-  for (auto requestIter = requestIds.begin(); requestIter != requestIds.end();)
-    if (mainAudioSource->isRequestIdValid(*requestIter)) {
-      ++requestIter;
-    }
-    else {
-      if (selectedRequestId == *requestIter) {
-        selectedRequestId = std::nullopt;
-      }
-
-      requestIter = requestIds.erase(requestIter);
-    }
 
   if (ImGui::CollapsingHeader("Sounds")) {
     for (size_t i = 0; i < sizeof(TEST_AUDIO_FILES) / sizeof(TEST_AUDIO_FILES[0]); ++i) {
       auto testAudioFile = TEST_AUDIO_FILES[i];
       auto tag = TEST_AUDIO_FILE_TAGS[i];
       if (ImGui::Button(testAudioFile)) {
-        if (std::optional<size_t> requestId = mainAudioSource->play_sound(testAudioFile, tag)) {
-          requestIds.push_back(*requestId);
-          if (selectedRequestId == std::nullopt) {
-            selectedRequestId = requestId;
-          }
-        }
+        mainAudioSource->play_sound(testAudioFile, tag);
       }
       ImGui::SameLine();
       auto tagStr = to_string(tag);

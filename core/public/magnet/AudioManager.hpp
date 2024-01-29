@@ -181,9 +181,8 @@ class AudioManager {
   void returnChannel(SpatialAudioChannel channel);
 
   std::optional<AudioBuffer> getTrack(const char* track);
-  std::optional<uint32_t> handleSpatialAudioRequest(SpatialAudioRequest request,
-                                                    vec3 pos);
-
+  
+  
   void playTrackBackground(const char* track);
   void deleteTrack(const char* track);
 

@@ -44,16 +44,34 @@ struct MeshRenderer {
 
 /* AUDIO */
 
+enum class AudioSourcePlayState {
+  REQUESTED_PLAY,
+  PLAYING,
+  STOPPED
+};
 
 struct AudioSource {
-  std::array<std::optional<SpatialAudioRequest>, 8> requests;
+  AudioSourcePlayState playState;
+  std::optional<SpatialAudioChannel> channel = std::nullopt;
+  const char* trackName = nullptr;
+  double timestampStartedS = 0.0;
 
-  std::optional<size_t> play_sound(
-    const char* name, AudioTag tag = AudioTag::NONE, 
+  void reset();
+  AudioSource();
+
+  AudioTag tag = AudioTag::NONE;
+  float volume = 1.f;
+  float pitch = 1.f;
+  std::optional<Cone> cone;
+  bool looping = false;
+
+
+  void play_sound(
+    const char* name, AudioTag tag = AudioTag::NONE,
     bool looping = false, float volume = 1.f
   );
-  SpatialAudioRequest* getRequest(size_t requestId);
-  bool isRequestIdValid(size_t requestId);
+
+  void stop();
 };
 
 /* PHYSICS */

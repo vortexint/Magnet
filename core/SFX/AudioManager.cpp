@@ -39,50 +39,72 @@ void AudioManager::AudioSourceSystem(flecs::iter& iter, Transform* transforms,
                                      AudioSource* sources) {
   AudioManager& audioManager = AudioManager::getInstance();
 
+
   for (size_t row : iter) {
-    Transform& transform = transforms[row];
-    AudioSource& audioSource = sources[row];
+    auto& transform = transforms[row];
+    auto& audioSource = sources[row];
 
-    for (auto& request : audioSource.requests) {
-      if (!request) {
-        continue;
+    if (audioSource.playState == AudioSourcePlayState::REQUESTED_PLAY) {
+      audioSource.channel = audioManager.borrowChannel();
+
+      auto track = audioManager.getTrack(audioSource.trackName);
+
+      if (track && audioSource.channel) {
+        audioSource.channel->reset();
+        audioSource.channel->assign(*track);
+        audioSource.channel->play();
+      } else {
+        audioSource.channel = std::nullopt;
       }
 
-      auto& channel = request->channel;
-      auto track = audioManager.getTrack(request->trackName);
-      if (!channel) {
-        request->channel = audioManager.borrowChannel();
+      audioSource.playState = AudioSourcePlayState::PLAYING;
+    }
+    if (audioSource.playState == AudioSourcePlayState::PLAYING) {
 
-        if (track) {
-          request->channel->reset();
-          request->channel->assign(*track);
-          request->channel->play();
-        }
+      float finalVolume = audioSource.volume *
+        audioManager.getTagModifier(audioSource.tag).volume *
+        audioManager.getMaster().volume;
+
+      audioSource.channel->set_volume(finalVolume);
+      audioSource.channel->set_position(transform.position);
+
+      vec3 forward = { 1.f, 0.f, 0.f };
+      vec3 forwardRes = {};
+
+      glm_quat_rotatev(transform.rotation, forward, forwardRes);
+      audioSource.channel->set_direction(forwardRes);
+
+      audioSource.channel->set_pitch(audioSource.pitch);
+    }
+
+    if (
+      audioSource.playState == AudioSourcePlayState::STOPPED || 
+      !audioSource.channel ||
+      audioSource.channel->is_stopped()
+    ) {
+      if (audioSource.channel) {
+        audioManager.returnChannel(*audioSource.channel);
       }
-      if (channel) {
-        float finalVolume = request->volume *
-                            audioManager.getTagModifier(request->tag).volume *
-                            audioManager.getMaster().volume;
 
-        request->channel->set_volume(finalVolume);
-        request->channel->set_position(transform.position);
+      audioSource.stop();
+    }
+  }
 
-        vec3 forward = {1.f, 0.f, 0.f};
-        vec3 forwardRes = {};
+  // If the user plays a sound from the same AudioSource twice,
+  // the old channel will be set to std::nullopt.
+  // That will prevent this system from returning it
 
-        glm_quat_rotatev(transform.rotation, forward, forwardRes);
-        request->channel->set_direction(forwardRes);
+  for (
+    auto borrowedIter = audioManager.borrowedSpatialAudioChannels.begin();
+    borrowedIter != audioManager.borrowedSpatialAudioChannels.end();
+  ) {
+    SpatialAudioChannel channel{ *borrowedIter };
 
-        // TODO: Full implement
-      }
-
-      if (!channel || !track || channel->is_stopped()) {
-        if (channel) {
-          audioManager.returnChannel(*channel);
-          channel = std::nullopt;
-        }
-        request = std::nullopt;
-      }
+    if (channel.is_stopped()) {
+      borrowedIter = audioManager.borrowedSpatialAudioChannels.erase(borrowedIter);
+      audioManager.returnChannel(channel);
+    } else {
+      ++borrowedIter;
     }
   }
 }
@@ -536,6 +558,8 @@ struct DeleteStbVorbisData {
 };
 
 std::optional<AudioBuffer> AudioManager::getTrack(const char* track) {
+  assert(track);
+
   if (auto trackLoc = tracks.find(track); trackLoc != tracks.end()) {
     return trackLoc->second;
   }
