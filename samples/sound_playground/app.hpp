@@ -13,7 +13,6 @@ class Interface : public ProjectInterface {
   GLFWwindow* window;
 
   flecs::entity_t mainEntityId;
-  flecs::entity_t listenerEntityId;
 
  public:
   void init() override;

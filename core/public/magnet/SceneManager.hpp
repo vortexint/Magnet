@@ -17,8 +17,9 @@ class SceneManager {
     return instance;
   }
 
-  void progress();
+  flecs::world& getECS() const { return *ecs; }
+  
 
-  flecs::world& getECS() { return *ecs; }
+  void progress();
 };
 }  // namespace Magnet

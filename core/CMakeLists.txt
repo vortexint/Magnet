@@ -36,6 +36,7 @@ endif()
 find_package(OpenGL REQUIRED)
 
 target_include_directories(magnet-core PRIVATE
+                           ${CMAKE_CURRENT_SOURCE_DIR}
                            ${OPENGL_INCLUDE_DIR}
                            PUBLIC
                            ${CMAKE_CURRENT_SOURCE_DIR}/public

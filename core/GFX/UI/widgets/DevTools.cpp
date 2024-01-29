@@ -88,7 +88,7 @@ void DevTools() {
     static flecs::entity selectedEntity;
     static flecs::world& ecs = sceneMgr.getECS();
 
-    static ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration;
+    // static ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration;
     ImGui::SetNextWindowPos(
       {
         (work_pos.x + PAD),

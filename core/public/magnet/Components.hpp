@@ -14,7 +14,7 @@ namespace Magnet::Components {
  * @brief An entity's transformation relative to its parent.
  */
 struct Transform {
-  vec3   translation{0.0f, 0.0f, 0.0f};
+  vec3   position{0.0f, 0.0f, 0.0f};
   versor rotation{0.0f, 0.0f, 0.0f, 0.0f};
   vec3   scale{1.0f, 1.0f, 1.0f};
 };
@@ -55,12 +55,6 @@ struct AudioSource {
   SpatialAudioRequest* getRequest(size_t requestId);
   bool isRequestIdValid(size_t requestId);
 };
-
-struct AudioListener {
-  uint32_t padding = 0; 
-  // A component can't have zero size in flecs
-};
-
 
 /* PHYSICS */
 

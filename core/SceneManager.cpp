@@ -1,32 +1,36 @@
+#include <spdlog/spdlog.h>
+
 #include <magnet/Components.hpp>
-#include <magnet/Renderer.hpp>
+#include <magnet/AudioManager.hpp>
 #include <magnet/SceneManager.hpp>
 #include <magnet/Time.hpp>
 
-#include <spdlog/spdlog.h>
+#include "GFX/Viewport.hpp"
 
 namespace Magnet {
-using namespace Magnet::Components;
+using namespace Components;
 
 SceneManager::SceneManager() {
   ecs = std::make_unique<flecs::world>();
-  Renderer& renderer = Renderer::getInstance();
+
+  /* Register Components */
+
+  ecs->component<Transform>();
+  ecs->component<Camera>();
+  ecs->component<AudioSource>();
 
   /* Scene setup */
-  flecs::entity camera = ecs->entity("Camera")
-                             .add<Camera>()
-                             .add<Transform>();
+  flecs::entity activeCamera =
+    ecs->entity("Camera").add<Camera>().add<Transform>();
+    
+  Viewport::setActiveCamera(activeCamera);
 
-  renderer.setActiveCamera(camera);
-
-  ecs->component<AudioListener>();
-  ecs->component<AudioSource>();
-  ecs->system<Transform, AudioSource>()
-    .iter(AudioManager::AudioSourceSystem);
-  ecs->system<Components::Transform, AudioListener>()
-    .iter(AudioManager::AudioListenerSystem);
+  ecs->system<Transform, AudioSource>().iter(AudioManager::AudioSourceSystem);
 }
 
-void SceneManager::progress() { ecs->progress(Time::getDelta()); }
+void SceneManager::progress() {
+
+  ecs->progress(Time::getDelta());
+}
 
 }  // namespace Magnet

@@ -78,11 +78,6 @@ void Interface::init() {
   mainEntity.set<Magnet::Components::AudioSource>({});
   mainEntity.set<Magnet::Components::Transform>({});
   this->mainEntityId = mainEntity.id();
-
-  auto listenerEntity = ecs.entity("ListenerEntity");
-  listenerEntity.set<Magnet::Components::AudioListener>({});
-  listenerEntity.set<Magnet::Components::Transform>({});
-  this->listenerEntityId = listenerEntity.id();
 }
 
 void Interface::update() {
@@ -91,8 +86,6 @@ void Interface::update() {
   auto* mainAudioSource = ecs.entity(this->mainEntityId)
     .get_mut<Magnet::Components::AudioSource>();
   auto* mainTransform = ecs.entity(this->mainEntityId)
-    .get_mut<Magnet::Components::Transform>();
-  auto* listenerTransform = ecs.entity(this->listenerEntityId)
     .get_mut<Magnet::Components::Transform>();
 
   static std::vector<size_t> requestIds;
@@ -152,8 +145,8 @@ void Interface::update() {
         }
       }
       ImGui::SameLine();
-      auto tagStr = std::to_string(tag);
-      ImGui::Text(tagStr.c_str());
+      auto tagStr = to_string(tag);
+      ImGui::Text("%s", tagStr.c_str());
     }
   }
 
@@ -164,13 +157,13 @@ void Interface::update() {
   ImGui::Separator();
   
   ImGui::Text("Emitter");
-  ImGui::DragFloat3("position##Emitter_position", mainTransform->translation);
+  ImGui::DragFloat3("position##Emitter_position", mainTransform->position);
   static float angleDegrees = 0.f;
   ImGui::Text("This rotates the entity around the listeners head the xz axis");
   ImGui::DragFloat("Entity Rotation", &angleDegrees, 1.f, 0.f, 360.f);
 
-  mainTransform->translation[2] = 2.f * cosf(angleDegrees * M_PI / 180);
-  mainTransform->translation[0] = 2.f * sinf(angleDegrees * M_PI / 180);
+  mainTransform->position[2] = 2.f * cosf(angleDegrees * M_PI / 180);
+  mainTransform->position[0] = 2.f * sinf(angleDegrees * M_PI / 180);
 
   ImGui::Separator();
 

@@ -2,10 +2,6 @@
 
 /* ENTRY POINT */
 
-#include <cglm/cglm.h>
-#include <iostream>
-#include <iomanip>
-
 int main(void) {
   ApplicationContext& appCtx = ApplicationContext::getInstance();
   appCtx.registerInterface(new Interface());

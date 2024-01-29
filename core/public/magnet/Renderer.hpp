@@ -1,17 +1,14 @@
 #pragma once
-/**
- * @file Renderer.hpp
- * @brief GL rendering component
- */
+
+// Renderer.hpp
+// Manages the rendering pipeline
 
 #include <cstdint>
-#include <flecs.h>
 
 namespace Magnet {
 
 class Renderer {
   int width, height;
-  flecs::entity activeCameraEntity;
 
   Renderer();
   Renderer(const Renderer&) = delete;
@@ -22,11 +19,6 @@ class Renderer {
     return instance;
   }
   void drawFrame() const;
-
-  /* Setters */
-
-  void setViewportSize(int width, int height);
-  void setActiveCamera(flecs::entity camera);
 };
 
 }  // namespace Magnet

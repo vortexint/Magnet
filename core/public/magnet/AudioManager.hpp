@@ -1,40 +1,27 @@
 #pragma once
-#include <magnet/AudioManager.hpp>
-#include <magnet/SceneManager.hpp>
-#include <magnet/AssetManager.hpp>
-
-#include <flecs.h>
 #include <cglm/cglm.h>
+#include <flecs.h>
 
+#include <magnet/AssetManager.hpp>
+#include <magnet/SceneManager.hpp>
 #include <memory>
-#include <unordered_map>
-#include <span>
-#include <vector>
 #include <optional>
+#include <span>
 #include <string>
+#include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 struct ALCdevice;
 struct ALCcontext;
 
 namespace Magnet {
-  struct SpatialAudioChannel;
-}
-
-namespace Magnet {
+struct SpatialAudioChannel;
 
 namespace Components {
-  struct AudioSource;
-  struct AudioListener;
-  struct Transform;
-}
-
-struct GlobalAudioListener {
-  static void set_position(vec3);
-  static void set_velocity(vec3);
-  static void set_orientation_versor(versor v);
-  static void set_orientation_forward_up(vec3 forward, vec3 up);
-};
+struct AudioSource;
+struct Transform;
+}  // namespace Components
 
 enum class AudioFormat {
   AUDIO_FORMAT_MONO8,
@@ -49,11 +36,14 @@ struct AudioBuffer {
   uint64_t samples = 0;
   uint64_t sampleRate = 0;
 
-  static std::optional<AudioBuffer> create(std::span<uint8_t> bytes, AudioFormat, size_t samples, size_t sampleRate);
-  static std::optional<uint32_t> createMonoBuffer(std::span<uint8_t> bytes, AudioFormat, size_t samples, size_t sampleRate);
+  static std::optional<AudioBuffer> create(std::span<uint8_t> bytes,
+                                           AudioFormat, size_t samples,
+                                           size_t sampleRate);
+  static std::optional<uint32_t> createMonoBuffer(std::span<uint8_t> bytes,
+                                                  AudioFormat, size_t samples,
+                                                  size_t sampleRate);
   void destroy() const;
   double length() const;
-
 };
 
 enum class AudioTag {
@@ -69,7 +59,6 @@ struct Cone {
   float angleDeg = 0.f;
   float outerGain = 0.f;
 };
-
 
 struct AudioChannel {
   uint32_t source = 0;
@@ -175,7 +164,8 @@ class AudioManager {
   int32_t MAX_CHANNELS = 0;
   int32_t AUDIO_CHANNELS = 0;
   int32_t SPATIAL_AUDIO_CHANNELS = 0;
-public:
+
+ public:
   static AudioManager& getInstance() {
     static AudioManager audioManager;
     return audioManager;
@@ -191,23 +181,21 @@ public:
   void returnChannel(SpatialAudioChannel channel);
 
   std::optional<AudioBuffer> getTrack(const char* track);
-  std::optional<uint32_t> handleSpatialAudioRequest(SpatialAudioRequest request, vec3 pos);
+  std::optional<uint32_t> handleSpatialAudioRequest(SpatialAudioRequest request,
+                                                    vec3 pos);
 
   void playTrackBackground(const char* track);
-
   void deleteTrack(const char* track);
+
+  static void updateListener();
+
+  static void AudioSourceSystem(flecs::iter&, Components::Transform*,
+                                Components::AudioSource*);
+
 
   AudioTagParameters& getTagModifier(AudioTag);
   AudioTagParameters& getMaster() { return masterTagModifier; }
-
-
-  static void AudioSourceSystem(flecs::iter&, Components::Transform*, Components::AudioSource*);
-  static void AudioListenerSystem(flecs::iter&, Components::Transform*, Components::AudioListener*);
 };
 
-} // namespace magnet
-
-
-namespace std {
-  std::string to_string(Magnet::AudioTag);
-}
+std::string to_string(Magnet::AudioTag);
+}  // namespace Magnet

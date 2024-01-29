@@ -6,11 +6,11 @@
 
 #include <magnet/ApplicationContext.hpp>
 #include <magnet/InputManager.hpp>
-#include <magnet/Renderer.hpp>
+
+#include "Viewport.hpp"
 
 namespace Magnet {
 
-void resizeCallback(GLFWwindow*, int width, int height);
 void errorCallback(int error, const char* desc);
 
 WindowManager::WindowManager() {
@@ -30,7 +30,7 @@ WindowManager::WindowManager() {
   gladLoadGL();
 
   /* Setup callbacks */
-  glfwSetFramebufferSizeCallback(window, resizeCallback);
+  glfwSetFramebufferSizeCallback(window, Viewport::setSize);
   glfwSetErrorCallback(errorCallback);
 
   /* Initialize InputManager */
@@ -56,11 +56,6 @@ void WindowManager::pollEvents() {
 
 bool WindowManager::shouldClose() const {
   return glfwWindowShouldClose(window);
-}
-
-void resizeCallback(GLFWwindow*, int width, int height) {
-  static Renderer& renderer = Renderer::getInstance();
-  renderer.setViewportSize(width, height);
 }
 
 void errorCallback(int error, const char* desc) {
