@@ -75,22 +75,22 @@ void AudioManager::AudioSourceSystem(flecs::iter& iter, Transform* transforms,
         audioManager.getTagModifier(audioSource.tag).volume *
         audioManager.getMaster().volume;
 
-      audioSource.channel->set_volume(finalVolume);
-      audioSource.channel->set_position(transform.position);
+      audioSource.channel->setVolume(finalVolume);
+      audioSource.channel->setPosition(transform.position);
 
       vec3 forward = { 1.f, 0.f, 0.f };
       vec3 forwardRes = {};
 
       glm_quat_rotatev(transform.rotation, forward, forwardRes);
-      audioSource.channel->set_direction(forwardRes);
+      audioSource.channel->setDirection(forwardRes);
 
-      audioSource.channel->set_pitch(audioSource.pitch);
+      audioSource.channel->setPitch(audioSource.pitch);
     }
 
     if (
       audioSource.playState == AudioSourcePlayState::STOPPED || 
       !audioSource.channel ||
-      audioSource.channel->is_stopped()
+      audioSource.channel->isStopped()
     ) {
       if (audioSource.channel) {
         audioManager.returnChannel(*audioSource.channel);
@@ -110,7 +110,7 @@ void AudioManager::AudioSourceSystem(flecs::iter& iter, Transform* transforms,
   ) {
     SpatialAudioChannel channel{ *borrowedIter };
 
-    if (channel.is_stopped()) {
+    if (channel.isStopped()) {
       borrowedIter = audioManager.borrowedSpatialAudioChannels.erase(borrowedIter);
       audioManager.returnChannel(channel);
     } else {
@@ -291,29 +291,6 @@ double AudioBuffer::length() const {
   return seconds;
 }
 
-size_t SpatialAudioRequest::hash() const {
-  size_t trackNameHash = std::hash<const char*>()(trackName);
-  size_t timestampHash = std::hash<double>()(timestampStartedS);
-
-  size_t finalHash = trackNameHash;
-  finalHash ^= timestampHash + 0x9e3779b9 + (finalHash << 6) + (finalHash >> 2);
-
-  return finalHash;
-}
-void SpatialAudioRequest::stop() {
-  if (channel) {
-    channel->stop();
-  }
-}
-void SpatialAudioRequest::setPitch(float pitch) { this->pitch = pitch; }
-void SpatialAudioRequest::setVolume(float volume) { this->volume = volume; }
-float SpatialAudioRequest::getPitch() const { return this->pitch; }
-float SpatialAudioRequest::getVolume() const { return this->volume; }
-
-void SpatialAudioRequest::setFilter(AudioFilter &audioFilter) {
-  return this->channel.value().setFilter(audioFilter);
-}
-
 void AudioChannel::reset() {
   stop();
   alSourcei(source, AL_BUFFER, 0);
@@ -393,8 +370,8 @@ void AudioChannel::setLooping(bool should_loop) {
   alSourcei(source, AL_LOOPING, al_should_loop);
 }
 void AudioChannel::destroy() const { alDeleteSources(1, &source); }
-void AudioChannel::set_volume(float vol) { alSourcef(source, AL_GAIN, vol); }
-void AudioChannel::set_pitch(float pitch) {
+void AudioChannel::setVolume(float vol) { alSourcef(source, AL_GAIN, vol); }
+void AudioChannel::setPitch(float pitch) {
   AL_PITCH;
   alSourcef(source, AL_PITCH, pitch);
 }
@@ -482,7 +459,7 @@ void SpatialAudioChannel::setLooping(bool should_loop) {
   alSourcei(source, AL_LOOPING, al_should_loop);
 }
 void SpatialAudioChannel::destroy() const { alDeleteSources(1, &source); }
-void SpatialAudioChannel::set_volume(float vol) {
+void SpatialAudioChannel::setVolume(float vol) {
   alSourcef(source, AL_GAIN, vol);
 }
 void SpatialAudioChannel::setPitch(float pitch) {
