@@ -27,7 +27,7 @@ struct Skybox {
 
 /**
  * @struct Camera
- * @brief Describes a virtual camera with it's own view frustum.
+ * @brief Describes a virtual camera and it's view frustum.
  */
 struct Camera {
   float fieldOfView = 60.0f;         // Angle defining visible scene extent.

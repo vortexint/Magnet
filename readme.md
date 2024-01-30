@@ -90,12 +90,12 @@ class AppInterface : public ProjectInterface {
  public:
   void init() override {
     // If using an Asset Manager:
-    AssetManager assetMgr(ARCH_data, ARCH_data_KEY); // Macros provided by magnet_package()
+    ArchiveManager archiveMgr(ARCH_data, ARCH_data_KEY); // Macros provided by magnet_package()
     WindowManager* windowMgr = ApplicationContext::getWindowManager();
 
     GLFWwindow* window = windowMgr->getWindow();
 
-    // Use AssetManager to load essential assets, etc...
+    // Use an ArchiveManager to load essential assets, etc...
   }
 
   void update() override {

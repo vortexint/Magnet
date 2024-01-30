@@ -4,7 +4,7 @@
 #include <spdlog/spdlog.h>
 
 #include <magnet/ApplicationContext.hpp>
-#include <magnet/AssetManager.hpp>
+#include <magnet/ArchiveManager.hpp>
 #include <magnet/AudioManager.hpp>
 #include <magnet/Components.hpp>
 #include <magnet/SceneManager.hpp>
@@ -501,8 +501,8 @@ void SpatialAudioChannel::set_cone(float angleDeg, float outerVolume) {
   alSourcef(source, AL_CONE_OUTER_GAIN, outerVolume);
 }
 
-AudioManager::AudioManager() : assetManager(nullptr) {
-  assetManager = new AssetManager("data.magnet", nullptr);
+AudioManager::AudioManager() : archiveMgr(nullptr) {
+  archiveMgr = new ArchiveManager("data.magnet", nullptr);
   audioDevice = alcOpenDevice(nullptr);
   alContext = alcCreateContext(audioDevice, nullptr);
 
@@ -568,7 +568,7 @@ std::optional<AudioBuffer> AudioManager::getTrack(const char* track) {
   short* hData = nullptr;
 
   std::vector<uint8_t> fileBuffer;
-  assetManager->getAsset(track, fileBuffer);
+  archiveMgr->loadFile(track, fileBuffer);
   if (fileBuffer.size() == 0) {
     spdlog::error("Failed to open file {}", track);
     return std::nullopt;

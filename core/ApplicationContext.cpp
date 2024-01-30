@@ -5,7 +5,7 @@
 #include <spdlog/spdlog.h>
 
 #include <magnet/ApplicationContext.hpp>
-#include <magnet/AssetManager.hpp>
+#include <magnet/ArchiveManager.hpp>
 #include <magnet/Renderer.hpp>
 #include <magnet/SceneManager.hpp>
 #include <magnet/Time.hpp>
@@ -22,7 +22,7 @@ void ApplicationContext::registerInterface(ProjectInterface* interface) {
 }
 
 ApplicationContext::ApplicationContext()
-  : assetManager(ARCH_core, ARCH_core_KEY) {
+  : archiveManager(ARCH_core, ARCH_core_KEY) {
   /* Logging */
   auto consoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
   auto fileSink =
@@ -70,6 +70,6 @@ void ApplicationContext::initialize(const char* windowTitle) {
   // UI -> Renderer -> SceneManager -> WindowManager
 }
 
-AssetManager& ApplicationContext::getAssetManager() { return assetManager; }
+ArchiveManager& ApplicationContext::getArchiveManager() { return archiveManager; }
 
 }  // namespace Magnet

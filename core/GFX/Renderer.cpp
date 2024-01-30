@@ -38,11 +38,11 @@ Renderer::Renderer() {
 
   /* Generate default Shader(s)*/
   ApplicationContext& appCtx = ApplicationContext::getInstance();
-  AssetManager& assetMgr = appCtx.getAssetManager();
+  ArchiveManager& archiveMgr = appCtx.getArchiveManager();
 
   std::string vertexSource, fragmentSource;
-  assetMgr.getAsset("shaders/base.vert", vertexSource);
-  assetMgr.getAsset("shaders/base.frag", fragmentSource);
+  archiveMgr.loadFile("shaders/base.vert", vertexSource);
+  archiveMgr.loadFile("shaders/base.frag", fragmentSource);
 
   ShaderManager& shaderMgr = ShaderManager::getInstance();
   baseID = shaderMgr.genShader(vertexSource, fragmentSource);

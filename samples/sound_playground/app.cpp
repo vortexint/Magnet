@@ -51,15 +51,14 @@ Magnet::AudioTag TEST_AUDIO_FILE_TAGS[] = {
 };
 
 void Interface::init() {
-  
-  AssetManager assetMgr(ARCH_data, ARCH_data_KEY);
+  ArchiveManager archiveMgr(ARCH_data, ARCH_data_KEY);
 
   window = glfwGetCurrentContext();
 
   // Load icon
   {
     std::vector<unsigned char> imageData;
-    assetMgr.getAsset("icon.png", imageData);
+    archiveMgr.loadFile("icon.png", imageData);
 
     GLFWimage icons[1] = {};
     icons[0].pixels =

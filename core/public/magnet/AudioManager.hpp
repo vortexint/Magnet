@@ -2,7 +2,7 @@
 #include <cglm/cglm.h>
 #include <flecs.h>
 
-#include <magnet/AssetManager.hpp>
+#include <magnet/ArchiveManager.hpp>
 #include <magnet/SceneManager.hpp>
 #include <memory>
 #include <optional>
@@ -148,7 +148,7 @@ struct AudioTagParameters {
 };
 
 class AudioManager {
-  AssetManager* assetManager;
+  ArchiveManager* archiveMgr;
   std::unordered_map<std::string, AudioBuffer> tracks;
 
   AudioChannel background;

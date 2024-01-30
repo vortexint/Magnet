@@ -1,6 +1,6 @@
 #pragma once
 
-#include <magnet/AssetManager.hpp>
+#include <magnet/ArchiveManager.hpp>
 #include <memory>
 
 // forward declarations
@@ -14,7 +14,7 @@ class ProjectInterface {
 };
 
 class ApplicationContext {
-  AssetManager assetManager;
+  ArchiveManager archiveManager;
 
   ApplicationContext();
   ApplicationContext(const ApplicationContext&) = delete;
@@ -30,8 +30,8 @@ class ApplicationContext {
   void initialize(const char* gameTitle);
 
   /* Getters */
-  
-  AssetManager& getAssetManager();
+
+  ArchiveManager& getArchiveManager();
 };
 
 }  // namespace Magnet

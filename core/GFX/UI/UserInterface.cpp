@@ -31,7 +31,7 @@ UI::UI() {
   /* Load fonts */
   {
     ApplicationContext& appCtx = ApplicationContext::getInstance();
-    AssetManager& assetManager = appCtx.getAssetManager();
+    ArchiveManager& archiveMgr = appCtx.getArchiveManager();
     ImFontConfig cfg;
 
     // Prevent ImGui and std::vector from both deallocating font
@@ -44,8 +44,8 @@ UI::UI() {
 
     static std::vector<unsigned char> roboto, firacode;
 
-    assetManager.getAsset("fonts/Roboto-Regular.ttf", roboto);
-    assetManager.getAsset("fonts/FiraCode-Regular.ttf", firacode);
+    archiveMgr.loadFile("fonts/Roboto-Regular.ttf", roboto);
+    archiveMgr.loadFile("fonts/FiraCode-Regular.ttf", firacode);
 
     io.Fonts->ClearFonts();
     io.Fonts->AddFontFromMemoryTTF(roboto.data(), roboto.size(), 16.0f, &cfg);
@@ -110,10 +110,10 @@ UI::UI() {
       ImVec4(0.145f, 0.145f, 0.145f, 1.0f);
     style.Colors[ImGuiCol_MenuBarBg] = ImVec4(0.2f, 0.2f, 0.2f, 1.0f);
     style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.157f, 0.157f, 0.157f, 1.0f);
-    style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(
-      0.2745098173618317f, 0.2745098173618317f, 0.2745098173618317f, 1.0f);
-    style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(
-      0.2980392277240753f, 0.2980392277240753f, 0.2980392277240753f, 1.0f);
+    style.Colors[ImGuiCol_ScrollbarGrab] =
+      ImVec4(0.2745f, 0.2745f, 0.2745f, 1.0f);
+    style.Colors[ImGuiCol_ScrollbarGrabHovered] =
+      ImVec4(0.3f, 0.3f, 0.3f, 1.0f);
     style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(1.0f, 0.4f, 0.0f, 1.0f);
     style.Colors[ImGuiCol_CheckMark] = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
     style.Colors[ImGuiCol_SliderGrab] = ImVec4(0.4f, 0.4f, 0.4f, 1.0f);
@@ -128,8 +128,7 @@ UI::UI() {
     style.Colors[ImGuiCol_SeparatorHovered] = ImVec4(0.4f, 0.4f, 0.4f, 1.0f);
     style.Colors[ImGuiCol_SeparatorActive] = ImVec4(1.0f, 0.4f, 0.0f, 1.0f);
     style.Colors[ImGuiCol_ResizeGrip] = ImVec4(1.0f, 1.0f, 1.0f, 0.25f);
-    style.Colors[ImGuiCol_ResizeGripHovered] =
-      ImVec4(1.0f, 1.0f, 1.0f, 0.6700000166893005f);
+    style.Colors[ImGuiCol_ResizeGripHovered] = ImVec4(1.0f, 1.0f, 1.0f, 0.67f);
     style.Colors[ImGuiCol_ResizeGripActive] = ImVec4(1.0f, 0.4f, 0.0f, 1.0f);
     style.Colors[ImGuiCol_Tab] = ImVec4(0.1f, 0.1f, 0.1f, 1.0f);
     style.Colors[ImGuiCol_TabHovered] = ImVec4(0.35f, 0.35f, 0.35f, 1.0f);
@@ -141,11 +140,10 @@ UI::UI() {
     style.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.584f, 0.584f, 0.584f, 1.0f);
     style.Colors[ImGuiCol_PlotHistogramHovered] =
       ImVec4(1.0f, 0.4f, 0.0f, 1.0f);
-    style.Colors[ImGuiCol_TableHeaderBg] =
-      ImVec4(0.1882352977991104f, 0.1882352977991104f, 0.2f, 1.0f);
+    style.Colors[ImGuiCol_TableHeaderBg] = ImVec4(0.188f, 0.188f, 0.2f, 1.0f);
     style.Colors[ImGuiCol_TableBorderStrong] = ImVec4(0.3f, 0.3f, 0.35f, 1.0f);
-    style.Colors[ImGuiCol_TableBorderLight] = ImVec4(
-      0.2274509817361832f, 0.2274509817361832f, 0.2470588237047195f, 1.0f);
+    style.Colors[ImGuiCol_TableBorderLight] =
+      ImVec4(0.227f, 0.227f, 0.247f, 1.0f);
     style.Colors[ImGuiCol_TableRowBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
     style.Colors[ImGuiCol_TableRowBgAlt] = ImVec4(1.0f, 1.0f, 1.0f, 0.06f);
     style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(1.0f, 1.0f, 1.0f, 0.156f);

@@ -7,7 +7,7 @@ const char* const TITLE = "Primitives Example";
 class AppInterface : public ProjectInterface {
  public:
   void init() override {
-    AssetManager assetMgr(ARCH_assets);
+    ArchiveManager archiveMgr(ARCH_assets);
 
   }
 
