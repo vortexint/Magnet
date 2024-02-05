@@ -1,6 +1,13 @@
 #include <magnet/Components.hpp>
+#include <../SFX/EfxPresetList.h>
 
 #include "app.hpp"
+
+// DEBUG: Remove these 3 includes
+#define AL_ALEXT_PROTOTYPES
+#include <AL/al.h>
+#include <AL/alc.h>
+#include <AL/efx.h>
 
 #include <GLFW/glfw3.h>
 #include <spdlog/spdlog.h>
@@ -79,6 +86,7 @@ void Interface::init() {
 }
 
 void Interface::update() {
+  // DEBUG: Remove for testing purposes only
 
   ImGui::Begin("Sound Editor");
 
@@ -99,34 +107,142 @@ void Interface::update() {
   }
 
   static int selectedFilterType = 0;
-  AudioFilterDescription desc = {};
-  const char* FILTER_TYPES[] = { "None", "Lowpass", "Highpass", "Bandpass" };
-  std::optional<AudioFilterType> FILTER_TYPE_ENUMS[] = { std::nullopt, AudioFilterType::LOWPASS, AudioFilterType::HIGHPASS, AudioFilterType::BANDPASS };
-
-  if (ImGui::BeginCombo("Filter Settings", "None")) {
-    for (int i = 0; i < IM_ARRAYSIZE(FILTER_TYPES); ++i) {
-      if (ImGui::Selectable(FILTER_TYPES[i], selectedFilterType == i)) {
+  static std::optional<AudioFilterDescription> desc;
+  const char* FILTER_TYPES_STR[] = { "None", "Lowpass", "Highpass", "Bandpass" };
+  std::optional<AudioFilterType> FILTER_TYPE[] = {
+    std::nullopt, AudioFilterType::LOWPASS,
+    AudioFilterType::HIGHPASS, AudioFilterType::BANDPASS
+  };
+  if (ImGui::BeginCombo("Filter Settings", FILTER_TYPES_STR[selectedFilterType])) {
+    for (int i = 0; i < IM_ARRAYSIZE(FILTER_TYPES_STR); ++i) {
+      if (ImGui::Selectable(FILTER_TYPES_STR[i], selectedFilterType == i)) {
         selectedFilterType = i;
+        if (FILTER_TYPE[i] != std::nullopt) {
+          desc = AudioFilterDescription(*FILTER_TYPE[i]);
+        }
       }
     }
     ImGui::EndCombo();
   }
-  //ImGui::DragFloat("");
-  
 
-  if (ImGui::CollapsingHeader("Sounds")) {
-    for (size_t i = 0; i < sizeof(TEST_AUDIO_FILES) / sizeof(TEST_AUDIO_FILES[0]); ++i) {
-      auto testAudioFile = TEST_AUDIO_FILES[i];
-      auto tag = TEST_AUDIO_FILE_TAGS[i];
-      if (ImGui::Button(testAudioFile)) {
-        mainAudioSource->play_sound(testAudioFile, tag);
-      }
-      ImGui::SameLine();
-      auto tagStr = to_string(tag);
-      ImGui::Text("%s", tagStr.c_str());
+  if (FILTER_TYPE[selectedFilterType] && desc) {
+    ImGui::SliderFloat("gain##Filter_gain", &desc->gain, 0.f, 1.f);
+
+    if (
+      *FILTER_TYPE[selectedFilterType] == AudioFilterType::LOWPASS ||
+      *FILTER_TYPE[selectedFilterType] == AudioFilterType::BANDPASS) {
+      ImGui::SliderFloat("High Frequency##Filter_HighFrequency", &desc->gainHighFrequency, 0.f, 1.f);
+    }
+    if (
+      *FILTER_TYPE[selectedFilterType] == AudioFilterType::HIGHPASS ||
+      *FILTER_TYPE[selectedFilterType] == AudioFilterType::BANDPASS) {
+      ImGui::SliderFloat("Low Frequency##Filter_LowFrequency", &desc->gainLowFrequency, 0.f, 1.f);
     }
   }
 
+  static std::optional<std::string> selectedPreset = std::nullopt;
+  const char* selectedPresetCStr = nullptr;
+  if (selectedPreset) {
+    selectedPresetCStr = selectedPreset->c_str();
+  }
+  if (ImGui::BeginCombo("Reverb Settings", selectedPresetCStr)) {
+    for (auto& [name, preset] : getEFXPresets()) {
+      if (ImGui::Selectable(name.c_str(), selectedPreset == name)) {
+        selectedPreset = name;
+      }
+    }
+
+    ImGui::EndCombo();
+  }
+
+  static int selectedAudioFile = 0;
+  if (ImGui::BeginCombo("Sounds", TEST_AUDIO_FILES[selectedAudioFile])) {
+    for (size_t i = 0; i < sizeof(TEST_AUDIO_FILES) / sizeof(TEST_AUDIO_FILES[0]); ++i) {
+      if (ImGui::Selectable(TEST_AUDIO_FILES[i], selectedAudioFile == i)) {
+        selectedAudioFile = i;
+      }
+    }
+
+    ImGui::EndCombo();
+  }
+
+
+  std::optional<EAXReverbDescription> reverb = std::nullopt;
+  if (selectedPreset) {
+    reverb = getEFXPresets().at(*selectedPreset);
+  }
+  auto testAudioFile = TEST_AUDIO_FILES[selectedAudioFile];
+  auto tag = TEST_AUDIO_FILE_TAGS[selectedAudioFile];
+  if (ImGui::Button("Play Audio File")) {
+    mainAudioSource->play_sound(
+      testAudioFile,
+      tag,
+      false,
+      1.f,
+      desc,
+      reverb
+    );
+  }
+  ImGui::SameLine();
+  auto tagStr = to_string(tag);
+  ImGui::Text("%s", tagStr.c_str());
+
+  static std::vector<AudioBuffer*> customBuffers;
+  static std::optional<Recorder> recorder = Recorder::create();
+  if (!recorder) {
+    if (ImGui::Button("Retry Create Audio Device")) {
+      recorder = Recorder::create();
+    }
+    ImGui::Text("No audio capture device was found");
+  }
+  if (ImGui::Button("Start Recording") && recorder && !recorder->isRecording()) {
+    recorder->startCapture();
+  }
+  if (recorder && recorder->isRecording()) {
+    recorder->update();
+  }
+  ImGui::SameLine();
+  if (ImGui::Button("Stop Recording") && recorder && recorder->isRecording()) {
+    recorder->stopCapture();
+    if (auto buffer = AudioBuffer::create(
+      recorder->toSpan(), 
+      recorder->getFormat(), 
+      Recorder::FREQUENCY
+    )) {
+      auto* newBuffer = new AudioBuffer(*buffer);
+      // This creates a memory leak but it is just a hold over untill
+      // the asset id system is complete
+      customBuffers.push_back(newBuffer); 
+    } else {
+      spdlog::warn("AudioBuffer could not be created from recording");
+    }
+    recorder->clear();
+  }
+
+  
+  static std::optional<int> selectedCustomAudio = std::nullopt;
+  std::string customAudioPreview = "";
+  if (selectedCustomAudio) {
+    customAudioPreview = "Custom Audio:" + std::to_string(*selectedCustomAudio);
+  }
+
+  if (ImGui::BeginCombo("Custom Audio List", customAudioPreview.c_str())) {
+    for (size_t i = 0; i < customBuffers.size(); ++i) {
+      std::string audioPreview = "Custom Audio:" + std::to_string(i);
+
+      if (ImGui::Selectable(audioPreview.c_str(), selectedCustomAudio == i)) {
+        selectedCustomAudio = i;
+      }
+    }
+
+    ImGui::EndCombo();
+  }
+  if (ImGui::Button("Play Custom Audio") && selectedCustomAudio) {
+    mainAudioSource->play_sound(customBuffers.at(*selectedCustomAudio), tag, false, 1.f, desc, reverb);
+  }
+
+
+  
   ImGui::End();
 
   ImGui::Begin("Sound Playground Demo");
@@ -135,12 +251,13 @@ void Interface::update() {
   
   ImGui::Text("Emitter");
   ImGui::DragFloat3("position##Emitter_position", mainTransform->position);
-  static float angleDegrees = 0.f;
+  static float angleDegrees = 0.f, radius = 2.f;
   ImGui::Text("This rotates the entity around the listeners head the xz axis");
   ImGui::DragFloat("Entity Rotation", &angleDegrees, 1.f, 0.f, 360.f);
+  ImGui::DragFloat("Entity Radius from origin", &radius, 0.01f, 0.f, 10.f);
 
-  mainTransform->position[2] = 2.f * cosf(angleDegrees * M_PI / 180);
-  mainTransform->position[0] = 2.f * sinf(angleDegrees * M_PI / 180);
+  mainTransform->position[2] = radius * cosf(angleDegrees * M_PI / 180);
+  mainTransform->position[0] = radius * sinf(angleDegrees * M_PI / 180);
 
   ImGui::Separator();
 
