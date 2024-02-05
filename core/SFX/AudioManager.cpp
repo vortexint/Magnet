@@ -16,16 +16,27 @@
 #include "GFX/Viewport.hpp"
 
 #define AL_ALEXT_PROTOTYPES
+#include <AL/alext.h>
 #include <AL/efx.h>
 #include <AL/efx-presets.h>
 
 #include <cglm/cglm.h>
 
 
+// NOTE:
+// OpenAl-Soft has a bunch of examples in openal-soft/examples
+// It shows how to use EFX and HRTF extensions
 
 
 namespace Magnet {
 using namespace Components;
+
+AudioFilterDescription::AudioFilterDescription(AudioFilterType type)
+  : filterType(type) {
+  gain = 1.f;
+  gainHighFrequency = 1.f;
+  gainLowFrequency = 1.f;
+}
 
 const char* alGetErrorString(int err) {
   switch (err) {
@@ -54,22 +65,69 @@ void AudioManager::AudioSourceSystem(flecs::iter& iter, Transform* transforms,
     auto& transform = transforms[row];
     auto& audioSource = sources[row];
 
-    if (audioSource.playState == AudioSourcePlayState::REQUESTED_PLAY) {
+    if (audioSource.getPlayState() == AudioSourcePlayState::REQUESTED_PLAY) {
+      bool requestSucceeded = true;
       audioSource.channel = audioManager.borrowChannel();
 
-      auto track = audioManager.getTrack(audioSource.trackName);
+
+      if (audioSource.filterDesc) {
+        audioSource.filter = AudioFilter::create(
+          audioSource.filterDesc->filterType,
+          audioSource.filterDesc
+        );
+      }
+      if (audioSource.reverb) {
+        audioSource.effect = AudioEffect::create(
+          *audioSource.reverb
+        );
+      }
+
+      if ((audioSource.filter || audioSource.effect) && audioSource.channel) {
+        AudioFilter* filter = nullptr;
+        if (audioSource.filter) {
+          // DEBUG
+          //filter = &*audioSource.filter;
+          audioSource.channel->setFilter(*audioSource.filter);
+        }
+        
+        if (audioSource.effect) {
+          audioManager.effectSlot.attachEffect(*audioSource.effect);
+        }
+        audioSource.channel->setAuxiliaryEffectSlot(&audioManager.effectSlot, filter);
+
+      }
+
+      std::optional<AudioBuffer> track = std::nullopt;
+
+      assert((audioSource.audioBuffer != nullptr) ^ (audioSource.getTrackName() != nullptr));
+
+      if (audioSource.audioBuffer) {
+        track = *audioSource.audioBuffer;
+      } else {
+        track = audioManager.getTrack(audioSource.getTrackName());
+      }
 
       if (track && audioSource.channel) {
         audioSource.channel->reset();
         audioSource.channel->assign(*track);
         audioSource.channel->play();
-      } else {
-        audioSource.channel = std::nullopt;
-      }
 
-      audioSource.playState = AudioSourcePlayState::PLAYING;
+        audioSource.playState = AudioSourcePlayState::PLAYING;
+      } else {
+        spdlog::error("Failed to play track");
+        requestSucceeded = false;
+      }
+      
+     
+      
+
+      if (!requestSucceeded) {
+        audioSource.stop();
+        spdlog::warn("Audio play request failed");
+      }
     }
-    if (audioSource.playState == AudioSourcePlayState::PLAYING) {
+    if (audioSource.getPlayState() == AudioSourcePlayState::PLAYING) {
+      assert(audioSource.channel);
 
       float finalVolume = audioSource.volume *
         audioManager.getTagModifier(audioSource.tag).volume *
@@ -92,31 +150,11 @@ void AudioManager::AudioSourceSystem(flecs::iter& iter, Transform* transforms,
       !audioSource.channel ||
       audioSource.channel->isStopped()
     ) {
-      if (audioSource.channel) {
-        audioManager.returnChannel(*audioSource.channel);
-      }
-
       audioSource.stop();
     }
   }
 
-  // If the user plays a sound from the same AudioSource twice,
-  // the old channel will be set to std::nullopt.
-  // That will prevent this system from returning it
-
-  for (
-    auto borrowedIter = audioManager.borrowedSpatialAudioChannels.begin();
-    borrowedIter != audioManager.borrowedSpatialAudioChannels.end();
-  ) {
-    SpatialAudioChannel channel{ *borrowedIter };
-
-    if (channel.isStopped()) {
-      borrowedIter = audioManager.borrowedSpatialAudioChannels.erase(borrowedIter);
-      audioManager.returnChannel(channel);
-    } else {
-      ++borrowedIter;
-    }
-  }
+  audioManager.returnBorrowedChannels();
 }
 std::optional<SpatialAudioChannel> AudioManager::borrowChannel() {
   if (freeSpatialAudioChannels.size() == 0) {
@@ -131,16 +169,19 @@ std::optional<SpatialAudioChannel> AudioManager::borrowChannel() {
 
   return SpatialAudioChannel{channel};
 }
-void AudioManager::returnChannel(SpatialAudioChannel channel) {
-  if (auto channelLoc = borrowedSpatialAudioChannels.find(channel.source);
-      channelLoc != borrowedSpatialAudioChannels.end()) {
-    borrowedSpatialAudioChannels.extract(channelLoc);
+void AudioManager::returnBorrowedChannels() {
+  for (
+    auto borrowedIter = borrowedSpatialAudioChannels.begin();
+    borrowedIter != borrowedSpatialAudioChannels.end();
+    ) {
+    SpatialAudioChannel channel{ *borrowedIter };
 
-    freeSpatialAudioChannels.insert(channel.source);
-  } else {
-    spdlog::error(
-      "Channel {} was already returned. This is basically a use after free",
-      channel.source);
+    if (channel.isStopped()) {
+      freeSpatialAudioChannels.insert(*borrowedIter);
+      borrowedIter = borrowedSpatialAudioChannels.erase(borrowedIter);
+    } else {
+      ++borrowedIter;
+    }
   }
 }
 
@@ -156,11 +197,11 @@ void AudioManager::updateListener() {
     vec3 forward = {1.f, 0.f, 0.f};
     vec3 up = {0.f, 1.f, 0.f};
 
-    vec3 new_foward = {};
-    glm_quat_rotatev(cameraTranform->rotation, forward, new_foward);
+    vec3 newForward = {};
+    glm_quat_rotatev(cameraTranform->rotation, forward, newForward);
 
-    vec3 new_up = {};
-    glm_quat_rotatev(cameraTranform->rotation, up, new_up);
+    vec3 newUp = {};
+    glm_quat_rotatev(cameraTranform->rotation, up, newUp);
 
     float f[] = {
       forward[0], forward[1], forward[2], up[0], up[1], up[2],
@@ -173,28 +214,52 @@ void AudioManager::updateListener() {
   // alListener3f(AL_VELOCITY, vel[0], vel[1], vel[2]);
 }
 
+ALint AudioFormatToALint(AudioFormat audioFormat) {
+  switch (audioFormat) {
+  case AudioFormat::AUDIO_FORMAT_MONO8:
+    return AL_FORMAT_MONO8;
+    break;
+  case AudioFormat::AUDIO_FORMAT_MONO16:
+    return AL_FORMAT_MONO16;
+    break;
+  case AudioFormat::AUDIO_FORMAT_STEREO8:
+    return AL_FORMAT_STEREO8;
+    break;
+  case AudioFormat::AUDIO_FORMAT_STEREO16:
+    return AL_FORMAT_STEREO16;
+    break;
+  }
+}
+size_t FormatBytesPerSample(AudioFormat format) {
+  switch (format)
+  {
+  case Magnet::AudioFormat::AUDIO_FORMAT_MONO16:
+    return sizeof(uint16_t);
+    break;
+  case Magnet::AudioFormat::AUDIO_FORMAT_STEREO16:
+    return sizeof(uint16_t) * 2;
+    break;
+  case Magnet::AudioFormat::AUDIO_FORMAT_STEREO8:
+    return sizeof(uint8_t) * 2;
+    break;
+  case Magnet::AudioFormat::AUDIO_FORMAT_MONO8:
+    return sizeof(uint8_t);
+    break;
+  }
+}
+
 // From OpenAL-soft version 1.17,
 // no source or buffer will have the value of 0
 // https://stackoverflow.com/questions/71095893/can-an-openal-source-ever-be-0
-std::optional<AudioBuffer> AudioBuffer::create(std::span<uint8_t> bytes,
-                                               AudioFormat audio_format,
-                                               size_t samples,
+std::optional<AudioBuffer> AudioBuffer::create(std::span<const uint8_t> cBytes,
+                                               AudioFormat audioFormat,
                                                size_t sampleRate) {
-  ALenum alFormat = AL_FORMAT_STEREO16;
-  switch (audio_format) {
-    case AudioFormat::AUDIO_FORMAT_MONO8:
-      alFormat = AL_FORMAT_MONO8;
-      break;
-    case AudioFormat::AUDIO_FORMAT_MONO16:
-      alFormat = AL_FORMAT_MONO16;
-      break;
-    case AudioFormat::AUDIO_FORMAT_STEREO8:
-      alFormat = AL_FORMAT_STEREO8;
-      break;
-    case AudioFormat::AUDIO_FORMAT_STEREO16:
-      alFormat = AL_FORMAT_STEREO16;
-      break;
-  }
+  
+  std::vector<uint8_t> bufferCopy(cBytes.begin(), cBytes.end());
+  std::span<uint8_t> bytes(bufferCopy.data(), bufferCopy.size());
+
+  ALenum alFormat = AudioFormatToALint(audioFormat);
+  size_t samples = bytes.size() / FormatBytesPerSample(audioFormat);
 
   ALuint originalBuffer = 0;
   alGenBuffers(1, &originalBuffer);
@@ -206,8 +271,9 @@ std::optional<AudioBuffer> AudioBuffer::create(std::span<uint8_t> bytes,
     return std::nullopt;
   }
 
+
   auto monoBufferRes =
-    createMonoBuffer(bytes, audio_format, samples, sampleRate);
+    createMonoBuffer(bytes, audioFormat, samples, sampleRate);
 
   if (!monoBufferRes) {
     return std::nullopt;
@@ -363,11 +429,11 @@ bool AudioChannel::isLooping() {
   alGetSourcei(source, AL_LOOPING, &looping);
   return looping == AL_TRUE;
 }
-void AudioChannel::setLooping(bool should_loop) {
+void AudioChannel::setLooping(bool shouldLoop) {
   checkIfInitialized();
 
-  ALint al_should_loop = should_loop ? AL_TRUE : AL_FALSE;
-  alSourcei(source, AL_LOOPING, al_should_loop);
+  ALint alShouldLoop = shouldLoop ? AL_TRUE : AL_FALSE;
+  alSourcei(source, AL_LOOPING, alShouldLoop);
 }
 void AudioChannel::destroy() const { alDeleteSources(1, &source); }
 void AudioChannel::setVolume(float vol) { alSourcef(source, AL_GAIN, vol); }
@@ -452,11 +518,10 @@ bool SpatialAudioChannel::isLooping() {
   alGetSourcei(source, AL_LOOPING, &looping);
   return looping == AL_TRUE;
 }
-void SpatialAudioChannel::setLooping(bool should_loop) {
+void SpatialAudioChannel::setLooping(bool shouldLoop) {
   checkIfInitialized();
 
-  ALint al_should_loop = should_loop ? AL_TRUE : AL_FALSE;
-  alSourcei(source, AL_LOOPING, al_should_loop);
+  alSourcei(source, AL_LOOPING, shouldLoop ? AL_TRUE : AL_FALSE);
 }
 void SpatialAudioChannel::destroy() const { alDeleteSources(1, &source); }
 void SpatialAudioChannel::setVolume(float vol) {
@@ -494,6 +559,39 @@ void SpatialAudioChannel::setCone(float angleDeg, float outerVolume) {
 void SpatialAudioChannel::setFilter(AudioFilter &filter) {
   alSourcei(source, AL_DIRECT_FILTER, filter.filter);
 }
+void SpatialAudioChannel::setAuxiliaryEffectSlot(
+  AuxiliaryEffectSlot *effectSlot = nullptr, 
+  AudioFilter *filter = nullptr
+) {
+  // TODO: Add an optional third parameter for the filter
+  ALint slotID = AL_EFFECTSLOT_NULL;
+  if (effectSlot) {
+    slotID = effectSlot->slot;
+  }
+  ALint filterID = AL_FILTER_NULL;
+  //ALint filterEnabled = 0;
+  if (filter) {
+    filterID = filter->filter;
+    //filterEnabled = 1;
+  }
+  // DEBUG: Replace filter enabled with 0
+  alSource3i(source, AL_AUXILIARY_SEND_FILTER, slotID, 0 /*filterEnabled*/, filterID);
+  if (alGetError() != AL_NO_ERROR) {
+    spdlog::error("Failed to set axuliary effect slot");
+  }
+}
+void SpatialAudioChannel::disableAuxiliaryEffectSlot() {
+  //TODO: Figure out what sends are
+  // For this function we pass 1 as the send argument
+  // while in the previous we passed 0
+  // AL_AUXILIARY_SEND_FILTER takes three integer arguments
+  // The first is the effect, the third is the filter
+  // The second argument is you're attaching a filter or not
+  // 0 means don't attach filter
+  // 1 means do attach filter
+  ALC_MAX_AUXILIARY_SENDS;
+  alSource3i(source, AL_AUXILIARY_SEND_FILTER, AL_EFFECTSLOT_NULL, 1, AL_FILTER_NULL);
+}
 
 std::optional<AudioFilter> AudioFilter::create(AudioFilterType type, std::optional<AudioFilterDescription> desc) {
   AudioFilter filter;
@@ -525,16 +623,19 @@ std::optional<AudioFilter> AudioFilter::create(AudioFilterType type, std::option
 
   if (desc) {
 
-    if (auto gain = desc->gain) {
-      filter.setGain(*gain);
-    }
+    AudioFilterType type = desc->filterType;
+    filter.setGain(desc->gain);
 
-    if (auto hf = desc->gainHighFrequency) {
-      filter.setGainHighFrequency(*hf);
-    }
 
-    if (auto lf = desc->gainLowFrequency) {
-      filter.setGainLowFrequency(*lf);
+    if (
+      desc->filterType == AudioFilterType::LOWPASS ||
+      desc->filterType == AudioFilterType::BANDPASS) {
+      filter.setGainHighFrequency(desc->gainHighFrequency);
+    }
+    if (
+      desc->filterType == AudioFilterType::HIGHPASS ||
+      desc->filterType == AudioFilterType::BANDPASS) {
+      filter.setGainLowFrequency(desc->gainLowFrequency);
     }
   }
 
@@ -565,13 +666,13 @@ void AudioFilter::setGain(float f) {
 void AudioFilter::setGainHighFrequency(float f) {
   switch (filterType()) {
   case AudioFilterType::HIGHPASS:
-    alFilterf(filter, AL_HIGHPASS_GAINLF, f);
+    spdlog::warn("Only lowpass and bandpass filters support setting the low frequency gain");
     break;
   case AudioFilterType::BANDPASS:
     alFilterf(filter, AL_BANDPASS_GAINLF, f);
     break;
   case AudioFilterType::LOWPASS:
-    spdlog::warn("Only highbass and bandpass filters support setting the low frequency gain");
+    alFilterf(filter, AL_HIGHPASS_GAINLF, f);
     break;
   }
 }
@@ -584,7 +685,7 @@ void AudioFilter::setGainLowFrequency(float f) {
     alFilterf(filter, AL_BANDPASS_GAINLF, f);
     break;
   case AudioFilterType::LOWPASS:
-    spdlog::warn("Only highbass and bandpass filters support setting the low frequency gain");
+    spdlog::warn("Only highpass and bandpass filters support setting the low frequency gain");
     break;
   }
 }
@@ -610,13 +711,131 @@ AudioFilterType AudioFilter::filterType() {
   return AudioFilterType::LOWPASS;
 }
 
-std::optional<AudioEffect> AudioEffect::create() {
+std::optional<AudioEffect> AudioEffect::create(AudioEffectType type) {
   AudioEffect effect;
   alGenEffects(1, &effect.effect);
   if (alGetError() != AL_NO_ERROR) {
     spdlog::error("Failed to create OpenAL EFX effect");
     return std::nullopt;
   }
+
+  ALint alEffectType = AL_EFFECT_NULL;
+  bool effectSupported = false;
+  switch (type)
+  {
+  case Magnet::AudioEffectType::EAXREVERB:
+    alEffectType = AL_EFFECT_EAXREVERB;
+    effectSupported = true;
+    break;
+  case Magnet::AudioEffectType::REVERB:
+    alEffectType = AL_EFFECT_REVERB;
+    break;
+  case Magnet::AudioEffectType::CHORUS:
+    alEffectType = AL_EFFECT_CHORUS;
+    break;
+  case Magnet::AudioEffectType::DISTORTION:
+    alEffectType = AL_EFFECT_DISTORTION;
+    break;
+  case Magnet::AudioEffectType::ECHO:
+    alEffectType = AL_EFFECT_ECHO;
+    break;
+  case Magnet::AudioEffectType::FLANGER:
+    alEffectType = AL_EFFECT_FLANGER;
+    break;
+  case Magnet::AudioEffectType::FREQUENCY_SHIFTER:
+    alEffectType = AL_EFFECT_FREQUENCY_SHIFTER;
+    break;
+  case Magnet::AudioEffectType::VOCAL_MORPHER:
+    alEffectType = AL_EFFECT_VOCAL_MORPHER;
+    break;
+  case Magnet::AudioEffectType::PITCH_SHIFTER:
+    alEffectType = AL_EFFECT_PITCH_SHIFTER;
+    break;
+  case Magnet::AudioEffectType::RING_MODULATOR:
+    alEffectType = AL_EFFECT_RING_MODULATOR;
+    break;
+  case Magnet::AudioEffectType::AUTOWAH:
+    alEffectType = AL_EFFECT_AUTOWAH;
+    break;
+  case Magnet::AudioEffectType::COMPRESSOR:
+    alEffectType = AL_EFFECT_COMPRESSOR;
+    break;
+  case Magnet::AudioEffectType::EQUALIZER:
+    alEffectType = AL_EFFECT_EQUALIZER;
+    break;
+  default:
+    break;
+  }
+
+  alEffecti(effect.effect, AL_EFFECT_TYPE, alEffectType);
+  if (alEffectType == AL_EFFECT_NULL || alGetError() != AL_NO_ERROR) {
+    spdlog::error("Effect Type is not supported\n");
+    effect.destroy();
+    return std::nullopt;
+  }
+
+  return effect;
+}
+void AudioEffect::setEAXReverb(const EAXReverbDescription &reverb) {
+
+  if (alGetEnumValue("AL_EFFECT_EAXREVERB") != 0) {
+    alEffecti(effect, AL_EFFECT_TYPE, AL_EFFECT_EAXREVERB);
+    alEffectf(effect, AL_EAXREVERB_DENSITY, reverb.density);
+    alEffectf(effect, AL_EAXREVERB_DIFFUSION, reverb.diffusion);
+    alEffectf(effect, AL_EAXREVERB_GAIN, reverb.gain);
+    alEffectf(effect, AL_EAXREVERB_GAINHF, reverb.gainHF);
+    alEffectf(effect, AL_EAXREVERB_GAINLF, reverb.gainLF);
+    alEffectf(effect, AL_EAXREVERB_DECAY_TIME, reverb.decayTime);
+    alEffectf(effect, AL_EAXREVERB_DECAY_HFRATIO, reverb.decayHFRatio);
+    alEffectf(effect, AL_EAXREVERB_DECAY_LFRATIO, reverb.decayLFRatio);
+    alEffectf(effect, AL_EAXREVERB_REFLECTIONS_GAIN, reverb.reflectionsGain);
+    alEffectf(effect, AL_EAXREVERB_REFLECTIONS_DELAY, reverb.reflectionsDelay);
+    alEffectfv(effect, AL_EAXREVERB_REFLECTIONS_PAN, reverb.reflectionsPan);
+    alEffectf(effect, AL_EAXREVERB_LATE_REVERB_GAIN, reverb.lateReverbGain);
+    alEffectf(effect, AL_EAXREVERB_LATE_REVERB_DELAY, reverb.lateReverbDelay);
+    alEffectfv(effect, AL_EAXREVERB_LATE_REVERB_PAN, reverb.lateReverbPan);
+    alEffectf(effect, AL_EAXREVERB_ECHO_TIME, reverb.echoTime);
+    alEffectf(effect, AL_EAXREVERB_ECHO_DEPTH, reverb.echoDepth);
+    alEffectf(effect, AL_EAXREVERB_MODULATION_TIME, reverb.modulationTime);
+    alEffectf(effect, AL_EAXREVERB_MODULATION_DEPTH, reverb.modulationDepth);
+    alEffectf(effect, AL_EAXREVERB_AIR_ABSORPTION_GAINHF, reverb.airAbsorptionGainHF);
+    alEffectf(effect, AL_EAXREVERB_HFREFERENCE, reverb.hFReference);
+    alEffectf(effect, AL_EAXREVERB_LFREFERENCE, reverb.lFReference);
+    alEffectf(effect, AL_EAXREVERB_ROOM_ROLLOFF_FACTOR, reverb.roomRolloffFactor);
+  } else {
+    alEffecti(effect, AL_EFFECT_TYPE, AL_EFFECT_REVERB);
+    alEffectf(effect, AL_REVERB_DENSITY, reverb.density);
+    alEffectf(effect, AL_REVERB_DIFFUSION, reverb.diffusion);
+    alEffectf(effect, AL_REVERB_GAIN, reverb.gain);
+    alEffectf(effect, AL_REVERB_GAINHF, reverb.gainHF);
+    alEffectf(effect, AL_REVERB_DECAY_TIME, reverb.decayTime);
+    alEffectf(effect, AL_REVERB_DECAY_HFRATIO, reverb.decayHFRatio);
+    alEffectf(effect, AL_REVERB_REFLECTIONS_GAIN, reverb.reflectionsGain);
+    alEffectf(effect, AL_REVERB_REFLECTIONS_DELAY, reverb.reflectionsDelay);
+    alEffectf(effect, AL_REVERB_LATE_REVERB_GAIN, reverb.lateReverbGain);
+    alEffectf(effect, AL_REVERB_LATE_REVERB_DELAY, reverb.lateReverbDelay);
+    alEffectf(effect, AL_REVERB_AIR_ABSORPTION_GAINHF, reverb.airAbsorptionGainHF);
+    alEffectf(effect, AL_REVERB_ROOM_ROLLOFF_FACTOR, reverb.roomRolloffFactor);
+    alEffecti(effect, AL_REVERB_DECAY_HFLIMIT, reverb.decayHFLimit);
+  }
+  if (alGetError() != AL_NO_ERROR) {
+    spdlog::error("Failed to set eax reverb");
+  }
+}
+std::optional<AudioEffect> AudioEffect::create(const EAXReverbDescription &reverb) {
+  auto effect = create(AudioEffectType::EAXREVERB);
+  if (!effect) {
+    return std::nullopt;
+  }
+  
+  effect->setEAXReverb(reverb);
+  if (alGetError() != AL_NO_ERROR) {
+    spdlog::error("Failed to set eaxreverb variables, eaxreverb might not be supported");
+    effect->destroy();
+    return std::nullopt;
+  }
+
+  assert(effect);
 
   return effect;
 }
@@ -625,7 +844,7 @@ void AudioEffect::destroy() {
 }
 
 std::optional<AuxiliaryEffectSlot> AuxiliaryEffectSlot::create() {
-  AuxiliaryEffectSlot slot;
+  AuxiliaryEffectSlot slot = {};
   alGenAuxiliaryEffectSlots(1, &slot.slot);
   if (alGetError() != AL_NO_ERROR) {
     spdlog::error("Failed to create OpenAL EFX AuxiliaryEffectSlot");
@@ -638,18 +857,94 @@ void AuxiliaryEffectSlot::destroy() {
   alDeleteAuxiliaryEffectSlots(1, &slot);
 }
 
+void AuxiliaryEffectSlot::attachEffect(AudioEffect &effect) {
+  alAuxiliaryEffectSloti(slot, AL_EFFECTSLOT_EFFECT, effect.effect);
+  if (alGetError() != AL_NO_ERROR) {
+    spdlog::error("Failed to attack effect to auxiliary effect slot");
+  }
+}
+
+
+std::optional<Recorder> Recorder::create() {
+  // I was planning to let the user choose the format they wanted
+  // but OpenAL freaks out when I choose a stereo format
+  // It overruns the buffer I give it
+  AudioFormat format = AudioFormat::AUDIO_FORMAT_MONO16;
+  ALint alFormat = AudioFormatToALint(format);
+  auto captureDevice = alcCaptureOpenDevice(nullptr, FREQUENCY, alFormat, BUFFER_SIZE);
+  if (captureDevice == nullptr) {
+    spdlog::error("Failed to find a audio capture device");
+    return std::nullopt;
+  }
+
+  Recorder recorder = { captureDevice, false, format, {} };
+  recorder.buffer.reserve(BUFFER_SIZE * FormatBytesPerSample(format));
+
+  return recorder;
+}
+void Recorder::startCapture() {
+  assert(captureStarted == false);
+
+  alcCaptureStart(captureDevice);
+  captureStarted = true;
+}
+void Recorder::update() {
+  if (!captureStarted) {
+    return;
+  }
+  ALint samples = 0;
+  alcGetIntegerv(captureDevice, ALC_CAPTURE_SAMPLES, AudioFormatToALint(format), &samples);
+  
+  int64_t bytesRequired = FormatBytesPerSample(format) * samples;
+
+  const int MEGABYTES = 1048576;
+  
+  if (buffer.capacity() - buffer.size() < bytesRequired) {
+    size_t newSize = std::max(buffer.capacity() * 2, buffer.size() + bytesRequired);
+    buffer.reserve(newSize);
+  }
+  //assert(buffer.size() <= 100 * MEGABYTES); // Lets not let it get too big
+
+  size_t oldSize = buffer.size();
+  buffer.resize(oldSize + bytesRequired);
+
+  alcCaptureSamples(captureDevice, &buffer.data()[oldSize], samples);
+}
+void Recorder::stopCapture() {
+  assert(captureStarted == true);
+
+  alcCaptureStop(captureDevice);
+  captureStarted = false;
+}
+void Recorder::clear() {
+  buffer.clear();
+}
+std::span<const uint8_t> Recorder::toSpan() const {
+  return std::span<const uint8_t>(buffer.data(), buffer.size());
+}
+void Recorder::destroy() {
+  alcCaptureCloseDevice(captureDevice);
+}
+
 void AudioManager::InitializeOpenAL_EFX(ALCdevice *audioDevice) {
   if (alcIsExtensionPresent(audioDevice, ALC_EXT_EFX_NAME) == AL_FALSE) {
     spdlog::error("EFX extension is not present on device");
     throw std::runtime_error("EFX extension is not present on device");
   }
+
 }
 
 AudioManager::AudioManager()
   : assetManager(nullptr) {
   assetManager = new AssetManager("data.magnet", nullptr);
   audioDevice = alcOpenDevice(nullptr);
-  alContext = alcCreateContext(audioDevice, nullptr);
+
+  ALint attribs[4] = { 0 };
+
+  attribs[0] = ALC_MAX_AUXILIARY_SENDS;
+  attribs[1] = 4;
+
+  alContext = alcCreateContext(audioDevice, attribs);
 
   if (!audioDevice || !alContext) {
     spdlog::error("Failed to create openal device or context");
@@ -661,6 +956,11 @@ AudioManager::AudioManager()
   SPATIAL_AUDIO_CHANNELS = MAX_CHANNELS - AUDIO_CHANNELS;
 
   alcMakeContextCurrent(alContext);
+
+  InitializeOpenAL_EFX(audioDevice);
+
+
+  effectSlot = AuxiliaryEffectSlot::create().value(); // TODO: Check for errors
 
   alDistanceModel(AL_INVERSE_DISTANCE);
 
@@ -676,8 +976,6 @@ AudioManager::AudioManager()
                    AudioTag::MUSIC}) {
     tagModifier[tag] = AudioTagParameters{};
   }
-
-  InitializeOpenAL_EFX(audioDevice);
 }
 AudioManager::~AudioManager() {
   for (auto& spatialAudioChannel : freeSpatialAudioChannels) {
@@ -737,8 +1035,7 @@ std::optional<AudioBuffer> AudioManager::getTrack(const char* track) {
   std::span<uint8_t> samplesData(reinterpret_cast<uint8_t*>(data.get()),
                                  samples * sizeof(short));
 
-  if (auto buffer =
-        AudioBuffer::create(samplesData, format, samples, sampleRate)) {
+  if (auto buffer =  AudioBuffer::create(samplesData, format, sampleRate)) {
     tracks[track] = *buffer;
 
     return *buffer;
@@ -781,4 +1078,5 @@ std::string to_string(Magnet::AudioTag tag) {
       return "NONE";
   };
 }
+
 }  // namespace Magnet

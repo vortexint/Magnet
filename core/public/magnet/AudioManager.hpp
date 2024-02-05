@@ -15,8 +15,40 @@
 struct ALCdevice;
 struct ALCcontext;
 
+
+
 namespace Magnet {
 struct SpatialAudioChannel;
+
+// Excellent article to understand reverb: 
+// https://www.soundonsound.com/techniques/reverb-first-principles
+
+struct EAXReverbDescription {
+  float density;
+  float diffusion;
+  float gain;
+  float gainHF;
+  float gainLF;
+  float decayTime;
+  float decayHFRatio;
+  float decayLFRatio;
+  float reflectionsGain;
+  float reflectionsDelay;
+  vec3 reflectionsPan;
+  float lateReverbGain;
+  float lateReverbDelay;
+  vec3 lateReverbPan;
+  float echoTime;
+  float echoDepth;
+  float modulationTime;
+  float modulationDepth;
+  float airAbsorptionGainHF;
+  float hFReference;
+  float lFReference;
+  float roomRolloffFactor;
+  int   decayHFLimit;
+};
+
 
 namespace Components {
   struct AudioSource;
@@ -37,8 +69,8 @@ struct AudioBuffer {
   uint64_t samples = 0;
   uint64_t sampleRate = 0;
 
-  static std::optional<AudioBuffer> create(std::span<uint8_t> bytes,
-                                           AudioFormat, size_t samples,
+  static std::optional<AudioBuffer> create(std::span<const uint8_t> bytes,
+                                           AudioFormat,
                                            size_t sampleRate);
   static std::optional<uint32_t> createMonoBuffer(std::span<uint8_t> bytes,
                                                   AudioFormat, size_t samples,
@@ -88,12 +120,11 @@ struct AudioChannel {
 };
 
 struct AudioFilter;
+struct AuxiliaryEffectSlot;
 
 struct SpatialAudioChannel {
   uint32_t source = 0;
 
-  bool operator==(const AudioChannel& rhs) const noexcept;
-  bool operator!=(const AudioChannel& rhs) const noexcept;
   static std::optional<SpatialAudioChannel> create();
 
   void play();
@@ -127,6 +158,9 @@ struct SpatialAudioChannel {
 
 
   void setFilter(AudioFilter&);
+  void setAuxiliaryEffectSlot(AuxiliaryEffectSlot*,  AudioFilter*);
+  void disableAuxiliaryEffectSlot();
+  // void setEffectSlot(AuxiliaryEffectSlot&);
 };
 
 struct AudioFilter;
@@ -151,9 +185,11 @@ enum class AudioFilterType {
 
 struct AudioFilterDescription {
   AudioFilterType filterType;
-  std::optional<float> gain;
-  std::optional<float> gainHighFrequency;
-  std::optional<float> gainLowFrequency;
+  float gain;
+  float gainHighFrequency;
+  float gainLowFrequency;
+
+  AudioFilterDescription(AudioFilterType);
 };
 
 struct AudioFilter {
@@ -177,32 +213,42 @@ struct AudioFilter {
   AudioFilterType filterType();
 };
 
+struct AudioEffectDescription {
+
+};
+
+/*
+  
+*/
+enum class AudioEffectType {
+  EAXREVERB,
+  REVERB,
+  CHORUS,
+  DISTORTION,
+  ECHO,
+  FLANGER,
+  FREQUENCY_SHIFTER,
+  VOCAL_MORPHER,
+  PITCH_SHIFTER,
+  RING_MODULATOR,
+  AUTOWAH,
+  COMPRESSOR,
+  EQUALIZER
+};
+
 struct AudioEffect {
   uint32_t effect = 0;
 
-  std::optional<AudioEffect> create();
+  static std::optional<AudioEffect> create(AudioEffectType type);
+  static std::optional<AudioEffect> create(const EAXReverbDescription&);
+  void setEAXReverb(const EAXReverbDescription&);
   void destroy();
-
-  // AL_EFFECT_NULL
-  // AL_EFFECT_EAXREVERB
-  // AL_EFFECT_REVERB
-  // AL_EFFECT_CHORUS
-  // AL_EFFECT_DISTORTION
-  // AL_EFFECT_ECHO
-  // AL_EFFECT_FLANGER
-  // AL_EFFECT_FREQUENCY_SHITER
-  // AL_EFFECT_VOCAL_MORPHER
-  // AL_EFFECT_PITCH_SHIFTER
-  // AL_EFFECT_RING_MODULATOR
-  // AL_EFFECT_AUTOWAH
-  // AL_EFFECT_COMPRESSOR
-  // AL_EFFECT_EQUALIZER
 };
 
 struct AuxiliaryEffectSlot {
   uint32_t slot;
 
-  std::optional<AuxiliaryEffectSlot> create();
+  static std::optional<AuxiliaryEffectSlot> create();
   void destroy();
 
   // TODO: Implement AL_AUXILIARY_SEND_FILTER
@@ -210,7 +256,30 @@ struct AuxiliaryEffectSlot {
   // TODO: Check the maximum number of auxiliary sends
   // ALC_MAX_AUXILIARY_SENDS
 
+  void attachEffect(AudioEffect&);          
+};
 
+struct Recorder {
+  static constexpr int FREQUENCY = 44100;
+  static constexpr int64_t BUFFER_SIZE = 2048;
+
+  ALCdevice* captureDevice = nullptr;
+  bool captureStarted = false;
+  AudioFormat format;
+
+  std::vector<uint8_t> buffer;
+
+
+
+  static std::optional<Recorder> create();
+  void startCapture();
+  void update();
+  void stopCapture();
+  void clear();
+  std::span<const uint8_t> toSpan() const;
+  AudioFormat getFormat() const { return format; }
+  bool isRecording() const { return captureStarted; }
+  void destroy();
 };
 
 class AudioManager {
@@ -223,6 +292,8 @@ class AudioManager {
 
   std::unordered_map<AudioTag, AudioTagParameters> tagModifier;
   AudioTagParameters masterTagModifier;
+
+  AuxiliaryEffectSlot effectSlot;
 
   ALCdevice* audioDevice;
   ALCcontext* alContext;
@@ -245,7 +316,7 @@ public:
   AudioManager& operator=(const AudioManager&) = delete;
 
   std::optional<SpatialAudioChannel> borrowChannel();
-  void returnChannel(SpatialAudioChannel channel);
+  void returnBorrowedChannels();
 
   std::optional<AudioBuffer> getTrack(const char* track);
 
@@ -259,7 +330,6 @@ public:
 
 
   static void AudioSourceSystem(flecs::iter&, Components::Transform*, Components::AudioSource*);
-  static void AudioListenerSystem(flecs::iter&, Components::Transform*, Components::AudioListener*);
 };
 
 std::string to_string(Magnet::AudioTag);

@@ -50,25 +50,46 @@ enum class AudioSourcePlayState {
   STOPPED
 };
 
-struct AudioSource {
+class AudioSource {
+  friend void AudioManager::AudioSourceSystem(flecs::iter& iter, 
+                                              Transform* transforms,
+                                              AudioSource* sources);
   AudioSourcePlayState playState;
-  std::optional<SpatialAudioChannel> channel = std::nullopt;
+  std::optional<SpatialAudioChannel> channel;
+  std::optional<AudioFilterDescription> filterDesc;
+  std::optional<AudioFilter> filter;
+  std::optional<EAXReverbDescription> reverb;
+  std::optional<AudioEffect> effect;
+
+  AudioBuffer* audioBuffer = nullptr;
   const char* trackName = nullptr;
+  AudioBuffer *buffer;
   double timestampStartedS = 0.0;
-
-  void reset();
-  AudioSource();
-
+public:
   AudioTag tag = AudioTag::NONE;
   float volume = 1.f;
   float pitch = 1.f;
   std::optional<Cone> cone;
   bool looping = false;
 
+  void reset();
+  AudioSource();
+
+  AudioSourcePlayState getPlayState();
+  const char* getTrackName();
+
 
   void play_sound(
     const char* name, AudioTag tag = AudioTag::NONE,
-    bool looping = false, float volume = 1.f
+    bool looping = false, float volume = 1.f,
+    std::optional<AudioFilterDescription> desc = std::nullopt,
+    std::optional<EAXReverbDescription> reverb = std::nullopt
+  );
+  void play_sound(
+    AudioBuffer *buffer, AudioTag tag = AudioTag::NONE,
+    bool looping = false, float volume = 1.f,
+    std::optional<AudioFilterDescription> desc = std::nullopt,
+    std::optional<EAXReverbDescription> reverb = std::nullopt
   );
 
   void stop();
