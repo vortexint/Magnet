@@ -1033,7 +1033,7 @@ std::optional<AudioBuffer> AudioManager::getTrack(const char* track) {
   }
 
   std::span<uint8_t> samplesData(reinterpret_cast<uint8_t*>(data.get()),
-                                 samples * sizeof(short));
+                                 samples * FormatBytesPerSample(format));
 
   if (auto buffer =  AudioBuffer::create(samplesData, format, sampleRate)) {
     tracks[track] = *buffer;
