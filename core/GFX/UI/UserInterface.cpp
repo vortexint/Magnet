@@ -3,7 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <spdlog/spdlog.h>
 
-#include <magnet/ApplicationContext.hpp>
+#include <magnet/Application.hpp>
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"

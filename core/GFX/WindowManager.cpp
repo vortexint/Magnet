@@ -4,7 +4,7 @@
 #include <GLFW/glfw3.h>
 #include <spdlog/spdlog.h>
 
-#include <magnet/ApplicationContext.hpp>
+#include <magnet/Application.hpp>
 #include <magnet/InputManager.hpp>
 
 #include "Viewport.hpp"

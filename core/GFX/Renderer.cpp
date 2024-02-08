@@ -1,7 +1,7 @@
 #include <glad/glad.h>
 #include <spdlog/spdlog.h>
 
-#include <magnet/ApplicationContext.hpp>
+#include <magnet/Application.hpp>
 #include <magnet/Components.hpp>
 #include <magnet/Scene.hpp>
 #include <magnet/ShaderManager.hpp>

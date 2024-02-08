@@ -2,7 +2,7 @@
 
 #include <flecs.h>
 
-#include <magnet/ApplicationContext.hpp>
+#include <magnet/Application.hpp>
 #include "imgui.h"
 
 const char *const GAME_TITLE = "Sound Playground";

@@ -1,4 +1,4 @@
-#include <magnet/ApplicationContext.hpp>
+#include <magnet/Application.hpp>
 
 using namespace Magnet;
 

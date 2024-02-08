@@ -3,7 +3,7 @@
 #include <cglm/cglm.h>
 #include <spdlog/spdlog.h>
 
-#include <magnet/ApplicationContext.hpp>
+#include <magnet/Application.hpp>
 #include <magnet/ArchiveManager.hpp>
 #include <magnet/AudioManager.hpp>
 #include <magnet/Components.hpp>

@@ -4,7 +4,7 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
-#include <magnet/ApplicationContext.hpp>
+#include <magnet/Application.hpp>
 #include <magnet/ArchiveManager.hpp>
 #include <magnet/Scene.hpp>
 

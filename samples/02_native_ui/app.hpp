@@ -1,6 +1,6 @@
 #pragma once
 
-#include <magnet/ApplicationContext.hpp>
+#include <magnet/Application.hpp>
 #include "imgui.h"
 
 using namespace Magnet;

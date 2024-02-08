@@ -79,7 +79,7 @@ Next, let's work on the project's code structure...
 #### Project Interface
 
 ```cpp
-#include <magnet/ApplicationContext.hpp>
+#include <magnet/Application.hpp>
 
 // Note: the core's libraries are PUBLIC
 // So you can use any of them as needed.

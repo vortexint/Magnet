@@ -1,7 +1,7 @@
 #include <spdlog/spdlog.h>
 
 #include <cstring>
-#include <magnet/ApplicationContext.hpp>
+#include <magnet/Application.hpp>
 #include <magnet/ShaderManager.hpp>
 
 namespace Magnet {
