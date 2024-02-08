@@ -3,8 +3,6 @@
 #include <magnet/Components.hpp>
 #include <magnet/Time.hpp>
 
-
-
 namespace Magnet::Components {
   AudioSource::AudioSource() {
     reset();
@@ -13,10 +11,11 @@ namespace Magnet::Components {
     stop();
 
     trackName = name;
+
     timestampStartedS = Magnet::Time::getTime();
-    volume = volume;
-    looping = looping;
-    tag = tag;
+    this->volume = volume;
+    this->looping = looping;
+    this->tag = tag;
 
     playState = AudioSourcePlayState::REQUESTED_PLAY;
   }

@@ -8,14 +8,10 @@
 
 namespace Magnet {
 
-/**
- * @brief ShaderManager Singleton combined with the RAII idiom
- *
- */
 class ShaderManager {
   std::unordered_set<GLuint> shaders;
 
-  ShaderManager() {}
+  ShaderManager() = default;
   ShaderManager(const ShaderManager&) = delete;
   void operator=(const ShaderManager&) = delete;
 

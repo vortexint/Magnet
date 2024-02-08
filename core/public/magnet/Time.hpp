@@ -1,17 +1,21 @@
 #pragma once
-
+#include <chrono>
 namespace Magnet::Time {
-  void update();
+struct TimeState {
+  std::chrono::system_clock::time_point currentTime =
+    std::chrono::system_clock::now();
+  std::chrono::system_clock::time_point lastTime =
+    std::chrono::system_clock::now();
+  double deltaTime = 0.0;
+};
 
-  /**
-   * @brief Get the current time in seconds
-   * @return double 
-   */
-  double getTime();
+// Update a time state
+void update(TimeState& state);
 
-  /**
-   * @brief Get the interval in seconds between the last frame and the current frame
-   * @return double 
-   */
-  double getDelta();
-} // namespace Magnet::Time
+// Get the time in seconds since epoch
+double getTime();
+
+// Get the interval between the last two updates
+double getDelta(const TimeState& state);
+
+}  // namespace Magnet::Time

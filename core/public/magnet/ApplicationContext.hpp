@@ -1,6 +1,8 @@
 #pragma once
 
 #include <magnet/ArchiveManager.hpp>
+#include <magnet/Time.hpp>
+
 #include <memory>
 
 // forward declarations
@@ -15,6 +17,7 @@ class ProjectInterface {
 
 class ApplicationContext {
   ArchiveManager archiveManager;
+  Time::TimeState timeState;
 
   ApplicationContext();
   ApplicationContext(const ApplicationContext&) = delete;
@@ -32,6 +35,7 @@ class ApplicationContext {
   /* Getters */
 
   ArchiveManager& getArchiveManager();
+  const Time::TimeState& getTimeState() const;
 };
 
 }  // namespace Magnet

@@ -3,14 +3,14 @@ add_library(magnet::core ALIAS magnet-core)
 
 target_sources(magnet-core PRIVATE
   ApplicationContext.cpp
-  SceneManager.cpp
-  Time.cpp
+  Scene.cpp
   Components.cpp
 )
 
-add_subdirectory(GFX) # Graphics
-add_subdirectory(SFX) # Sound
-add_subdirectory(IO)  # Input/Output
+add_subdirectory(GFX)   # Graphics
+add_subdirectory(SFX)   # Sound
+add_subdirectory(IO)    # Input/Output
+add_subdirectory(UTILS) # Utilities
 
 if(MSVC)
   target_compile_options(magnet-core PUBLIC

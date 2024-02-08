@@ -25,9 +25,9 @@ ArchiveManager::~ArchiveManager() {
 
 // Returns the asset's data in a generic type that can be converted.
 std::unique_ptr<std::vector<uint8_t>> ArchiveManager::readFile(
-  const std::string& assetName) {
-  std::string assetNameCopy =
-    "./" + assetName;  // leading ./ is required for archive_entry_pathname
+  const std::string& fileName) {
+  std::string fileNameCopy =
+    "./" + fileName;  // leading ./ is required for archive_entry_pathname
 
   struct archive* a = archive_read_new();
   archive_read_support_format_tar(a);
@@ -47,12 +47,12 @@ std::unique_ptr<std::vector<uint8_t>> ArchiveManager::readFile(
 
   while (archive_read_next_header(a, &entry) == ARCHIVE_OK) {
     spdlog::debug("Reading {}", archive_entry_pathname(entry));
-    if (archive_entry_pathname(entry) == assetNameCopy) {
+    if (archive_entry_pathname(entry) == fileNameCopy) {
       size_t size = archive_entry_size(entry);
       buffer->resize(size);
       if (static_cast<la_ssize_t>(archive_read_data(a, buffer->data(), size)) !=
           static_cast<la_ssize_t>(size)) {
-        spdlog::error("Failed to read {}: {}", assetNameCopy,
+        spdlog::error("Failed to read {}: {}", fileNameCopy,
                       archive_error_string(a));
         return nullptr;
       }
@@ -62,15 +62,15 @@ std::unique_ptr<std::vector<uint8_t>> ArchiveManager::readFile(
   }
 
   if (!found) {
-    spdlog::error("Asset {} not found", assetNameCopy);
+    spdlog::error("Asset {} not found", fileNameCopy);
   }
 
   return buffer;
 }
 
-void ArchiveManager::loadFile(const std::string& assetName,
+void ArchiveManager::loadFile(const std::string& fileName,
                             std::vector<uint8_t>& buffer) {
-  auto optBuffer = readFile(assetName);
+  auto optBuffer = readFile(fileName);
   if (!optBuffer) {
     spdlog::error("Failed to read asset");
     return;
@@ -78,8 +78,8 @@ void ArchiveManager::loadFile(const std::string& assetName,
   buffer = std::move(*optBuffer);
 }
 
-void ArchiveManager::loadFile(const std::string& assetName, std::string& buffer) {
-  auto optBuffer = readFile(assetName);
+void ArchiveManager::loadFile(const std::string& fileName, std::string& buffer) {
+  auto optBuffer = readFile(fileName);
   if (!optBuffer) {
     spdlog::error("Failed to read asset");
     return;

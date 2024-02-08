@@ -7,7 +7,7 @@
 #include <magnet/ArchiveManager.hpp>
 #include <magnet/AudioManager.hpp>
 #include <magnet/Components.hpp>
-#include <magnet/SceneManager.hpp>
+#include <magnet/Scene.hpp>
 #include <magnet/Time.hpp>
 
 #define STB_VORBIS_IMPLEMENTATION

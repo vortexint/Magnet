@@ -7,8 +7,7 @@
 #include <magnet/ApplicationContext.hpp>
 #include <magnet/ArchiveManager.hpp>
 #include <magnet/Renderer.hpp>
-#include <magnet/SceneManager.hpp>
-#include <magnet/Time.hpp>
+#include <magnet/Scene.hpp>
 
 #include "GFX/UI/UserInterface.hpp"
 #include "GFX/WindowManager.hpp"
@@ -38,9 +37,10 @@ void ApplicationContext::initialize(const char* windowTitle) {
   }
 
   WindowManager& windowMgr = WindowManager::getInstance();
-  SceneManager& sceneMgr = SceneManager::getInstance();
   Renderer& renderer = Renderer::getInstance();
-  UI ui;
+
+  Scene::setupECS();
+  UI::setup();
 
   windowMgr.setTitle(windowTitle);
   registeredInterface->init();
@@ -51,23 +51,22 @@ void ApplicationContext::initialize(const char* windowTitle) {
     windowMgr.pollEvents();
 
     /* Update time calculations */
-    Time::update();
+    Time::update(timeState);
 
     /* Update all active systems and subsystems */
-    sceneMgr.progress();
+    Scene::progressECS(timeState);
 
-    ui.newFrame();
+    UI::newFrame();
 
     registeredInterface->update();
 
     /* Draw everything */
     renderer.drawFrame();
-    ui.draw();
+    UI::draw();
 
     windowMgr.swapBuffers();
   }
-  // Deconstruct order (Last In, First Out):
-  // UI -> Renderer -> SceneManager -> WindowManager
+  UI::shutdown();
 }
 
 ArchiveManager& ApplicationContext::getArchiveManager() { return archiveManager; }

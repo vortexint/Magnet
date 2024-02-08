@@ -4,7 +4,7 @@
 #include <magnet/ApplicationContext.hpp>
 #include <magnet/Components.hpp>
 #include <magnet/Renderer.hpp>
-#include <magnet/SceneManager.hpp>
+#include <magnet/Scene.hpp>
 #include <magnet/ShaderManager.hpp>
 
 #include "Viewport.hpp"

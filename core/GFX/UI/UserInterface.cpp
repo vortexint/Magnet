@@ -12,9 +12,9 @@
 // This is a small wrapper over Dear ImGui to detach backend
 // functionality from the WindowManager and Renderer
 
-namespace Magnet {
+namespace Magnet::UI {
 
-UI::UI() {
+void setup() {
   // Setup Dear ImGui context
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
@@ -156,21 +156,21 @@ UI::UI() {
   }
 }
 
-UI::~UI() {
+void shutdown() {
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();
   ImGui::DestroyContext();
 }
 
-void UI::newFrame() {
+void newFrame() {
   ImGui_ImplOpenGL3_NewFrame();
   ImGui_ImplGlfw_NewFrame();
   ImGui::NewFrame();
 }
 
-void UI::draw() {
+void draw() {
   ImGui::Render();
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-}  // namespace Magnet
+}  // namespace Magnet::UI

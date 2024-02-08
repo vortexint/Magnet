@@ -1,10 +1,8 @@
 #pragma once
 
-#include <magnet/AudioManager.hpp>
-
-#include <array>
-
 #include <cglm/cglm.h>
+
+#include <magnet/AudioManager.hpp>  // TODO: Remove this dependency, AudioManager should be hidden from the public API
 namespace Magnet::Components {
 
 /* Scene Components */
@@ -14,9 +12,9 @@ namespace Magnet::Components {
  * @brief An entity's transformation relative to its parent.
  */
 struct Transform {
-  vec3   position{0.0f, 0.0f, 0.0f};
+  vec3 position{0.0f, 0.0f, 0.0f};
   versor rotation{0.0f, 0.0f, 0.0f, 0.0f};
-  vec3   scale{1.0f, 1.0f, 1.0f};
+  vec3 scale{1.0f, 1.0f, 1.0f};
 };
 
 /* RENDERING */
@@ -30,8 +28,8 @@ struct Skybox {
  * @brief Describes a virtual camera and it's view frustum.
  */
 struct Camera {
-  float fieldOfView = 60.0f;         // Angle defining visible scene extent.
-  vec2 clippingPlanes = {0.1f, 100.0f}; // Near and far clipping planes
+  float fieldOfView = 60.0f;             // Angle defining visible scene extent
+  vec2 clippingPlanes = {0.1f, 100.0f};  // Near and far clipping planes
   vec3 up{0.0f, 1.0f, 0.0f};
 };
 
@@ -42,13 +40,26 @@ struct MeshRenderer {
   uint32_t numIndices;
 };
 
+struct LightSource {
+  vec3 color = {1.f, 1.f, 1.f};
+  float intensity = 1.f;
+
+  bool shadows = true;
+};
+
+struct SpotLight : public LightSource {
+  vec3 direction;
+  float angle;
+};
+
+struct AreaLight : public LightSource {
+  vec3 direction;
+  float width, height;
+};
+
 /* AUDIO */
 
-enum class AudioSourcePlayState {
-  REQUESTED_PLAY,
-  PLAYING,
-  STOPPED
-};
+enum class AudioSourcePlayState { REQUESTED_PLAY, PLAYING, STOPPED };
 
 struct AudioSource {
   AudioSourcePlayState playState;
@@ -65,11 +76,8 @@ struct AudioSource {
   std::optional<Cone> cone;
   bool looping = false;
 
-
-  void play_sound(
-    const char* name, AudioTag tag = AudioTag::NONE,
-    bool looping = false, float volume = 1.f
-  );
+  void play_sound(const char* name, AudioTag tag = AudioTag::NONE,
+                  bool looping = false, float volume = 1.f);
 
   void stop();
 };
@@ -80,11 +88,10 @@ struct Collider {
   // TODO: Add collider types
 };
 
-
 // TODO: This.
 // Requires Transform, Collider.
 struct Rigidbody {
   bool fixed;
 };
 
-} // namespace Magnet::Components
+}  // namespace Magnet::Components

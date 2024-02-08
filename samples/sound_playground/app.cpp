@@ -70,8 +70,7 @@ void Interface::init() {
     free(icons[0].pixels);
   }
 
-  SceneManager& sceneManager = SceneManager::getInstance();
-  auto& ecs = sceneManager.getECS();
+  auto& ecs = Scene::getECS();
 
   auto mainEntity = ecs.entity("MainEntity");
   mainEntity.set<Magnet::Components::AudioSource>({});
@@ -84,7 +83,7 @@ void Interface::update() {
   ImGui::Begin("Sound Editor");
 
   auto& audioManager = AudioManager::getInstance();
-  auto& ecs = SceneManager::getInstance().getECS();
+  auto& ecs = Scene::getECS();
   auto* mainAudioSource = ecs.entity(this->mainEntityId)
     .get_mut<Magnet::Components::AudioSource>();
   auto* mainTransform = ecs.entity(this->mainEntityId)

@@ -5,7 +5,7 @@
 #include <magnet/InputManager.hpp>
 #include <magnet/Time.hpp>
 #include <magnet/Widgets.hpp>
-#include <magnet/SceneManager.hpp>
+#include <magnet/Scene.hpp>
 
 #include "imgui.h"
 
@@ -84,9 +84,8 @@ void DevTools() {
 
   /* Manipulate (Entity list and Property Editor) */
   if (show_manipulate) {
-    static SceneManager& sceneMgr = SceneManager::getInstance();
     static flecs::entity selectedEntity;
-    static flecs::world& ecs = sceneMgr.getECS();
+    static flecs::world& ecs = Scene::getECS();
 
     // static ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration;
     ImGui::SetNextWindowPos(

@@ -4,7 +4,6 @@
 #include <cglm/cglm.h>
 
 #include <magnet/Components.hpp>
-#include <magnet/SceneManager.hpp>
 #include <magnet/ShaderManager.hpp>
 
 #include <spdlog/spdlog.h> 

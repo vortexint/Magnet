@@ -3,7 +3,7 @@
 #include <flecs.h>
 
 #include <magnet/ArchiveManager.hpp>
-#include <magnet/SceneManager.hpp>
+#include <magnet/Scene.hpp>
 #include <memory>
 #include <optional>
 #include <span>
