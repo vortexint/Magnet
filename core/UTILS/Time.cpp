@@ -3,10 +3,10 @@
 namespace Magnet::Time {
 
 void update(TimeState& state) {
-  state.currentTime = std::chrono::system_clock::now();
-  std::chrono::duration<double> elapsed = state.currentTime - state.lastTime;
+  auto currentTime = std::chrono::system_clock::now();
+  std::chrono::duration<double> elapsed = currentTime - state.lastTime;
   state.deltaTime = elapsed.count();
-  state.lastTime = state.currentTime;
+  state.lastTime = currentTime;
 }
 
 double getTime() {

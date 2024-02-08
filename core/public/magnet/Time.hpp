@@ -2,8 +2,6 @@
 #include <chrono>
 namespace Magnet::Time {
 struct TimeState {
-  std::chrono::system_clock::time_point currentTime =
-    std::chrono::system_clock::now();
   std::chrono::system_clock::time_point lastTime =
     std::chrono::system_clock::now();
   double deltaTime = 0.0;
