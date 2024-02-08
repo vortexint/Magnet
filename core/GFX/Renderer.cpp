@@ -31,14 +31,12 @@ float texCoords[] = {
 unsigned int ID, VBO, VAO;
 //
 
-void setupPipeline() {
+void setupPipeline(ArchiveManager& archiveMgr) {
   /* OpenGL state configuration */
   glClearColor(0.f, 0.f, 0.f, 1.0f);
   glEnable(GL_DEPTH_TEST);
 
-  /* Generate default Shader(s)*/
-  ApplicationContext& appCtx = ApplicationContext::getInstance();
-  ArchiveManager& archiveMgr = appCtx.getArchiveManager();
+  /* Generate default Shader(s) */
 
   std::string vertexSource, fragmentSource;
   archiveMgr.loadFile("shaders/base.vert", vertexSource);

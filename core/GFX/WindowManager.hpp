@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-// forward declarations
+// Forward declarations
 struct GLFWwindow;
 namespace Magnet {
 

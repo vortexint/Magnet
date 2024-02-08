@@ -1,10 +1,13 @@
 #pragma once
 
-#include <vector>
+namespace Magnet {
+// Forward declaration
+class ArchiveManager;
+}
 
 namespace Magnet::UI {
 
-void setup();
+void setup(ArchiveManager& archiveMgr);
 void shutdown();
 
 void newFrame();

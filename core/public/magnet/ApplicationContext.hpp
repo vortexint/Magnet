@@ -19,16 +19,11 @@ class ApplicationContext {
   ArchiveManager archiveManager;
   Time::TimeState timeState;
 
-  ApplicationContext();
   ApplicationContext(const ApplicationContext&) = delete;
   void operator=(const ApplicationContext&) = delete;
-
  public:
-  static ApplicationContext& getInstance() {
-    static ApplicationContext instance;
-    return instance;
-  }
-
+  ApplicationContext();
+  
   void registerInterface(ProjectInterface* interface);
   void initialize(const char* gameTitle);
 

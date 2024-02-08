@@ -3,7 +3,7 @@
 /* ENTRY POINT */
 
 int main(void) {
-  ApplicationContext& appCtx = ApplicationContext::getInstance();
+  ApplicationContext appCtx;
   appCtx.registerInterface(new Interface());
 
   appCtx.initialize(GAME_TITLE);

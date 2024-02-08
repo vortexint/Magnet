@@ -17,7 +17,7 @@ class AppInterface : public ProjectInterface {
 };
 
 int main(void) {
-  auto& applicationContext = ApplicationContext::getInstance();
+  ApplicationContext appCtx;
   applicationContext.registerInterface(new AppInterface());
 
   applicationContext.initialize(TITLE);

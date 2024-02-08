@@ -21,10 +21,10 @@ public:
 /* ENTRY POINT */
 
 int main(void) {
-  auto& applicationContext = ApplicationContext::getInstance();
+  ApplicationContext appCtx;
 
-  applicationContext.registerInterface(new AppInterface());
+  appCtx.registerInterface(new AppInterface());
 
-  applicationContext.initialize(TITLE);
+  appCtx.initialize(TITLE);
   return 0;
 }

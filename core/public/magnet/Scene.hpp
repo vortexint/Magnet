@@ -6,10 +6,7 @@
 #include <memory>
 #include <vector>
 
-namespace Magnet::Time {
-// Forward declaration
-struct TimeState;
-}
+#include <magnet/Time.hpp>
 
 namespace Magnet::Scene {
 

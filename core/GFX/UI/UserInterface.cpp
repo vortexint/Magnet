@@ -14,7 +14,7 @@
 
 namespace Magnet::UI {
 
-void setup() {
+void setup(ArchiveManager& archiveMgr) {
   // Setup Dear ImGui context
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
@@ -30,8 +30,6 @@ void setup() {
 
   /* Load fonts */
   {
-    ApplicationContext& appCtx = ApplicationContext::getInstance();
-    ArchiveManager& archiveMgr = appCtx.getArchiveManager();
     ImFontConfig cfg;
 
     // Prevent ImGui and std::vector from both deallocating font

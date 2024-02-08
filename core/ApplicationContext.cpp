@@ -25,22 +25,24 @@ ApplicationContext::ApplicationContext()
   /* Logging */
   auto consoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
   auto fileSink =
-    std::make_shared<spdlog::sinks::basic_file_sink_mt>("run.log", true);
+    std::make_shared<spdlog::sinks::basic_file_sink_mt>("output.log", true);
   auto logger = std::make_shared<spdlog::logger>(
     "multi_sink", spdlog::sinks_init_list{consoleSink, fileSink});
   spdlog::set_default_logger(logger);
 }
 
 void ApplicationContext::initialize(const char* windowTitle) {
+
+
   if (!glfwInit()) {
     spdlog::critical("Failed to initialize GLFW");
   }
 
   WindowManager& windowMgr = WindowManager::getInstance();
 
-  Renderer::setupPipeline();
+  Renderer::setupPipeline(archiveManager);
   Scene::setupECS();
-  UI::setup();
+  UI::setup(archiveManager);
 
   windowMgr.setTitle(windowTitle);
   registeredInterface->init();
