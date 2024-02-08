@@ -3,13 +3,13 @@
 
 #include <magnet/ApplicationContext.hpp>
 #include <magnet/Components.hpp>
-#include <magnet/Renderer.hpp>
 #include <magnet/Scene.hpp>
 #include <magnet/ShaderManager.hpp>
 
+#include "Renderer.hpp"
 #include "Viewport.hpp"
 
-namespace Magnet {
+namespace Magnet::Renderer {
 using namespace Components;
 
 GLuint baseID;
@@ -31,7 +31,7 @@ float texCoords[] = {
 unsigned int ID, VBO, VAO;
 //
 
-Renderer::Renderer() {
+void setupPipeline() {
   /* OpenGL state configuration */
   glClearColor(0.f, 0.f, 0.f, 1.0f);
   glEnable(GL_DEPTH_TEST);
@@ -67,7 +67,7 @@ Renderer::Renderer() {
   //
 }
 
-void Renderer::drawFrame() const {
+void drawFrame() {
   Viewport::updateFrustum(baseID);
 
   /* Assuming that we'll always render something to all pixels, this
@@ -80,4 +80,4 @@ void Renderer::drawFrame() const {
   glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
-}  // namespace Magnet
+}  // namespace Magnet::Renderer

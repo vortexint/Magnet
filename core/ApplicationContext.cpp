@@ -6,9 +6,9 @@
 
 #include <magnet/ApplicationContext.hpp>
 #include <magnet/ArchiveManager.hpp>
-#include <magnet/Renderer.hpp>
 #include <magnet/Scene.hpp>
 
+#include <GFX/Renderer.hpp>
 #include "GFX/UI/UserInterface.hpp"
 #include "GFX/WindowManager.hpp"
 
@@ -37,8 +37,8 @@ void ApplicationContext::initialize(const char* windowTitle) {
   }
 
   WindowManager& windowMgr = WindowManager::getInstance();
-  Renderer& renderer = Renderer::getInstance();
 
+  Renderer::setupPipeline();
   Scene::setupECS();
   UI::setup();
 
@@ -61,7 +61,7 @@ void ApplicationContext::initialize(const char* windowTitle) {
     registeredInterface->update();
 
     /* Draw everything */
-    renderer.drawFrame();
+    Renderer::drawFrame();
     UI::draw();
 
     windowMgr.swapBuffers();
@@ -70,5 +70,9 @@ void ApplicationContext::initialize(const char* windowTitle) {
 }
 
 ArchiveManager& ApplicationContext::getArchiveManager() { return archiveManager; }
+
+const Time::TimeState& ApplicationContext::getTimeState() const {
+  return timeState;
+}
 
 }  // namespace Magnet
