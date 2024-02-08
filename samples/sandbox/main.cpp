@@ -3,8 +3,8 @@
 /* ENTRY POINT */
 
 int main(void) {
-  ApplicationContext appCtx;
-  appCtx.registerInterface(new Interface());
+  Interface appInterface;
+  ApplicationContext appCtx(appInterface);
 
   appCtx.initialize(GAME_TITLE);
 

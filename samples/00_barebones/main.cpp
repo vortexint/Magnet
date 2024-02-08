@@ -21,9 +21,8 @@ public:
 /* ENTRY POINT */
 
 int main(void) {
-  ApplicationContext appCtx;
-
-  appCtx.registerInterface(new AppInterface());
+  AppInterface appInterface;
+  ApplicationContext appCtx(appInterface);
 
   appCtx.initialize(TITLE);
   return 0;

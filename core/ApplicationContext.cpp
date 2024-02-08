@@ -14,14 +14,8 @@
 
 namespace Magnet {
 
-ProjectInterface* registeredInterface = nullptr;
-
-void ApplicationContext::registerInterface(ProjectInterface* interface) {
-  registeredInterface = interface;
-}
-
-ApplicationContext::ApplicationContext()
-  : archiveManager(ARCH_core, ARCH_core_KEY) {
+ApplicationContext::ApplicationContext(ProjectInterface& interface)
+  : archiveManager(ARCH_core, ARCH_core_KEY), registeredInterface(interface) {
   /* Logging */
   auto consoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
   auto fileSink =
@@ -32,12 +26,6 @@ ApplicationContext::ApplicationContext()
 }
 
 void ApplicationContext::initialize(const char* windowTitle) {
-
-
-  if (!glfwInit()) {
-    spdlog::critical("Failed to initialize GLFW");
-  }
-
   WindowManager& windowMgr = WindowManager::getInstance();
 
   Renderer::setupPipeline(archiveManager);
@@ -45,7 +33,7 @@ void ApplicationContext::initialize(const char* windowTitle) {
   UI::setup(archiveManager);
 
   windowMgr.setTitle(windowTitle);
-  registeredInterface->init();
+  registeredInterface.init();
 
   /* Main loop */
   while (!windowMgr.shouldClose()) {
@@ -60,7 +48,7 @@ void ApplicationContext::initialize(const char* windowTitle) {
 
     UI::newFrame();
 
-    registeredInterface->update();
+    registeredInterface.update();
 
     /* Draw everything */
     Renderer::drawFrame();

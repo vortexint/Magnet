@@ -3,8 +3,8 @@
 const char* const TITLE = "Native UI Example";
 
 int main(void) {
-  ApplicationContext appCtx;
-  appCtx.registerInterface(new Interface());
+  Interface appInterface;
+  ApplicationContext appCtx(appInterface);
 
   appCtx.initialize(TITLE);
 

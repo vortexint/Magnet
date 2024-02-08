@@ -4,7 +4,7 @@ using namespace Magnet;
 
 const char* const TITLE = "Primitives Example";
 
-class AppInterface : public ProjectInterface {
+class Interface : public ProjectInterface {
  public:
   void init() override {
     ArchiveManager archiveMgr(ARCH_assets);
@@ -17,9 +17,9 @@ class AppInterface : public ProjectInterface {
 };
 
 int main(void) {
-  ApplicationContext appCtx;
-  applicationContext.registerInterface(new AppInterface());
+  Interface appInterface;
+  ApplicationContext appCtx(appInterface);
 
-  applicationContext.initialize(TITLE);
+  appCtx.initialize(TITLE);
   return 0;
 }

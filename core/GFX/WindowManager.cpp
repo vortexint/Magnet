@@ -14,6 +14,10 @@ namespace Magnet {
 void errorCallback(int error, const char* desc);
 
 WindowManager::WindowManager() {
+  if (!glfwInit()) {
+    spdlog::critical("Failed to initialize GLFW");
+  }
+
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true);
