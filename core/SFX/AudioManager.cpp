@@ -935,8 +935,8 @@ void AudioManager::InitializeOpenAL_EFX(ALCdevice *audioDevice) {
 }
 
 AudioManager::AudioManager()
-  : assetManager(nullptr) {
-  assetManager = new AssetManager("data.magnet", nullptr);
+  : archiveMgr(nullptr) {
+  archiveMgr = new ArchiveManager("data.magnet", nullptr);
   audioDevice = alcOpenDevice(nullptr);
 
   ALint attribs[4] = { 0 };

@@ -14,7 +14,7 @@ AssetCache& getAssetCache() {
 }
 
 Asset* getAsset(AssetID id) {
-  
+  return nullptr;
 }
 
 } // namespace Magnet
