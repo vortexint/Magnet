@@ -12,9 +12,9 @@ namespace Magnet::Components {
  * @brief An entity's transformation relative to its parent.
  */
 struct Transform {
-  vec3 position{0.0f, 0.0f, 0.0f};
-  versor rotation{0.0f, 0.0f, 0.0f, 0.0f};
-  vec3 scale{1.0f, 1.0f, 1.0f};
+  vec3   position{0.0f, 0.0f, 0.0f};
+  versor rotation{0.0f, 0.0f, 0.0f, 1.0f};
+  vec3   scale{1.0f, 1.0f, 1.0f};
 };
 
 /* RENDERING */
