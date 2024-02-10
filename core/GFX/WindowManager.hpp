@@ -4,32 +4,17 @@
 
 // Forward declarations
 struct GLFWwindow;
-namespace Magnet {
+namespace Magnet::Window {
 
 const uint32_t INIT_WIDTH = 1280;
 const uint32_t INIT_HEIGHT = 720;
-class WindowManager {
-  GLFWwindow* window;
 
-  WindowManager();
-  WindowManager(const WindowManager&) = delete;
-  void operator=(const WindowManager&) = delete;
+void initialize(const char* title);
+void shutdown();
 
- public:
-  static WindowManager& getInstance() {
-    static WindowManager instance;
-    return instance;
-  }
-  ~WindowManager();
+void swapBuffers();
+void pollEvents();
 
-  void setTitle(const char* title);
-  void swapBuffers();
-  void pollEvents();
+bool shouldClose();
 
-  /* Getters */
-  GLFWwindow* getWindow() const { return window; }
-
-  bool shouldClose() const;
-};
-
-} // namespace Magnet
+}  // namespace Magnet::Window

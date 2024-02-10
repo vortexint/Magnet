@@ -15,7 +15,6 @@ class Interface : public ProjectInterface {
   flecs::entity_t mainEntityId;
 
  public:
-  void init() override;
-
-  void update() override;
+  void init(ApplicationContext& ctx) override;
+  void update(ApplicationContext& ctx) override;
 };

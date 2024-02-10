@@ -59,9 +59,7 @@ git submodule update --init --recursive --progress
 
 #### Configure CMakeLists.txt
 
-You can create a directory within your project's directory for assets to ship with the executable; By convention, "assets/" is used.  
-
-The `core` directory includes default assets for rendering and scripting.
+You can create a directory within your project's directory for assets to ship with the executable; By convention, "assets/" is used. The `core` directory includes default assets for rendering and scripting.
 
 Always make sure your project's CMakeLists.txt calls `magnet_package()`, otherwise no assets will be packaged.
 
@@ -72,36 +70,6 @@ target_link_libraries(myApp PRIVATE magnet-core)
 # Asset Packaging
 magnet_package_core(myApp) # required
 magnet_package(myApp ${CMAKE_CURRENT_SOURCE_DIR}/assets data) # generates data.magnet from "assets/" directory
-```
-
-Next, let's work on the project's code structure...
-
-#### Project Interface
-
-```cpp
-#include <magnet/Application.hpp>
-
-// Note: the core's libraries are PUBLIC
-// So you can use any of them as needed.
-#include <GLFW/glfw3.h>
-
-// Register Interface for init and update callbacks
-class AppInterface : public ProjectInterface {
- public:
-  void init() override {
-    // If using an Asset Manager:
-    ArchiveManager archiveMgr(ARCH_data, ARCH_data_KEY); // Macros provided by magnet_package()
-    WindowManager* windowMgr = ApplicationContext::getWindowManager();
-
-    GLFWwindow* window = windowMgr->getWindow();
-
-    // Use an ArchiveManager to load essential assets, etc...
-  }
-
-  void update() override {
-    // Do something every update...
-  }
-};
 ```
 
 ## Learning Material

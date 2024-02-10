@@ -9,11 +9,13 @@
 
 #include "Viewport.hpp"
 
-namespace Magnet {
+namespace Magnet::Window {
 
 void errorCallback(int error, const char* desc);
 
-WindowManager::WindowManager() {
+void initialize(const char* title) {
+  GLFWwindow* window;
+
   if (!glfwInit()) {
     spdlog::critical("Failed to initialize GLFW");
   }
@@ -23,8 +25,9 @@ WindowManager::WindowManager() {
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-  window =
-    glfwCreateWindow(INIT_WIDTH, INIT_HEIGHT, "Application", nullptr, nullptr);
+  window = glfwCreateWindow(INIT_WIDTH, INIT_HEIGHT, "Application", nullptr, nullptr);
+
+  glfwSetWindowTitle(window, title);
 
   glfwMakeContextCurrent(window);
   glfwSwapInterval(0);
@@ -41,29 +44,25 @@ WindowManager::WindowManager() {
   InputManager::getInstance();
 }
 
-WindowManager::~WindowManager() {
-  glfwDestroyWindow(window);
+void shutdown() {
+  glfwDestroyWindow(glfwGetCurrentContext());
   glfwTerminate();
 }
 
-void WindowManager::setTitle(const char* title) {
-  glfwSetWindowTitle(window, title);
+void swapBuffers() {
+  glfwSwapBuffers(glfwGetCurrentContext());
 }
 
-void WindowManager::swapBuffers() {
-  glfwSwapBuffers(window);
-}
-
-void WindowManager::pollEvents() {
+void pollEvents() {
   glfwPollEvents();
 }
 
-bool WindowManager::shouldClose() const {
-  return glfwWindowShouldClose(window);
+bool shouldClose() {
+  return glfwWindowShouldClose(glfwGetCurrentContext());
 }
 
 void errorCallback(int error, const char* desc) {
   spdlog::error("GLFW Error {}: {}", error, desc);
 }
 
-}  // namespace Magnet
+}  // namespace Magnet::Window

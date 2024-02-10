@@ -6,12 +6,11 @@ const char* const TITLE = "Primitives Example";
 
 class Interface : public ProjectInterface {
  public:
-  void init() override {
+  void init(ApplicationContext& ctx) override {
     ArchiveManager archiveMgr(ARCH_assets);
-
   }
 
-  void update() override {
+  void update(ApplicationContext& ctx) override {
     // Project-specific
   }
 };

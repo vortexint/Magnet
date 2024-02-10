@@ -5,17 +5,16 @@ using namespace Magnet;
 const char* const TITLE = "Barebones Example";
 class AppInterface : public ProjectInterface {
 public:
-  void init() override {
-    // ArchiveManager archiveMgr("archive.magnet", "key")
-    // WindowManager* windowMgr = ApplicationContext::getWindowManager();
+ void init(ApplicationContext& ctx) override {
+   // ArchiveManager archiveMgr("archive.magnet", "key")
 
-    // Here you would use the ArchiveManager to load essential assets of your
-    // project, including shaders, textures, sounds, etc...
-  }
+   // Here you would use the ArchiveManager to load essential assets of your
+   // project, including shaders, textures, sounds, etc...
+ }
 
-  void update() override {
-    // Project-specific
-  }
+ void update(ApplicationContext& ctx) override {
+   // ...
+ }
 };
 
 /* ENTRY POINT */

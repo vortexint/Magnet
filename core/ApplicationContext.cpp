@@ -2,64 +2,74 @@
 #include <GLFW/glfw3.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
-#include <spdlog/spdlog.h>
 
 #include <magnet/Application.hpp>
 #include <magnet/ArchiveManager.hpp>
 #include <magnet/Scene.hpp>
+#include <magnet/Shaders.hpp>
 
-#include <GFX/Renderer.hpp>
+#include "GFX/Pipeline.hpp"
 #include "GFX/UI/UserInterface.hpp"
 #include "GFX/WindowManager.hpp"
 
 namespace Magnet {
 
+ArchiveManager ApplicationContext::archiveManager(ARCH_core, ARCH_core_KEY);
+
 ApplicationContext::ApplicationContext(ProjectInterface& interface)
-  : archiveManager(ARCH_core, ARCH_core_KEY), registeredInterface(interface) {
+  : logger("magnet"), registeredInterface(interface) {
   /* Logging */
+
+#if defined(DEBUG)
   auto consoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-  auto fileSink =
-    std::make_shared<spdlog::sinks::basic_file_sink_mt>("output.log", true);
-  auto logger = std::make_shared<spdlog::logger>(
-    "multi_sink", spdlog::sinks_init_list{consoleSink, fileSink});
-  spdlog::set_default_logger(logger);
+  consoleSink->set_level(spdlog::level::debug);
+  logger.sinks().push_back(consoleSink);
+#endif
+
+  auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("output.log", true);
+  logger.sinks().push_back(fileSink);
+
+  // set default logger
+  spdlog::set_default_logger(std::make_shared<spdlog::logger>(logger));
 }
 
 void ApplicationContext::initialize(const char* windowTitle) {
-  WindowManager& windowMgr = WindowManager::getInstance();
-
-  Renderer::setupPipeline(archiveManager);
+  Window::initialize(windowTitle);
+  Rendering::setupPipeline(archiveManager);
   Scene::setupECS();
   UI::setup(archiveManager);
 
-  windowMgr.setTitle(windowTitle);
-  registeredInterface.init();
+  registeredInterface.init(*this);
 
   /* Main loop */
-  while (!windowMgr.shouldClose()) {
+  while (!Window::shouldClose()) {
     /* Poll for and process events */
-    windowMgr.pollEvents();
+    Window::pollEvents();
 
     /* Update time calculations */
     Time::update(timeState);
 
-    /* Update all active systems and subsystems */
+    /* Update all ECS systems */
     Scene::progressECS(timeState);
 
     UI::newFrame();
 
-    registeredInterface.update();
+    registeredInterface.update(*this);
 
     /* Draw everything */
-    Renderer::drawFrame();
+    Rendering::drawFrame();
     UI::draw();
 
-    windowMgr.swapBuffers();
+    Window::swapBuffers();
   }
   UI::shutdown();
+  Shaders::cleanup();
+  Window::shutdown();
 }
 
-ArchiveManager& ApplicationContext::getArchiveManager() { return archiveManager; }
+ArchiveManager& ApplicationContext::getArchiveManager() {
+  return archiveManager;
+}
 
 const Time::TimeState& ApplicationContext::getTimeState() const {
   return timeState;

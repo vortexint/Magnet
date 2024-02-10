@@ -8,7 +8,6 @@ using namespace Magnet;
 class Interface : public ProjectInterface {
 
  public:
-  void init() override;
-
-  void update() override;
+  void init(ApplicationContext& ctx) override;
+  void update(ApplicationContext& ctx) override;
 };

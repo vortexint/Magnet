@@ -4,7 +4,7 @@
 #include <cglm/cglm.h>
 
 #include <magnet/Components.hpp>
-#include <magnet/ShaderManager.hpp>
+#include <magnet/Shaders.hpp>
 
 #include <spdlog/spdlog.h> 
 
@@ -15,7 +15,6 @@ flecs::entity Viewport::activeCamera;
 int Viewport::width, Viewport::height;
 
 void Viewport::updateFrustum(GLuint baseID) {
-  static ShaderManager& shaderMgr = ShaderManager::getInstance();
   /* Camera */
   Camera* camera = activeCamera.get_mut<Camera>();
   Transform* transform = activeCamera.get_mut<Transform>();
@@ -54,9 +53,9 @@ void Viewport::updateFrustum(GLuint baseID) {
     camera->clippingPlanes[0], camera->clippingPlanes[1], projection);
 
   /* Update shader uniforms */
-  shaderMgr.setMat4(baseID, "model", model);
-  shaderMgr.setMat4(baseID, "view", view);
-  shaderMgr.setMat4(baseID, "projection", projection);
+  Shaders::setMat4(baseID, "model", model);
+  Shaders::setMat4(baseID, "view", view);
+  Shaders::setMat4(baseID, "projection", projection);
 }
 
 void Viewport::setSize(GLFWwindow*, int width, int height) {

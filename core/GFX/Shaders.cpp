@@ -2,9 +2,9 @@
 
 #include <cstring>
 #include <magnet/Application.hpp>
-#include <magnet/ShaderManager.hpp>
+#include <magnet/Shaders.hpp>
 
-namespace Magnet {
+namespace Magnet::Shaders {
 
 // Utility function for checking shader compilation/linking errors.
 void checkCompileErrors(unsigned int shader, const char* type) {
@@ -26,19 +26,13 @@ void checkCompileErrors(unsigned int shader, const char* type) {
   }
 }
 
-/* ShaderManager Implementation */
-
-ShaderManager::~ShaderManager() {
-  size_t count = 0;
-  for (GLuint shader : shaders) {
-    glDeleteProgram(shader);
-    count++;
-  }
-  spdlog::info("{} Shader program(s) deleted", count);
+std::unordered_set<GLuint>& getShaders() {
+  static std::unordered_set<GLuint> shaders;
+  return shaders;
 }
 
-GLuint ShaderManager::genShader(const std::string& vertexSource,
-                                const std::string& fragmentSource) {
+GLuint generate(const std::string& vertexSource,
+                const std::string& fragmentSource) {
   const GLchar* vertData[] = {vertexSource.c_str()};
   const GLchar* fragData[] = {fragmentSource.c_str()};
 
@@ -68,13 +62,23 @@ GLuint ShaderManager::genShader(const std::string& vertexSource,
   glDeleteShader(fragment);
 
   // Add to shaders unordered_set
-  shaders.emplace(shaderProgram);
+  getShaders().emplace(shaderProgram);
 
   return shaderProgram;
 }
+
+void cleanup() {
+  size_t count = 0;
+  for (GLuint shader : getShaders()) {
+    glDeleteProgram(shader);
+    count++;
+  }
+  spdlog::info("{} Shader program(s) deleted", count);
+}
+
 /* Setters */
 
-GLuint ShaderManager::createUniformBuffer(GLsizeiptr size) {
+GLuint createUniformBuffer(GLsizeiptr size) {
   GLuint ubo;
   glGenBuffers(1, &ubo);
   glBindBuffer(GL_UNIFORM_BUFFER, ubo);
@@ -82,32 +86,31 @@ GLuint ShaderManager::createUniformBuffer(GLsizeiptr size) {
   return ubo;
 }
 
-void ShaderManager::updateUniformBuffer(GLuint ubo, GLintptr offset,
-                                        GLsizeiptr size, const void* data) {
+void updateUniformBuffer(GLuint ubo, GLintptr offset, GLsizeiptr size,
+                         const void* data) {
   glBindBuffer(GL_UNIFORM_BUFFER, ubo);
   glBufferSubData(GL_UNIFORM_BUFFER, offset, size, data);
 }
 
-void ShaderManager::bindUniformBuffer(GLuint ubo, GLuint bindingPoint) {
+void bindUniformBuffer(GLuint ubo, GLuint bindingPoint) {
   glBindBufferBase(GL_UNIFORM_BUFFER, bindingPoint, ubo);
 }
 
-void ShaderManager::setBool(GLuint shaderID, const char* name, bool value) {
+void setBool(GLuint shaderID, const char* name, bool value) {
   glUniform1i(glGetUniformLocation(shaderID, name), (int)value);
 }
 
-void ShaderManager::setInt(GLuint shaderID, const char* name, int value) {
+void setInt(GLuint shaderID, const char* name, int value) {
   glUniform1i(glGetUniformLocation(shaderID, name), value);
 }
 
-void ShaderManager::setFloat(GLuint shaderID, const char* name, float value) {
+void setFloat(GLuint shaderID, const char* name, float value) {
   glUniform1f(glGetUniformLocation(shaderID, name), value);
 }
 
-void ShaderManager::setMat4(GLuint shaderID, const char* name,
-                            const mat4 matrix) {
+void setMat4(GLuint shaderID, const char* name, const mat4 matrix) {
   glUniformMatrix4fv(glGetUniformLocation(shaderID, name), 1, GL_FALSE,
                      (const GLfloat*)matrix);
 }
 
-}  // namespace Magnet
+}  // namespace Magnet::Shaders

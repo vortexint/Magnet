@@ -1,14 +1,16 @@
 #pragma once
 
-// Renderer.hpp
+// Pipeline.hpp
 // Manages the rendering pipeline
 
 #include <cstdint>
+#include <queue>
+
 #include <magnet/ArchiveManager.hpp>
 
-namespace Magnet::Renderer {
+namespace Magnet::Rendering {
 
 void setupPipeline(ArchiveManager& archiveMgr);
 void drawFrame();
 
-}  // namespace Magnet::Renderer
+}  // namespace Magnet::Rendering

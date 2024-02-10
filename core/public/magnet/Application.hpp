@@ -1,5 +1,7 @@
 #pragma once
 
+#include <spdlog/spdlog.h>
+
 #include <magnet/ArchiveManager.hpp>
 #include <magnet/Time.hpp>
 
@@ -9,15 +11,13 @@
 struct GLFWwindow;
 namespace Magnet {
 
-class ProjectInterface {
- public:
-  virtual void init() = 0;
-  virtual void update() = 0;
-};
+class ProjectInterface;
 
 class ApplicationContext {
-  ArchiveManager archiveManager;
+  static ArchiveManager archiveManager;
+
   Time::TimeState timeState;
+  spdlog::logger logger;
 
   ProjectInterface& registeredInterface;
 
@@ -33,6 +33,12 @@ class ApplicationContext {
 
   ArchiveManager& getArchiveManager();
   const Time::TimeState& getTimeState() const;
+};
+
+class ProjectInterface {
+ public:
+  virtual void init(ApplicationContext& ctx) = 0;
+  virtual void update(ApplicationContext& ctx) = 0;
 };
 
 }  // namespace Magnet
