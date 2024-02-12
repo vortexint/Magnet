@@ -2,7 +2,14 @@
 
 #include <cglm/cglm.h>
 
-#include <magnet/AudioManager.hpp>  // TODO: Remove this dependency, AudioManager should be hidden from the public API
+#include <magnet/AudioManager.hpp>  // TODO: Remove this dependency, AudioManager should hide from the public API
+
+/**
+ * ECS Component Guideline:
+ * Components are data structures only. They represent an entity's state.
+ * Do not add methods/logic. Keep them clean and simple.
+ */
+
 namespace Magnet::Components {
 
 /* Scene Components */
@@ -20,7 +27,7 @@ struct Transform {
 /* RENDERING */
 
 struct Skybox {
-  uint32_t textureID;  // ID of the skybox texture.
+  uint32_t AssetID; // ID of the skybox texture.
 };
 
 /**
@@ -28,16 +35,13 @@ struct Skybox {
  * @brief Describes a virtual camera and it's view frustum.
  */
 struct Camera {
-  float fieldOfView = 60.0f;             // Angle defining visible scene extent
+  float fieldOfView = 60.0f;                     // Angle defining visible scene extent
   vec2 clippingPlanes = {0.1f, 100.0f};  // Near and far clipping planes
   vec3 up{0.0f, 1.0f, 0.0f};
 };
 
 struct MeshRenderer {
-  uint32_t vao;
-  uint32_t vbo;
-  uint32_t ebo;
-  uint32_t numIndices;
+  uint32_t AssetID; // ID of the mesh to render.
 };
 
 struct LightSource {
@@ -85,13 +89,13 @@ struct AudioSource {
 /* PHYSICS */
 
 struct Collider {
-  // TODO: Add collider types
+  // TODO: collider types
 };
 
-// TODO: This.
 // Requires Transform, Collider.
 struct Rigidbody {
   bool fixed;
+  // TODO: This.
 };
 
 }  // namespace Magnet::Components

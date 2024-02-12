@@ -2,7 +2,7 @@
 #include <spdlog/spdlog.h>
 
 #include <magnet/Application.hpp>
-#include <magnet/InputManager.hpp>
+#include <magnet/Input.hpp>
 #include <magnet/Time.hpp>
 #include <magnet/Widgets.hpp>
 #include <magnet/Scene.hpp>
@@ -14,7 +14,7 @@ namespace Magnet::Widgets {
 bool show_console = false;
 bool show_debug_info = false;
 bool show_manipulate = false;
-class DevToolsObserver : public Observer {
+class DevToolsObserver : public Input::Observer {
  public:
   void onKeyEvent(int key, int, int action, int mods) override {
     // F3: Debug Info

@@ -10,6 +10,7 @@
 #include <magnet/Rendering.hpp>
 
 #include "Viewport.hpp"
+#include "UI/UserInterface.hpp"
 
 namespace Magnet::Rendering {
 using namespace Components;
@@ -44,6 +45,8 @@ void drawFrame() {
 
   /* Render scene */
   glUseProgram(baseID);
+
+  UI::draw();
 }
 
 }  // namespace Magnet::Rendering

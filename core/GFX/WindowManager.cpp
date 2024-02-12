@@ -5,7 +5,7 @@
 #include <spdlog/spdlog.h>
 
 #include <magnet/Application.hpp>
-#include <magnet/InputManager.hpp>
+#include <magnet/Input.hpp>
 
 #include "Viewport.hpp"
 
@@ -40,8 +40,8 @@ void initialize(const char* title) {
   glfwSetFramebufferSizeCallback(window, Viewport::setSize);
   glfwSetErrorCallback(errorCallback);
 
-  /* Initialize InputManager */
-  InputManager::getInstance();
+  /* Initialize Input */
+  Input::initialize(window);
 }
 
 void shutdown() {

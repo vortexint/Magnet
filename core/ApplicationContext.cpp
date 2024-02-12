@@ -58,7 +58,6 @@ void ApplicationContext::initialize(const char* windowTitle) {
 
     /* Draw everything */
     Rendering::drawFrame();
-    UI::draw();
 
     Window::swapBuffers();
   }
