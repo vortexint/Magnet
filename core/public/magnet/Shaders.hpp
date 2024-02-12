@@ -8,6 +8,8 @@
 
 namespace Magnet::Shaders {
 
+std::unordered_set<GLuint>& getShaders();
+
 // Generate a shader program from the given vertex and fragment sources
 // And returns it's ID.
 GLuint generate(const std::string& vertexSource,

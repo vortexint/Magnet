@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 23)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_definitions(-DDEBUG)
-elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+else()
   add_definitions(-DRELEASE)
 endif()
 

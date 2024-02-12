@@ -17,6 +17,8 @@ class Observer {
   virtual void onMouseScrollEvent(double xoffset, double yoffset);
 };
 
+std::vector<Observer*>& getObservers();
+
 void initialize(GLFWwindow* window);
 void addObserver(Observer* observer);
 void removeObserver(Observer* observer);
