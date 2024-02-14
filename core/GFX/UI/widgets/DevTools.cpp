@@ -80,10 +80,8 @@ void DevTools(Context* ctx) {
         ImPlot::EndPlot();
       }
 
-      ImPlot::ShowDemoWindow();
-
       ImGui::Separator();
-      ImGui::Text("Cursor: (%d,%d)", (int)io.MousePos.x, (int)io.MousePos.y);
+      ImGui::Text("Cursor: %d,%d", static_cast<int>(io.MousePos.x), static_cast<int>(io.MousePos.y));
     }
     ImGui::End();
 
