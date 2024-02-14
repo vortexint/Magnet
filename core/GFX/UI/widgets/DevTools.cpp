@@ -1,10 +1,11 @@
+#include <magnet/Widgets.hpp>
+
 #include <glad/glad.h>
 #include <spdlog/spdlog.h>
 
 #include <magnet/Application.hpp>
 #include <magnet/Input.hpp>
 #include <magnet/Time.hpp>
-#include <magnet/Widgets.hpp>
 #include <magnet/Scene.hpp>
 
 #include "imgui.h"
@@ -28,7 +29,7 @@ class DevToolsObserver : public Input::Observer {
   }
 };
 
-void DevTools() {
+void DevTools(flecs::world& ecs) {
   static DevToolsObserver observer;
   static ImGuiIO& io = ImGui::GetIO();
 
@@ -85,7 +86,6 @@ void DevTools() {
   /* Manipulate (Entity list and Property Editor) */
   if (show_manipulate) {
     static flecs::entity selectedEntity;
-    static flecs::world& ecs = Scene::getECS();
 
     // static ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration;
     ImGui::SetNextWindowPos(

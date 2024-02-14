@@ -9,14 +9,7 @@
 namespace Magnet::Scene {
 using namespace Components;
 
-flecs::world& getECS() {
-  static flecs::world ecs;
-  return ecs;
-}
-
-void setupECS() {
-  flecs::world& ecs = getECS();
-
+void setupECS(flecs::world& ecs) {
   /* Register Components */
 
   ecs.component<Transform>();
@@ -32,8 +25,8 @@ void setupECS() {
   ecs.system<Transform, AudioSource>().iter(AudioManager::AudioSourceSystem);
 }
 
-void progressECS(const Time::TimeState& state) {
-  getECS().progress(Time::getDelta(state));
+void progressECS(Context* context) {
+  context->getECS().progress(Time::getDelta(context->getTimeState()));
 }
 
 }  // namespace Magnet::Scene

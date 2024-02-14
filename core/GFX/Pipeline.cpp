@@ -5,38 +5,45 @@
 
 #include <magnet/Application.hpp>
 #include <magnet/Components.hpp>
+#include <magnet/Rendering.hpp>
 #include <magnet/Scene.hpp>
 #include <magnet/Shaders.hpp>
-#include <magnet/Rendering.hpp>
 
-#include "Viewport.hpp"
+#include "GFX/WindowManager.hpp"
 #include "UI/UserInterface.hpp"
+#include "Viewport.hpp"
 
 namespace Magnet::Rendering {
 using namespace Components;
 
 GLuint baseID;
 
-std::queue<Command>& getCmdBuffer() {
-  static std::queue<Command> cmdBuffer;
-  return cmdBuffer;
-}
-
-void setupPipeline(ArchiveManager& archiveMgr) {
+void setupPipeline() {
   /* OpenGL state configuration */
   glClearColor(0.f, 0.f, 0.f, 1.0f);
   glEnable(GL_DEPTH_TEST);
 
   /* Generate default Shader(s) */
+  {
+    ArchiveManager& archiveMgr = Application::getArchiveManager();
+    std::string vertexSource, fragmentSource;
+    archiveMgr.loadFile("shaders/base.vert", vertexSource);
+    archiveMgr.loadFile("shaders/base.frag", fragmentSource);
 
-  std::string vertexSource, fragmentSource;
-  archiveMgr.loadFile("shaders/base.vert", vertexSource);
-  archiveMgr.loadFile("shaders/base.frag", fragmentSource);
-
-  baseID = Shaders::generate(vertexSource, fragmentSource);
+    baseID = Shaders::generate(vertexSource, fragmentSource);
+  }
 }
 
-void drawFrame() {
+void setupPipeline(const PipelineConfig& config) {
+  setupPipeline();
+  if (config.VSync) {
+    glfwSwapInterval(1);
+  } else {
+    glfwSwapInterval(0);
+  }
+}
+
+void updatePipeline(GLFWwindow* window) {
   Viewport::updateFrustum(baseID);
 
   /* Assuming that we'll always render something to all pixels, this
@@ -47,6 +54,8 @@ void drawFrame() {
   glUseProgram(baseID);
 
   UI::draw();
+
+  glfwSwapBuffers(window);
 }
 
 }  // namespace Magnet::Rendering

@@ -6,15 +6,14 @@
 #include <memory>
 #include <vector>
 
-#include <magnet/Time.hpp>
+#include <magnet/Application.hpp>
 
 namespace Magnet::Scene {
 
 /* ECS */
 
-flecs::world& getECS();
-void setupECS();
-void progressECS(const Time::TimeState& state);
+void setupECS(flecs::world& ecs);
+void progressECS(Context* context);
 
 /* Asset Factory */
 

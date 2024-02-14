@@ -1,20 +1,14 @@
 #pragma once
 
+#include <magnet/Application.hpp>
+
 #include <cstdint>
 
-// Forward declarations
-struct GLFWwindow;
 namespace Magnet::Window {
 
-const uint32_t INIT_WIDTH = 1280;
-const uint32_t INIT_HEIGHT = 720;
+constexpr uint32_t INIT_WIDTH = 1280;
+constexpr uint32_t INIT_HEIGHT = 720;
 
-void initialize(const char* title);
-void shutdown();
-
-void swapBuffers();
-void pollEvents();
-
-bool shouldClose();
+void initialize(Magnet::Context& context, const char* title);
 
 }  // namespace Magnet::Window

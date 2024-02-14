@@ -50,7 +50,7 @@ Magnet::AudioTag TEST_AUDIO_FILE_TAGS[] = {
   AudioTag::SOUND_EFFECTS,
 };
 
-void Interface::init(ApplicationContext& ctx) {
+void App::init() {
   ArchiveManager archiveMgr(ARCH_data, ARCH_data_KEY);
 
   window = glfwGetCurrentContext();
@@ -78,7 +78,7 @@ void Interface::init(ApplicationContext& ctx) {
   this->mainEntityId = mainEntity.id();
 }
 
-void Interface::update(ApplicationContext& ctx) {
+void App::update() {
   ImGui::Begin("Sound Editor");
 
   auto& audioManager = AudioManager::getInstance();

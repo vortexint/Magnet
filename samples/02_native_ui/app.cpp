@@ -5,19 +5,19 @@
 #include <magnet/Time.hpp>
 #include <magnet/Widgets.hpp>
 
-void Interface::init(ApplicationContext&) {
+void App::init() {
   // create default logger
   spdlog::logger logger("app");
   
 }
 
-void Interface::update(ApplicationContext& ctx) {
+void App::update() {
   static float value = 0.0f;
   static bool show_demo_window = true;
   if (show_demo_window) ImGui::ShowDemoWindow(&show_demo_window);
 
   if (value > 100.0f) value = 0.0f;
-  value += Time::getDelta(ctx.getTimeState()) * 10.0f;
+  value += Time::getDelta(getTimeState()) * 10.0f;
 
   ImGui::SetNextWindowSize(ImVec2(300, 150), ImGuiCond_FirstUseEver);
   if (ImGui::Begin("Window Test")) {
@@ -38,5 +38,5 @@ void Interface::update(ApplicationContext& ctx) {
   }
   ImGui::End();
 
-  Widgets::DevTools();
+  Widgets::DevTools(getECS());
 }

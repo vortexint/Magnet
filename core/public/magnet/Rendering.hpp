@@ -1,32 +1,22 @@
 #pragma once
 
-#include <queue>
 #include <glad/glad.h>
 
 namespace Magnet::Rendering {
 
-enum class CommandType {
-  Mesh,
-  Texture
+enum AntiAliasing {
+  NONE, FXAA, MSAA
 };
 
-struct MeshCommand {
-  GLuint vao;
-  GLuint vertexCount;
+enum TextureFiltering { NEAREST,  LINEAR, ANISOTROPIC };
+
+struct PipelineConfig {
+  AntiAliasing antiAliasing = AntiAliasing::NONE;
+  TextureFiltering textureFiltering = TextureFiltering::LINEAR;
+  bool VSync = false;
 };
 
-struct TextureCommand {
-  GLuint textureID;
-};
+// Will re-start the pipeline with `setupPipeline()` under the new configuration.
+void setConfig(const PipelineConfig& config);
 
-struct Command {
-  CommandType type;
-  GLuint shaderID = 0;
-
-};
-
-std::queue<Command>& getCmdBuffer();
-
-void submit(const Command& cmd);
-
-}
+}  // namespace Magnet::Rendering

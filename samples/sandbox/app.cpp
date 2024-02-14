@@ -6,7 +6,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
-void Interface::init() {
+void App::init() {
   ArchiveManager archiveMgr(ARCH_data, ARCH_data_KEY);
 
   window = glfwGetCurrentContext();
@@ -28,6 +28,6 @@ void Interface::init() {
 
 }
 
-void Interface::update() {
+void App::update() {
 
 }

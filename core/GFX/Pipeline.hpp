@@ -1,6 +1,6 @@
 #pragma once
 
-// Pipeline.hpp
+// Pipeline.hpp (private)
 // Manages the rendering pipeline
 
 #include <cstdint>
@@ -8,9 +8,14 @@
 
 #include <magnet/ArchiveManager.hpp>
 
+struct GLFWwindow;
 namespace Magnet::Rendering {
 
-void setupPipeline(ArchiveManager& archiveMgr);
-void drawFrame();
+struct PipelineSettings;
+
+void setupPipeline(const PipelineSettings& settings);
+void setupPipeline();
+
+void updatePipeline(GLFWwindow* window);
 
 }  // namespace Magnet::Rendering

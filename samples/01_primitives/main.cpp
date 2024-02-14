@@ -4,21 +4,22 @@ using namespace Magnet;
 
 const char* const TITLE = "Primitives Example";
 
-class Interface : public ProjectInterface {
+class App : public Magnet::Context {
  public:
-  void init(ApplicationContext& ctx) override {
+  void init() override {
     ArchiveManager archiveMgr(ARCH_assets);
   }
 
-  void update(ApplicationContext& ctx) override {
+  void update() override {
     // Project-specific
   }
 };
 
 int main(void) {
-  Interface appInterface;
-  ApplicationContext appCtx(appInterface);
+  App application;
 
-  appCtx.initialize(TITLE);
+  Application::registerContext(application, TITLE);
+  Application::initialize();
+
   return 0;
 }

@@ -1,7 +1,6 @@
 #include "WindowManager.hpp"
 
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
 #include <spdlog/spdlog.h>
 
 #include <magnet/Application.hpp>
@@ -11,11 +10,12 @@
 
 namespace Magnet::Window {
 
-void errorCallback(int error, const char* desc);
+void errorCallback(int error, const char* desc) {
+  spdlog::error("GLFW Error {}: {}", error, desc);
+}
 
-void initialize(const char* title) {
+void initialize(Magnet::Context& context, const char* title) {
   GLFWwindow* window;
-
   if (!glfwInit()) {
     spdlog::critical("Failed to initialize GLFW");
   }
@@ -25,12 +25,9 @@ void initialize(const char* title) {
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-  window = glfwCreateWindow(INIT_WIDTH, INIT_HEIGHT, "Application", nullptr, nullptr);
-
-  glfwSetWindowTitle(window, title);
+  window = glfwCreateWindow(INIT_WIDTH, INIT_HEIGHT, title, nullptr, nullptr);
 
   glfwMakeContextCurrent(window);
-  glfwSwapInterval(0);
 
   /* GLAD manages function pointers for OpenGL so initialize GLAD
    * before any OpenGL function is called */
@@ -42,27 +39,7 @@ void initialize(const char* title) {
 
   /* Initialize Input */
   Input::initialize(window);
-}
-
-void shutdown() {
-  glfwDestroyWindow(glfwGetCurrentContext());
-  glfwTerminate();
-}
-
-void swapBuffers() {
-  glfwSwapBuffers(glfwGetCurrentContext());
-}
-
-void pollEvents() {
-  glfwPollEvents();
-}
-
-bool shouldClose() {
-  return glfwWindowShouldClose(glfwGetCurrentContext());
-}
-
-void errorCallback(int error, const char* desc) {
-  spdlog::error("GLFW Error {}: {}", error, desc);
+  context.setWindow(window);
 }
 
 }  // namespace Magnet::Window
