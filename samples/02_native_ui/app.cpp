@@ -37,6 +37,4 @@ void App::update() {
     }
   }
   ImGui::End();
-
-  Widgets::DevTools(this);
 }

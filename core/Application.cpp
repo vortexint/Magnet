@@ -5,6 +5,7 @@
 #include <magnet/ArchiveManager.hpp>
 #include <magnet/Scene.hpp>
 #include <magnet/Shaders.hpp>
+#include <magnet/Widgets.hpp>
 
 #include "GFX/Pipeline.hpp"
 #include "GFX/UI/UserInterface.hpp"
@@ -66,6 +67,8 @@ void initialize() {
     Scene::progressECS(appContext);
 
     UI::newFrame();
+
+    Widgets::DevTools(appContext);
 
     appContext->update();
 

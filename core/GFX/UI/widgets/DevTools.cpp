@@ -79,8 +79,12 @@ void DevTools(Context* ctx) {
         ImPlot::PlotLine("Frame Time", values, IM_ARRAYSIZE(values), offset);
         ImPlot::EndPlot();
       }
-
+      ImGui::NewLine();
+      ImGui::Text("Information");
       ImGui::Separator();
+      // resolution
+      ImGui::Text("Resolution: %dx%d", static_cast<int>(work_size.x), static_cast<int>(work_size.y));
+      ImGui::Text("Mouse: %s", io.WantCaptureMouse ? "Captured" : "Free");
       ImGui::Text("Cursor: %d,%d", static_cast<int>(io.MousePos.x), static_cast<int>(io.MousePos.y));
     }
     ImGui::End();
@@ -96,6 +100,9 @@ void DevTools(Context* ctx) {
 
     ImGui::Begin("Vendor Info", &show_debug_info, window_flags);
     {
+      ImGui::Text("Graphics");
+      ImGui::Separator();
+      // Graphics card info
       static const GLubyte* renderer = glGetString(GL_RENDERER);
       static const GLubyte* version = glGetString(GL_VERSION);
       ImGui::Text("%s", renderer);
