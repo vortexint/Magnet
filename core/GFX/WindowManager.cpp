@@ -28,6 +28,7 @@ void initialize(Magnet::Context& context, const char* title) {
   window = glfwCreateWindow(INIT_WIDTH, INIT_HEIGHT, title, nullptr, nullptr);
 
   glfwMakeContextCurrent(window);
+  glfwSwapInterval(0);
 
   /* GLAD manages function pointers for OpenGL so initialize GLAD
    * before any OpenGL function is called */

@@ -13,7 +13,8 @@ void update(TimeState& state);
 // Get the time in seconds since epoch
 double getTime();
 
-// Get the interval between the last two updates
+// Get interval between the last two updates
 double getDelta(const TimeState& state);
+float getFPS(const TimeState& state);
 
 }  // namespace Magnet::Time

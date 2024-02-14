@@ -6,6 +6,8 @@ target_sources(magnet-core PRIVATE
   imgui_tables.cpp
   imgui_widgets.cpp
   imgui.cpp
+  implot_items.cpp
+  implot.cpp
   UserInterface.cpp
 )
 

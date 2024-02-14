@@ -38,5 +38,5 @@ void App::update() {
   }
   ImGui::End();
 
-  Widgets::DevTools(getECS());
+  Widgets::DevTools(this);
 }

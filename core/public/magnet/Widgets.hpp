@@ -4,6 +4,6 @@
 
 namespace Magnet::Widgets {
 
-void DevTools(flecs::world& ecs);
+void DevTools(Context* ctx);
 
 }  // namespace Magnet::Widgets
