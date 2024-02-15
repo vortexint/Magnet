@@ -14,9 +14,12 @@
 #include <magnet/Components.hpp>
 
 namespace Magnet::Components {
-  struct AudioSource;
-  struct Transform;
-  struct Environment;
+struct AudioSource;
+struct Transform;
+struct Environment;
+}  // namespace Magnet::Components
+namespace flecs {
+struct world;
 }
 
 namespace Magnet {
@@ -84,6 +87,7 @@ struct VolumeAdjuster {
 
 class AudioManager {
   ALBackend *al;
+  flecs::world *ecs = nullptr;
 
   VolumeAdjuster volumeAdjustor;
  public:
@@ -95,6 +99,7 @@ class AudioManager {
     return audioMgr;
   }
 
+  void setupECS(flecs::world* ecs);
   VolumeAdjuster& volumes();
 
   void handleRequestedPlay(Components::AudioSource&, 

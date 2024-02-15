@@ -49,6 +49,7 @@ AudioManager::AudioManager()
 }
 AudioManager::~AudioManager() { delete al; }
 
+void AudioManager::setupECS(flecs::world* ecs) { this->ecs = ecs; }
 VolumeAdjuster& AudioManager::volumes() { return volumeAdjustor; }
 void AudioManager::handleRequestedPlay(Components::AudioSource &source, 
                                       const Components::Transform &transform, 
@@ -128,7 +129,7 @@ void AudioManager::AudioSourceSystem(flecs::iter &iter, Components::Transform *t
   
   
   flecs::filter<Components::Transform, Components::Environment> environments_query =
-    Scene::getECS().filter<Components::Transform, Components::Environment>();
+    audioMgr.ecs->filter<Components::Transform, Components::Environment>();
 
   std::vector<std::pair<Components::Transform, Components::Environment>>
     environments;

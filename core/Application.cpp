@@ -3,6 +3,7 @@
 
 #include <magnet/Application.hpp>
 #include <magnet/ArchiveManager.hpp>
+#include <magnet/AudioManager.hpp>
 #include <magnet/Scene.hpp>
 #include <magnet/Shaders.hpp>
 #include <magnet/Widgets.hpp>
@@ -49,6 +50,8 @@ void initialize() {
   /* Initialize Systems */
 
   Scene::setupECS(appContext->getECS());
+  auto& ecs = appContext->getECS();
+  AudioManager::getInstance().setupECS(&ecs);
   UI::setup(archiveManager);
 
   appContext->init();
