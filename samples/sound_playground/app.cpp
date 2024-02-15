@@ -102,12 +102,6 @@ void App::update() {
                                .entity(this->mainEntityId)
                                .get_mut<Magnet::Components::Transform>();
 
-  ImGui::Begin("Environments Editor");
-  if (ImGui::Button("Try Play")) {
-    mainAudioSource->playSound(TEST_AUDIO_FILES[1]);
-  }
-
-
   ImGui::Separator();
   ImGui::Text("Environments");
 
