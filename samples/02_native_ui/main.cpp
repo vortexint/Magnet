@@ -3,10 +3,10 @@
 const char* const TITLE = "Native UI Example";
 
 int main(void) {
-  Interface appInterface;
-  ApplicationContext appCtx(appInterface);
+  App application;
 
-  appCtx.initialize(TITLE);
-
+  Application::registerContext(application, TITLE);
+  Application::initialize();
+  
   return 0;
 }

@@ -5,6 +5,7 @@ namespace Magnet::Time {
 void update(TimeState& state) {
   auto currentTime = std::chrono::system_clock::now();
   std::chrono::duration<double> elapsed = currentTime - state.lastTime;
+
   state.deltaTime = elapsed.count();
   state.lastTime = currentTime;
 }
@@ -17,5 +18,9 @@ double getTime() {
 }
 
 double getDelta(const TimeState& state) { return state.deltaTime; }
+
+float getFPS(const TimeState& state) {
+  return 1.0 / state.deltaTime;
+}
 
 }  // namespace Magnet::Time

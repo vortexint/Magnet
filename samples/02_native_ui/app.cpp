@@ -1,24 +1,23 @@
 #include "app.hpp"
 
 #include <GLFW/glfw3.h>
-#include <spdlog/spdlog.h>
 
 #include <magnet/Time.hpp>
 #include <magnet/Widgets.hpp>
 
-void Interface::init() {
-
-
+void App::init() {
+  // create default logger
+  spdlog::logger logger("app");
+  
 }
 
-void Interface::update() {
-
+void App::update() {
   static float value = 0.0f;
   static bool show_demo_window = true;
   if (show_demo_window) ImGui::ShowDemoWindow(&show_demo_window);
 
   if (value > 100.0f) value = 0.0f;
-  value += Time::getDelta() * 10.0f;
+  value += Time::getDelta(getTimeState()) * 10.0f;
 
   ImGui::SetNextWindowSize(ImVec2(300, 150), ImGuiCond_FirstUseEver);
   if (ImGui::Begin("Window Test")) {
@@ -38,6 +37,4 @@ void Interface::update() {
     }
   }
   ImGui::End();
-
-  Widgets::DevTools();
 }

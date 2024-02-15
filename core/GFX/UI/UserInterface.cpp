@@ -8,6 +8,7 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "implot.h"
 
 // This is a small wrapper over Dear ImGui to detach backend
 // functionality from the WindowManager and Renderer
@@ -18,6 +19,7 @@ void setup(ArchiveManager& archiveMgr) {
   // Setup Dear ImGui context
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
+  ImPlot::CreateContext();
   ImGuiIO& io = ImGui::GetIO();
   ImGuiStyle& style = ImGui::GetStyle();
   io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
@@ -151,12 +153,43 @@ void setup(ArchiveManager& archiveMgr) {
       ImVec4(1.0f, 0.4f, 0.0f, 1.0f);
     style.Colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.586f);
     style.Colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.586f);
+
+    /* ImPlot style */
+    ImPlotStyle* plot_style = &ImPlot::GetStyle();
+
+    plot_style->MinorAlpha = 0.25f;
+    plot_style->PlotPadding = ImVec2(0, 0);
+
+    plot_style->Colors[ImPlotCol_Line] = IMPLOT_AUTO_COL;
+    plot_style->Colors[ImPlotCol_Fill] = IMPLOT_AUTO_COL;
+    plot_style->Colors[ImPlotCol_MarkerOutline] = IMPLOT_AUTO_COL;
+    plot_style->Colors[ImPlotCol_MarkerFill] = IMPLOT_AUTO_COL;
+    plot_style->Colors[ImPlotCol_ErrorBar] = IMPLOT_AUTO_COL;
+    plot_style->Colors[ImPlotCol_FrameBg] = ImVec4(1.00f, 1.00f, 1.00f, 0.07f);
+    plot_style->Colors[ImPlotCol_PlotBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.50f);
+    plot_style->Colors[ImPlotCol_PlotBorder] = ImVec4(0.43f, 0.43f, 0.50f, 0.50f);
+    plot_style->Colors[ImPlotCol_LegendBg] = ImVec4(0.08f, 0.08f, 0.08f, 0.94f);
+    plot_style->Colors[ImPlotCol_LegendBorder] = ImVec4(0.43f, 0.43f, 0.50f, 0.50f);
+    plot_style->Colors[ImPlotCol_LegendText] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+    plot_style->Colors[ImPlotCol_TitleText] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+    plot_style->Colors[ImPlotCol_InlayText] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+    plot_style->Colors[ImPlotCol_AxisText] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+    plot_style->Colors[ImPlotCol_AxisGrid] = ImVec4(1.00f, 1.00f, 1.00f, 0.25f);
+    plot_style->Colors[ImPlotCol_AxisTick] = IMPLOT_AUTO_COL;       // TODO
+    plot_style->Colors[ImPlotCol_AxisBg] = IMPLOT_AUTO_COL;         // TODO
+    plot_style->Colors[ImPlotCol_AxisBgHovered] = IMPLOT_AUTO_COL;  // TODO
+    plot_style->Colors[ImPlotCol_AxisBgActive] = IMPLOT_AUTO_COL;   // TODO
+    plot_style->Colors[ImPlotCol_Selection] = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
+    plot_style->Colors[ImPlotCol_Crosshairs] = ImVec4(1.00f, 1.00f, 1.00f, 0.50f);
+
+    plot_style->Colormap = ImPlotColormap_Paired;
   }
 }
 
 void shutdown() {
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();
+  ImPlot::DestroyContext();
   ImGui::DestroyContext();
 }
 

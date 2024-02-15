@@ -39,7 +39,7 @@ const char* TEST_AUDIO_FILES[] = {
   "tracks/9mm-pistol-shot-6349.ogg",
 };
 
-void Interface::init() {
+void App::init() {
   ArchiveManager archiveMgr(ARCH_data, ARCH_data_KEY);
   this->archiveMgr = new ArchiveManager("data.magnet", nullptr);
 

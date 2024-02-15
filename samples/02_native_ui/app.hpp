@@ -5,10 +5,9 @@
 
 using namespace Magnet;
 
-class Interface : public ProjectInterface {
+class App : public Magnet::Context {
 
  public:
   void init() override;
-
   void update() override;
 };

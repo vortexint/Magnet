@@ -1,20 +1,22 @@
+#include <magnet/Widgets.hpp>
+
 #include <glad/glad.h>
 #include <spdlog/spdlog.h>
 
 #include <magnet/Application.hpp>
-#include <magnet/InputManager.hpp>
+#include <magnet/Input.hpp>
 #include <magnet/Time.hpp>
-#include <magnet/Widgets.hpp>
 #include <magnet/Scene.hpp>
 
 #include "imgui.h"
+#include "implot.h"
 
 namespace Magnet::Widgets {
 
 bool show_console = false;
 bool show_debug_info = false;
 bool show_manipulate = false;
-class DevToolsObserver : public Observer {
+class DevToolsObserver : public Input::Observer {
  public:
   void onKeyEvent(int key, int, int action, int mods) override {
     // F3: Debug Info
@@ -22,13 +24,13 @@ class DevToolsObserver : public Observer {
       show_debug_info = !show_debug_info;
     }
     // Shift + F10: Manipulate
-    if (key == GLFW_KEY_F10 && action == GLFW_PRESS && mods == GLFW_MOD_SHIFT) {
+    if (key == GLFW_KEY_F10 && mods == GLFW_MOD_SHIFT) {
       show_manipulate = !show_manipulate;
     }
   }
 };
 
-void DevTools() {
+void DevTools(Context* ctx) {
   static DevToolsObserver observer;
   static ImGuiIO& io = ImGui::GetIO();
 
@@ -43,8 +45,9 @@ void DevTools() {
     static ImGuiWindowFlags window_flags =
       ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize |
       ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing |
-      ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoMove;
-    
+      ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoMove |
+      ImGuiWindowFlags_NoBackground;
+
     ImGui::SetNextWindowPos(
       {
         (work_pos.x + PAD),
@@ -55,11 +58,34 @@ void DevTools() {
 
     ImGui::Begin("Debug Info", &show_debug_info, window_flags);
     {
-      ImGui::Text("Debug Info - F3");
+      ImGui::Text("Performance");
       ImGui::Separator();
-      ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
+      ImGui::Text("FPS: %.1f", Time::getFPS(ctx->getTimeState()));
+      ImGui::Text("Frame Time: %.5f ms", Time::getDelta(ctx->getTimeState()));
+
+      /* FrameTime graph */
+      static ImPlotFlags flags = ImPlotAxisFlags_NoDecorations;
+      static ImPlotAxisFlags axis_flags = ImPlotAxisFlags_Lock | ImPlotAxisFlags_NoDecorations;
+      // circular buffer
+      static float values[1000] = {0};
+      static int offset = 0;
+      values[offset] = Time::getDelta(ctx->getTimeState());
+      offset = (offset + 1) % IM_ARRAYSIZE(values);
+
+      if (ImPlot::BeginPlot("##FrameTime Graph", ImVec2(-1, 50), flags)) {
+        ImPlot::SetupAxes(nullptr, nullptr, axis_flags, axis_flags);
+        ImPlot::SetupAxisLimits(ImAxis_X1, 0, IM_ARRAYSIZE(values), false);
+        ImPlot::SetupAxisLimits(ImAxis_Y1, 0, 0.001, false);
+        ImPlot::PlotLine("Frame Time", values, IM_ARRAYSIZE(values), offset);
+        ImPlot::EndPlot();
+      }
+      ImGui::NewLine();
+      ImGui::Text("Information");
       ImGui::Separator();
-      ImGui::Text("Cursor: (%d,%d)", (int)io.MousePos.x, (int)io.MousePos.y);
+      // resolution
+      ImGui::Text("Resolution: %dx%d", static_cast<int>(work_size.x), static_cast<int>(work_size.y));
+      ImGui::Text("Mouse: %s", io.WantCaptureMouse ? "Captured" : "Free");
+      ImGui::Text("Cursor: %d,%d", static_cast<int>(io.MousePos.x), static_cast<int>(io.MousePos.y));
     }
     ImGui::End();
 
@@ -74,6 +100,9 @@ void DevTools() {
 
     ImGui::Begin("Vendor Info", &show_debug_info, window_flags);
     {
+      ImGui::Text("Graphics");
+      ImGui::Separator();
+      // Graphics card info
       static const GLubyte* renderer = glGetString(GL_RENDERER);
       static const GLubyte* version = glGetString(GL_VERSION);
       ImGui::Text("%s", renderer);
@@ -85,7 +114,6 @@ void DevTools() {
   /* Manipulate (Entity list and Property Editor) */
   if (show_manipulate) {
     static flecs::entity selectedEntity;
-    static flecs::world& ecs = Scene::getECS();
 
     // static ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration;
     ImGui::SetNextWindowPos(

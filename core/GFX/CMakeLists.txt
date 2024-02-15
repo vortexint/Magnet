@@ -1,7 +1,7 @@
 target_sources(magnet-core PRIVATE
   glad.c
-  Renderer.cpp
-  ShaderManager.cpp
+  Pipeline.cpp
+  Shaders.cpp
   Viewport.cpp
   WindowManager.cpp
 )

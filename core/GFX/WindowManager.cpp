@@ -1,19 +1,21 @@
 #include "WindowManager.hpp"
 
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
 #include <spdlog/spdlog.h>
 
 #include <magnet/Application.hpp>
-#include <magnet/InputManager.hpp>
+#include <magnet/Input.hpp>
 
 #include "Viewport.hpp"
 
-namespace Magnet {
+namespace Magnet::Window {
 
-void errorCallback(int error, const char* desc);
+void errorCallback(int error, const char* desc) {
+  spdlog::error("GLFW Error {}: {}", error, desc);
+}
 
-WindowManager::WindowManager() {
+void initialize(Magnet::Context& context, const char* title) {
+  GLFWwindow* window;
   if (!glfwInit()) {
     spdlog::critical("Failed to initialize GLFW");
   }
@@ -23,8 +25,7 @@ WindowManager::WindowManager() {
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-  window =
-    glfwCreateWindow(INIT_WIDTH, INIT_HEIGHT, "Application", nullptr, nullptr);
+  window = glfwCreateWindow(INIT_WIDTH, INIT_HEIGHT, title, nullptr, nullptr);
 
   glfwMakeContextCurrent(window);
   glfwSwapInterval(0);
@@ -37,33 +38,9 @@ WindowManager::WindowManager() {
   glfwSetFramebufferSizeCallback(window, Viewport::setSize);
   glfwSetErrorCallback(errorCallback);
 
-  /* Initialize InputManager */
-  InputManager::getInstance();
+  /* Initialize Input */
+  Input::initialize(window);
+  context.setWindow(window);
 }
 
-WindowManager::~WindowManager() {
-  glfwDestroyWindow(window);
-  glfwTerminate();
-}
-
-void WindowManager::setTitle(const char* title) {
-  glfwSetWindowTitle(window, title);
-}
-
-void WindowManager::swapBuffers() {
-  glfwSwapBuffers(window);
-}
-
-void WindowManager::pollEvents() {
-  glfwPollEvents();
-}
-
-bool WindowManager::shouldClose() const {
-  return glfwWindowShouldClose(window);
-}
-
-void errorCallback(int error, const char* desc) {
-  spdlog::error("GLFW Error {}: {}", error, desc);
-}
-
-}  // namespace Magnet
+}  // namespace Magnet::Window

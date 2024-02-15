@@ -2,7 +2,7 @@ add_library(magnet-core STATIC)
 add_library(magnet::core ALIAS magnet-core)
 
 target_sources(magnet-core PRIVATE
-  ApplicationContext.cpp
+  Application.cpp
   Scene.cpp
   Components.cpp
  "UTILS/Geometry.cpp")

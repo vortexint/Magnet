@@ -1,35 +1,14 @@
 #pragma once
 
+#include <magnet/Application.hpp>
+
 #include <cstdint>
 
-// Forward declarations
-struct GLFWwindow;
-namespace Magnet {
+namespace Magnet::Window {
 
-const uint32_t INIT_WIDTH = 1280;
-const uint32_t INIT_HEIGHT = 720;
-class WindowManager {
-  GLFWwindow* window;
+constexpr uint32_t INIT_WIDTH = 1280;
+constexpr uint32_t INIT_HEIGHT = 720;
 
-  WindowManager();
-  WindowManager(const WindowManager&) = delete;
-  void operator=(const WindowManager&) = delete;
+void initialize(Magnet::Context& context, const char* title);
 
- public:
-  static WindowManager& getInstance() {
-    static WindowManager instance;
-    return instance;
-  }
-  ~WindowManager();
-
-  void setTitle(const char* title);
-  void swapBuffers();
-  void pollEvents();
-
-  /* Getters */
-  GLFWwindow* getWindow() const { return window; }
-
-  bool shouldClose() const;
-};
-
-} // namespace Magnet
+}  // namespace Magnet::Window
