@@ -102,6 +102,7 @@ void App::update() {
                                .entity(this->mainEntityId)
                                .get_mut<Magnet::Components::Transform>();
 
+  ImGui::Begin("Environments Editor");
   ImGui::Separator();
   ImGui::Text("Environments");
 
