@@ -77,9 +77,11 @@ struct ALAuxiliaryEffectSlot {
 };
 struct ALFilter {
   static std::optional<ALFilter> create();
+
   uint32_t filter = 0;
 
-  
+  void setFilter(const Components::Filter &filter);
+  void reset();
   void destroy();
 };
 
@@ -106,6 +108,8 @@ struct ALAudioRequest {
   std::optional<uint32_t> environmentalEffectSlotId;
 
   static std::optional<ALAudioRequest> create(uint32_t requestId);
+
+  void setFilter(const Components::Filter &filter);
 
   void destroy();
 };

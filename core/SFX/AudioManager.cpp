@@ -130,7 +130,7 @@ void AudioManager::AudioSourceSystem(flecs::iter &iter, Components::Transform *t
   flecs::filter<Components::Transform, Components::Environment> environments_query =
     Scene::getECS().filter<Components::Transform, Components::Environment>();
 
-  std::vector<std::pair<AABB, Components::Environment>>
+  std::vector<std::pair<Components::Transform, Components::Environment>>
     environments;
   const int ENV_DISTANCE = 1000;
   vec3 listenerPos = { 0.f, 0.f, 0.f };
@@ -147,14 +147,15 @@ void AudioManager::AudioSourceSystem(flecs::iter &iter, Components::Transform *t
         }
   
         if (cornerIsWithinDistance) {
-          environments.push_back(std::make_pair(envBoundingBox, environment[row]));
+          environments.push_back(std::make_pair(transform[row], environment[row]));
         }
       }
   });
 
   auto findEnvironment = [&](vec3 pos)->std::optional < Components::Environment > {
-    for (auto &[aabb, environment]: environments) {
-      if (aabb.contains(pos)) {
+    for (auto &[transform, environment]: environments) {
+      auto aabb = AABB::fromPositionAndSize(transform.position, transform.scale);
+      if (aabb.rotatedAABBContains(transform.rotation, pos)) {
         return environment;
       }
     }

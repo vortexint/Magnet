@@ -37,6 +37,45 @@ AABB AABB::fromTransform(const Magnet::Components::Transform& hTransform) {
 
   return AABB::fromPoints2(corners[0], corners[1]);
 }
+AABB AABB::fromPositionAndSize(vec3 pos, vec3 scale) {
+  vec3 corners[2];
+  corners[0][0] = -0.5f;
+  corners[0][1] = -0.5f;
+  corners[0][2] = -0.5f;
+  corners[1][0] = 0.5f;
+  corners[1][1] = 0.5f;
+  corners[1][2] = 0.5f;
+
+  
+  for (size_t i = 0; i < 2; ++i) {
+    glm_vec3_mul(scale, corners[i], corners[i]);
+    glm_vec2_add(pos, corners[i], corners[i]);
+  }
+
+  return AABB::fromPoints2(corners[0], corners[1]);
+}
+bool AABB::rotatedAABBContains(versor hRot, vec3 hPoint) {
+  // Instead of rotating the aabb and see if that contains the point
+  // We can instead rotate the point with the inverse rotation around
+  // the center of the ABB, and check if the original AABB contains
+  // the new rotated point
+
+  versor rot = {hRot[0], hRot[1], hRot[2], hRot[3]};
+  vec3 point = {hPoint[0], hPoint[1], hPoint[2]};
+
+  glm_quat_inv(rot, rot); // Inverts the quaterion
+  // If the original quaternion rotate x degrees around an axis
+  // the inverse will rotate -x degrees around the same axis
+
+  vec3 center = {};
+  this->getCenter(center);
+  glm_vec3_sub(point, center, point);
+  glm_quat_rotatev(rot, point, point);
+  glm_vec3_add(point, center, point);
+
+  return contains(point);
+}
+
 
 std::array<std::array<float, 3>, 8> AABB::corners() {
   std::array<std::array<float, 3>, 8> boxCorners = {
@@ -51,6 +90,12 @@ std::array<std::array<float, 3>, 8> AABB::corners() {
   };
 
   return boxCorners;
+}
+void AABB::getCenter(vec3 center) {
+  vec3 hBox[2] = {{box[0][0], box[0][1], box[0][2]},
+                  {box[1][0], box[1][1], box[1][2]}};
+
+  glm_aabb_center(hBox, center);
 }
 
 void GET_FORWARD(vec3 v) {

@@ -149,7 +149,6 @@ void ALSource::setCone(const Components::Cone &cone) {
     spdlog::warn("Setting cone failed");
   }
 }
-
 std::optional<ALBuffer> ALBuffer::create(std::span<const uint8_t> bytes,
                                          AudioFormat audioFormat,
                                          size_t sampleRate) {
@@ -257,6 +256,29 @@ std::optional<ALFilter> ALFilter::create() {
 
 return filter;
 }
+void ALFilter::setFilter(const Components::Filter &filter) {
+  switch (filter.type) { 
+  case Components::FilterType::BANDPASS:
+    alFilteri(this->filter, AL_FILTER_TYPE, AL_FILTER_BANDPASS);
+    alFilterf(this->filter, AL_BANDPASS_GAIN, filter.gain);
+    alFilterf(this->filter, AL_BANDPASS_GAINHF, filter.gainHighFrequency);
+    alFilterf(this->filter, AL_BANDPASS_GAINLF, filter.gainLowFrequency);
+    break;
+  case Components::FilterType::LOWPASS:
+    alFilteri(this->filter, AL_FILTER_TYPE, AL_FILTER_LOWPASS);
+    alFilterf(this->filter, AL_LOWPASS_GAIN, filter.gain);
+    alFilterf(this->filter, AL_LOWPASS_GAINHF, filter.gainHighFrequency);
+    break;
+  case Components::FilterType::HIGHPASS:
+    alFilteri(this->filter, AL_FILTER_TYPE, AL_FILTER_HIGHPASS);
+    alFilterf(this->filter, AL_HIGHPASS_GAIN, filter.gain);
+    alFilterf(this->filter, AL_HIGHPASS_GAINLF, filter.gainLowFrequency);
+    break;
+  }
+}
+void ALFilter::reset() { 
+  alFilteri(filter, AL_FILTER_TYPE, AL_FILTER_NULL);
+}
 void ALFilter::destroy() { alDeleteFilters(1, &filter); }
 std::optional<ALEffect> ALEffect::create() {
   ALEffect effect;
@@ -341,6 +363,9 @@ std::optional<ALAudioRequest> ALAudioRequest::create(uint32_t requestId) {
   }
 
   return std::nullopt;
+}
+void ALAudioRequest::setFilter(const Components::Filter &filter) {
+  this->filter.setFilter(filter);
 }
 void ALAudioRequest::destroy() {
   source.destroy();
@@ -541,6 +566,9 @@ void ALBackend::setParameters(uint32_t requestId,
         request->source.setCone(*component.cone);
       }
       request->source.setLooping(component.looping);
+      if (component.filter) {
+        request->setFilter(*component.filter);
+      }
     }
   }
 }
@@ -611,6 +639,7 @@ void ALBackend::freeRequest(uint32_t requestId) {
       decrementEffectSlot(*request->environmentalEffectSlotId);
     }
 
+    request->filter.reset();
     request->source.reset();
 
     usedRequestIds.erase(idLoc);

@@ -5,7 +5,29 @@
 
 namespace Magnet::Components {
 
-  
+
+bool operator==(const Filter &lhs, const Filter &rhs) { 
+  if (lhs.type != rhs.type) {
+    return false;
+  }
+
+  switch (lhs.type) {
+  case FilterType::LOWPASS:
+    return lhs.gain == rhs.gain &&
+            lhs.gainHighFrequency == rhs.gainHighFrequency;
+    break;
+  case FilterType::HIGHPASS:
+    return lhs.gain == rhs.gain && lhs.gainLowFrequency == rhs.gainLowFrequency;
+    break;
+  case FilterType::BANDPASS:
+    return lhs.gain == rhs.gain && lhs.gainLowFrequency == rhs.gainLowFrequency;
+    break;
+  }
+
+  return false;
+}
+bool operator!=(const Filter &lhs, const Filter &rhs) { return !(lhs == rhs); }
+
 const std::pair<Components::AudioTag, const char *> TAG_NAMES[] = {
 {Components::AudioTag::VOICE, "VOIC"},
 {Components::AudioTag::SOUND_EFFECTS, "SOUND_EFFECTS"},
@@ -88,9 +110,10 @@ bool operator!=(const AudioSource &lhs, const AudioSource& rhs) {
   bool loopingDiff = lhs.looping != rhs.looping;
   bool isSpatialDiff = lhs.isSpatial != rhs.isSpatial;
   bool effectIdDiff = lhs.effectId != rhs.effectId;
+  bool filterDiff = lhs.filter != rhs.filter;
   
   return trackNameDiff || audioBuffDiff || requestIdDiff || stateDiff ||
          volumeDiff || pitchDiff || coneDiff || loopingDiff || isSpatialDiff ||
-         effectIdDiff;
+         effectIdDiff || filterDiff;
 }
 } // namespace Magnet

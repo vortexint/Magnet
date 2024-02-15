@@ -87,7 +87,7 @@ void Interface::init() {
   auto entity = ecs.entity("Environment");
   entity.set<Magnet::Components::Transform>({});
   entity.set<Magnet::Components::Environment>(
-    {"EFX_REVERB_PRESET_CASTLE_LONGPASSAGE"});
+    {"EFX_REVERB_PRESET_GENERIC"});
   environmentIds.push_back(entity.id());
     
 }

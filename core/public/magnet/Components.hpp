@@ -84,6 +84,19 @@ bool operator==(const Cone&, const Cone&);
 bool operator!=(const Cone&, const Cone&);
 
 
+
+enum class FilterType { LOWPASS, HIGHPASS, BANDPASS };
+
+struct Filter {
+  FilterType type = FilterType::BANDPASS;
+  float gain = 1.f;
+  float gainHighFrequency = 1.f;
+  float gainLowFrequency = 1.f;
+};
+bool operator==(const Filter&, const Filter&);
+bool operator!=(const Filter&, const Filter&);
+
+
 enum class AudioTag { VOICE, SOUND_EFFECTS, MUSIC, NONE };
 std::optional<AudioTag> from_string(const std::string&);
 std::string to_string(AudioTag);
@@ -106,6 +119,7 @@ struct AudioSource {
   std::optional<Cone> cone = std::nullopt;
   bool looping = false;
   std::optional<uint32_t> effectId = std::nullopt;
+  std::optional<Filter> filter;
 
   void playSound(const char* trackName);
   void stop();
