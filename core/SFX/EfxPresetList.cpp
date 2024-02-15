@@ -1,4 +1,4 @@
-#include "EfxPresetList.h"
+#include "EfxPresetList.hpp"
 
 #include <AL/efx-presets.h>
 
@@ -236,7 +236,8 @@ const char* EFX_PRESET_NAMES[] = {
 "EFX_REVERB_PRESET_SMALLWATERROOM"
 };
 
-void ConvertReverbPresetDescriptionALPreset(const EAXReverbDescription& desc, EFXEAXREVERBPROPERTIES* a) {
+void ConvertReverbPresetDescriptionALPreset(const ReverbDescription& desc,
+                                            EFXEAXREVERBPROPERTIES* a) {
   a->flDensity = desc.density;
   a->flDiffusion = desc.diffusion;
   a->flGain = desc.gain;
@@ -261,8 +262,8 @@ void ConvertReverbPresetDescriptionALPreset(const EAXReverbDescription& desc, EF
   a->flRoomRolloffFactor = desc.roomRolloffFactor;
   a->iDecayHFLimit = desc.decayHFLimit;
 }
-EAXReverbDescription ConvertALPresetToReverbPresetDescription(const EFXEAXREVERBPROPERTIES* a) {
-  EAXReverbDescription desc = {};
+ReverbDescription ConvertALPresetToReverbPresetDescription(const EFXEAXREVERBPROPERTIES* a) {
+  ReverbDescription desc = {};
   desc.density = a->flDensity;
   desc.diffusion = a->flDiffusion;
   desc.gain = a->flGain;
@@ -294,8 +295,8 @@ static_assert(
   sizeof(EFX_PRESET_NAMES) / sizeof(EFX_PRESET_NAMES[0]),
   "EFX_PRESET_LIST should be the same size as EFX_PRESET_NAMES"
 );
-std::unordered_map<std::string, EAXReverbDescription> fillPresetList() {
-  std::unordered_map<std::string, EAXReverbDescription> presets;
+std::unordered_map<std::string, ReverbDescription> fillPresetList() {
+  std::unordered_map<std::string, ReverbDescription> presets;
 
   int PRESET_COUNT = sizeof(EFX_PRESET_LIST) / sizeof(EFX_PRESET_LIST[0]);
   for (size_t i = 0; i < PRESET_COUNT; ++i) {
@@ -304,10 +305,10 @@ std::unordered_map<std::string, EAXReverbDescription> fillPresetList() {
 
   return presets;
 };
-const std::unordered_map<std::string, EAXReverbDescription> &getEFXPresets() {
+const std::unordered_map<std::string, ReverbDescription>& getEFXPresets() {
   
 
-  static std::unordered_map<std::string, EAXReverbDescription> presets = 
+  static std::unordered_map<std::string, ReverbDescription> presets = 
     fillPresetList();
   return presets;
 }

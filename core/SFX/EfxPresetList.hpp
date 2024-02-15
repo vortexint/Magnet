@@ -6,9 +6,8 @@
 #include <cglm/cglm.h>
 
 #include <magnet/AudioManager.hpp>
-#include <SFX/EfxPresetList.hpp>
 
 
 namespace Magnet {
-  const std::unordered_map<std::string, EAXReverbDescription> &getEFXPresets();
+const std::unordered_map<std::string, ReverbDescription> &getEFXPresets();
 } // namespace Magnet

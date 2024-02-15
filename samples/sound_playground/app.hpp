@@ -14,6 +14,10 @@ class Interface : public ProjectInterface {
 
   flecs::entity_t mainEntityId;
 
+  ArchiveManager *archiveMgr;
+  std::vector<flecs::entity_t> environmentIds;
+  std::vector<flecs::entity_t> sourceIds;
+  std::vector<std::string> trackNames;
  public:
   void init() override;
 

@@ -1,8 +1,16 @@
 #pragma once
 
+#include <optional>
+#include <span>
+#include <string>
+
 #include <cglm/cglm.h>
 
-#include <magnet/AudioManager.hpp>  // TODO: Remove this dependency, AudioManager should be hidden from the public API
+// TODO: Remove when asset system is finished
+namespace Magnet {
+struct ALBuffer;
+}
+
 namespace Magnet::Components {
 
 /* Scene Components */
@@ -16,6 +24,9 @@ struct Transform {
   versor rotation{0.0f, 0.0f, 0.0f, 1.0f};
   vec3   scale{1.0f, 1.0f, 1.0f};
 };
+
+bool operator==(const Transform&, const Transform&);
+bool operator!=(const Transform&, const Transform&);
 
 /* RENDERING */
 
@@ -59,52 +70,50 @@ struct AreaLight : public LightSource {
 
 /* AUDIO */
 
-enum class AudioSourcePlayState { REQUESTED_PLAY, PLAYING, STOPPED };
 
-class AudioSource {
-  friend void AudioManager::AudioSourceSystem(flecs::iter& iter, 
-                                              Transform* transforms,
-                                              AudioSource* sources);
-  AudioSourcePlayState playState;
-  std::optional<SpatialAudioChannel> channel;
-  std::optional<AudioFilterDescription> filterDesc;
-  std::optional<AudioFilter> filter;
-  std::optional<EAXReverbDescription> reverb;
-  std::optional<AudioEffect> effect;
+struct Environment {
+  std::optional<const char*> effectName;
+};
 
-  AudioBuffer* audioBuffer = nullptr;
+struct Cone {
+  float angleDeg = 0.f;
+  float outerGain = 0.f;
+  
+};
+bool operator==(const Cone&, const Cone&);
+bool operator!=(const Cone&, const Cone&);
+
+
+enum class AudioTag { VOICE, SOUND_EFFECTS, MUSIC, NONE };
+std::optional<AudioTag> from_string(const std::string&);
+std::string to_string(AudioTag);
+std::span<const AudioTag> allAudioTags();
+
+
+enum class AudioPlayState { REQUESTED_PLAY, PLAYING, STOPPED };
+
+struct AudioSource {
   const char* trackName = nullptr;
-  AudioBuffer *buffer;
-  double timestampStartedS = 0.0;
-public:
+  ALBuffer* audioBuffer = nullptr;
+  std::optional<uint32_t> requestId = std::nullopt;
+  bool isSpatial = true;
+  // TODO: Make the previous 4 members private
+
+  AudioPlayState state = AudioPlayState::STOPPED;
   AudioTag tag = AudioTag::NONE;
   float volume = 1.f;
   float pitch = 1.f;
-  std::optional<Cone> cone;
+  std::optional<Cone> cone = std::nullopt;
   bool looping = false;
+  std::optional<uint32_t> effectId = std::nullopt;
 
-  void reset();
-  AudioSource();
-
-  AudioSourcePlayState getPlayState();
-  const char* getTrackName();
-
-
-  void play_sound(
-    const char* name, AudioTag tag = AudioTag::NONE,
-    bool looping = false, float volume = 1.f,
-    std::optional<AudioFilterDescription> desc = std::nullopt,
-    std::optional<EAXReverbDescription> reverb = std::nullopt
-  );
-  void play_sound(
-    AudioBuffer *buffer, AudioTag tag = AudioTag::NONE,
-    bool looping = false, float volume = 1.f,
-    std::optional<AudioFilterDescription> desc = std::nullopt,
-    std::optional<EAXReverbDescription> reverb = std::nullopt
-  );
-
+  void playSound(const char* trackName);
   void stop();
 };
+
+bool operator==(const AudioSource&, const AudioSource&);
+bool operator!=(const AudioSource&, const AudioSource&);
+
 
 /* PHYSICS */
 

@@ -35,13 +35,16 @@ endif()
 
 find_package(OpenGL REQUIRED)
 
+
 target_include_directories(magnet-core PRIVATE
                            ${CMAKE_CURRENT_SOURCE_DIR}
                            ${OPENGL_INCLUDE_DIR}
+                           ${CMAKE_CURRENT_SOURCE_DIR}/SFX
                            PUBLIC
                            ${CMAKE_CURRENT_SOURCE_DIR}/public
                            ${CMAKE_SOURCE_DIR}/submodules/libarchive/libarchive
                            GFX
+                           ${CMAKE_CURRENT_SOURCE_DIR}/SFX
 )
 
 target_link_libraries(magnet-core PUBLIC

@@ -1,13 +1,12 @@
 #include <magnet/Components.hpp>
-#include <../SFX/EfxPresetList.h>
+#include <magnet/Scene.hpp>
+
+#include <magnet/AudioManager.hpp>
+
+#include <../SFX/EfxPresetList.hpp>
 
 #include "app.hpp"
 
-// DEBUG: Remove these 3 includes
-#define AL_ALEXT_PROTOTYPES
-#include <AL/al.h>
-#include <AL/alc.h>
-#include <AL/efx.h>
 
 #include <GLFW/glfw3.h>
 #include <spdlog/spdlog.h>
@@ -39,26 +38,10 @@ const char* TEST_AUDIO_FILES[] = {
   "tracks/whoosh-cinematic-161021.ogg",
   "tracks/9mm-pistol-shot-6349.ogg",
 };
-Magnet::AudioTag TEST_AUDIO_FILE_TAGS[] = {
-  AudioTag::MUSIC,
-  AudioTag::MUSIC,
-  AudioTag::MUSIC,
-  AudioTag::MUSIC,
-  AudioTag::SOUND_EFFECTS,
-  AudioTag::MUSIC,
-  AudioTag::SOUND_EFFECTS,
-  AudioTag::SOUND_EFFECTS,
-  AudioTag::SOUND_EFFECTS,
-  AudioTag::SOUND_EFFECTS,
-  AudioTag::SOUND_EFFECTS,
-  AudioTag::SOUND_EFFECTS,
-  AudioTag::SOUND_EFFECTS,
-  AudioTag::SOUND_EFFECTS,
-  AudioTag::SOUND_EFFECTS,
-};
 
 void Interface::init() {
   ArchiveManager archiveMgr(ARCH_data, ARCH_data_KEY);
+  this->archiveMgr = new ArchiveManager("data.magnet", nullptr);
 
   window = glfwGetCurrentContext();
 
@@ -76,6 +59,22 @@ void Interface::init() {
 
     free(icons[0].pixels);
   }
+  
+
+  auto& audioManager = AudioManager::getInstance();
+  const size_t NUM_TEST_AUDIO_FILES = sizeof(TEST_AUDIO_FILES) / sizeof(TEST_AUDIO_FILES[0]);
+  for (size_t i = 0; i < NUM_TEST_AUDIO_FILES; ++i) {
+    std::vector<uint8_t> fileBuffer;
+    this->archiveMgr->loadFile(TEST_AUDIO_FILES[i], fileBuffer);
+    std::span<const uint8_t> fileSpan(fileBuffer.data(), fileBuffer.size());
+    RawAudioData rawAudio = AudioManager::LoadAudio(fileSpan).value();
+    std::span<const uint8_t> rawAudioData(rawAudio.data.data(), rawAudio.data.size());
+
+    audioManager.registerAudio(TEST_AUDIO_FILES[i], rawAudioData, rawAudio.format, rawAudio.sampleRate);
+    trackNames.push_back(TEST_AUDIO_FILES[i]);
+  }
+
+  audioManager.registerAllEfxPresets();
 
   auto& ecs = Scene::getECS();
 
@@ -83,9 +82,173 @@ void Interface::init() {
   mainEntity.set<Magnet::Components::AudioSource>({});
   mainEntity.set<Magnet::Components::Transform>({});
   this->mainEntityId = mainEntity.id();
+  sourceIds.push_back(mainEntity.id());
+  
+  auto entity = ecs.entity("Environment");
+  entity.set<Magnet::Components::Transform>({});
+  entity.set<Magnet::Components::Environment>(
+    {"EFX_REVERB_PRESET_CASTLE_LONGPASSAGE"});
+  environmentIds.push_back(entity.id());
+    
 }
 
 void Interface::update() {
+  auto& audioManager = AudioManager::getInstance();
+  auto* mainAudioSource = Scene::getECS()
+                            .entity(this->mainEntityId)
+                            .get_mut<Magnet::Components::AudioSource>();
+  auto* mainAudioTransform = Scene::getECS()
+                               .entity(this->mainEntityId)
+                               .get_mut<Magnet::Components::Transform>();
+
+  ImGui::Begin("Environments Editor");
+  if (ImGui::Button("Try Play")) {
+    mainAudioSource->playSound(TEST_AUDIO_FILES[1]);
+  }
+
+
+  ImGui::Separator();
+  ImGui::Text("Environments");
+
+  if (ImGui::Button("New Environment")) {
+    auto entity = Scene::getECS().entity();
+    entity.set<Magnet::Components::Transform>({});
+    entity.set<Magnet::Components::Environment>(
+      {"EFX_REVERB_PRESET_CASTLE_LONGPASSAGE"});
+    environmentIds.push_back(entity.id());
+  }
+  static size_t selectedEnvironment = 0;
+  for (size_t i = 0; i < environmentIds.size(); ++i) {
+    std::string environmentLabel = "Environment " + std::to_string(i);
+    if (ImGui::Selectable(environmentLabel.c_str(), selectedEnvironment == i)) {
+      selectedEnvironment = i;
+    }
+    if (selectedEnvironment == i) {
+      const auto& environmentId = environmentIds[i];
+
+      auto* environment = Scene::getECS()
+                            .entity(environmentId)
+                            .get_mut<Magnet::Components::Environment>();
+      auto* environmentTransform = Scene::getECS()
+                                     .entity(environmentId)
+                                     .get_mut<Magnet::Components::Transform>();
+      assert(environment && environmentTransform);
+
+      ImGui::DragFloat3("pos##EnvironmentPos", environmentTransform->position);
+      ImGui::DragFloat3("scale##EnvironmentScale", environmentTransform->scale);
+
+      const char* effectName = "";
+      if (environment->effectName) {
+        effectName = *environment->effectName;
+      }
+      if (ImGui::BeginCombo("Reverb##EnvironmentReverb", effectName)) {
+        for (auto& [name, preset] : getEFXPresets()) {
+          if (ImGui::Selectable(name.c_str(), effectName == name)) {
+            environment->effectName = name.c_str();
+          }
+        }
+
+        ImGui::EndCombo();
+      }
+    }
+  }
+
+  ImGui::Separator();
+  ImGui::Text("Volume");
+  ImGui::SliderFloat("MASTER##VolumeMASTER",
+                     &audioManager.volumes().masterVolume, 0.f, 1.f);
+  for (auto tag : Components::allAudioTags()) {
+    std::string name =
+      Components::to_string(tag) + "##Volume" + Components::to_string(tag);
+
+
+    ImGui::SliderFloat(name.c_str(), &audioManager.volumes().volumes[tag], 0.f,
+                       1.f);
+  }
+
+  ImGui::End();
+
+  ImGui::Begin("Audio Source Editor");
+
+  vec3 listenerPos = {};
+  AudioManager::getListenerPos(listenerPos);
+  ImGui::DragFloat3("Listener Pos", listenerPos);
+  AudioManager::setListenerPos(listenerPos);
+  
+  ImGui::Text("Audio Sources");
+  
+  static size_t selectedSourceId = 0;
+
+  static size_t selectedTrackId = 0;
+  const char* selectedTrackName = nullptr;
+  if (selectedTrackId < trackNames.size()) {
+    selectedTrackName = trackNames[selectedTrackId].c_str();
+  }
+  if (ImGui::BeginCombo("Tracks", selectedTrackName)) {
+    for (size_t i = 0; i < trackNames.size(); ++i) {
+      std::string trackName = trackNames[i] + "##Tracks" +
+                              std::to_string(i);
+      if (ImGui::Selectable(trackName.c_str(), selectedTrackId == i)) {
+        selectedTrackId = i;
+      }
+      if (selectedTrackId == i) {
+        ImGui::Text(trackNames[selectedTrackId].c_str());
+      }
+    }
+
+    ImGui::EndCombo();
+  }
+  if (ImGui::Button("Play Track with selected source") && 
+      selectedSourceId < sourceIds.size() && 
+      selectedTrackId < trackNames.size()) {
+    auto sourceId = sourceIds[selectedSourceId];
+    auto* audioSource = Scene::getECS()
+                          .entity(sourceId)
+                          .get_mut<Magnet::Components::AudioSource>();
+    audioSource->playSound(trackNames[selectedTrackId].c_str());
+  }
+
+  ImGui::Separator();
+  if (ImGui::Button("New Audio Source")) {
+    auto newAudioSource = Scene::getECS().entity();
+    newAudioSource.set<Magnet::Components::AudioSource>({});
+    newAudioSource.set<Magnet::Components::Transform>({});
+    sourceIds.push_back(newAudioSource);
+  }
+  for (size_t i = 0; i < sourceIds.size(); ++i) {
+    std::string name = "Source " + std::to_string(i);
+    if (ImGui::Selectable(name.c_str(), selectedSourceId == i)) {
+      selectedSourceId = i;
+    }
+    if (selectedSourceId == i) {
+      auto sourceId = sourceIds[selectedSourceId];
+      auto* audioSource = Scene::getECS()
+                            .entity(sourceId)
+                            .get_mut<Magnet::Components::AudioSource>();
+      auto* sourceTransform = Scene::getECS()
+                                .entity(sourceId)
+                                .get_mut<Magnet::Components::Transform>();
+      ImGui::DragFloat3("pos##AudioSourcePos", sourceTransform->position);
+      ImGui::DragFloat("volume##AudioSourceVolume", &audioSource->volume, 0.01f, 0.f, 1.f);
+      ImGui::DragFloat("pitch##AudioSourcePitch", &audioSource->pitch, 0.1f, 0.5f, 2.f);
+      ImGui::Checkbox("looping##AudioSourceLooping", &audioSource->looping);
+
+      const bool isSpatialAudioIsDisabled = audioSource->state != Components::AudioPlayState::STOPPED;
+      if (isSpatialAudioIsDisabled) {
+        ImGui::BeginDisabled();
+      }
+      ImGui::Checkbox("isSpatial##AudioSourceSpatial", &audioSource->isSpatial);
+      if (isSpatialAudioIsDisabled) {
+        ImGui::EndDisabled();
+      }
+      if (ImGui::Button("Stop Source##AudioSource")) {
+        audioSource->stop();
+      }
+    }
+  }
+
+  ImGui::End();
+  /*
   // DEBUG: Remove for testing purposes only
 
   ImGui::Begin("Sound Editor");
@@ -270,4 +433,5 @@ void Interface::update() {
   }
 
   ImGui::End();
+  */
 }
