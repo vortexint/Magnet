@@ -512,8 +512,9 @@ ALBackend::~ALBackend() {
   monoBuffers.clear();
 
   for (auto &[name, effect] : effects) {
-    effects.clear();
+    effect.destroy();
   }
+  effects.clear();
 
   for (auto &slot : slots) {
     slot.destroy();
