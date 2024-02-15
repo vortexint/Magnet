@@ -458,7 +458,7 @@ ALBackend::ALBackend() {
 
   m_MAX_SLOTS_PER_CHANNEL = 0;
   alcGetIntegerv(device, ALC_MAX_AUXILIARY_SENDS, 1, &m_MAX_SLOTS_PER_CHANNEL);
-  if (m_MAX_SLOTS_PER_CHANNEL <= 2) {
+  if (m_MAX_SLOTS_PER_CHANNEL <= 1) {
     spdlog::warn("On this device OpenAL only supports {} sound effects per channel"
                  ". Other sound effects will be ignored", m_MAX_SLOTS_PER_CHANNEL);
   }
@@ -636,7 +636,7 @@ void ALBackend::freeRequest(uint32_t requestId) {
     ALAudioRequest *request = getRequest(requestId);
     assert(request);
     if (request->environmentalEffectSlotId) {
-      decrementEffectSlot(*request->environmentalEffectSlotId);
+      clearEnvironmentalEffect(requestId);
     }
 
     request->filter.reset();
