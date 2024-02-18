@@ -1,3 +1,5 @@
+#define GLFW_INCLUDE_NONE
+
 #include <GLFW/glfw3.h>
 #include <cglm/cglm.h>
 #include <spdlog/spdlog.h>

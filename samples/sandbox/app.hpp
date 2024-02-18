@@ -1,8 +1,10 @@
 #pragma once
 
-#include <magnet/Application.hpp>
+#include <spdlog/spdlog.h>
 
-#include <GLFW/glfw3.h>
+#include <magnet/Application.hpp>
+#include <magnet/Library.hpp>
+
 #include "imgui.h"
 
 const char *const GAME_TITLE = "Sandbox";

@@ -7,7 +7,7 @@
 #include <spdlog/spdlog.h>
 
 #include <magnet/ArchiveManager.hpp>
-#include <magnet/AssetFactory.hpp>
+#include <magnet/Library.hpp>
 #include <magnet/Time.hpp>
 #include <memory>
 
@@ -18,7 +18,6 @@ class Context {
   Asset::Library assetLibrary;
   Time::TimeState timeState;
   GLFWwindow* window = nullptr;
-
  public:
   virtual void init() = 0;
   virtual void update() = 0;
