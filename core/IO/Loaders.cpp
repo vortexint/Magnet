@@ -8,7 +8,7 @@
 #define TINYGLTF_IMPLEMENTATION
 
 #include "qoi.h"
-#include "tiny_gltf.h" // includes stb_image.h, won't question it! :D
+#include "tiny_gltf.h"  // includes stb_image.h, won't question it! :D
 
 namespace Magnet::Asset {
 
@@ -34,7 +34,7 @@ std::unique_ptr<IAsset> AssetLoader(Mimetype mimetype,
     case Mimetype::GLB:
       // TODO
       break;
-    case Mimetype::PNG: {
+    case Mimetype::PNG: { // Portable Network Graphics
       auto texture = std::make_unique<Texture>();
       stbi_set_flip_vertically_on_load(true);
       unsigned char* img =
@@ -50,11 +50,11 @@ std::unique_ptr<IAsset> AssetLoader(Mimetype mimetype,
       setTexOptions();
 
       if (texture->channels == 3)
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture->width, texture->height, 0, GL_RGB,
-                     GL_UNSIGNED_BYTE, img);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture->width, texture->height,
+                     0, GL_RGB, GL_UNSIGNED_BYTE, img);
       else if (texture->channels == 4)
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture->width, texture->height, 0, GL_RGBA,
-                     GL_UNSIGNED_BYTE, img);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture->width, texture->height,
+                     0, GL_RGBA, GL_UNSIGNED_BYTE, img);
 
       glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -62,7 +62,31 @@ std::unique_ptr<IAsset> AssetLoader(Mimetype mimetype,
       asset = std::move(texture);
 
     } break;
-    case Mimetype::QOI: {
+    case Mimetype::QOI: { // Quite OK Image format
+      auto texture = std::make_unique<Texture>();
+      qoi_desc desc;
+      void* img = qoi_decode(data.data(), data.size(), &desc, 4);
+      if (img == nullptr) {
+        spdlog::error("Failed to load QOI data!");
+        return nullptr;
+      }
+
+      texture->width = desc.width;
+      texture->height = desc.height;
+      texture->channels = desc.channels;
+
+      glGenTextures(1, &(texture->id));
+      glBindTexture(GL_TEXTURE_2D, texture->id);
+
+      setTexOptions();
+
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture->width, texture->height,
+                   0, GL_RGBA, GL_UNSIGNED_BYTE, img);
+
+      glGenerateMipmap(GL_TEXTURE_2D);
+
+      free(img);
+      asset = std::move(texture);
     } break;
   }
   return asset;

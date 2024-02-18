@@ -29,7 +29,7 @@ enum class Mimetype : uint8_t {
   GLTF,  // GL Transmission Format
   GLB,   // glTF Binary
   PNG,   // Portable Network Graphics
-  QOI,   // Quite Ok Image format
+  QOI,   // Quite OK Image format
 };
 
 using ID = uint32_t;
