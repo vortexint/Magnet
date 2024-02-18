@@ -3,7 +3,7 @@ target_sources(magnet-core PRIVATE
   Pipeline.cpp
   Shaders.cpp
   Viewport.cpp
-  WindowManager.cpp
+  Window.cpp
 )
 
 add_subdirectory(UI)

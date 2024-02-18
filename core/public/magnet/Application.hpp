@@ -7,14 +7,16 @@
 #include <spdlog/spdlog.h>
 
 #include <magnet/ArchiveManager.hpp>
+#include <magnet/AssetFactory.hpp>
 #include <magnet/Time.hpp>
 #include <memory>
 
 namespace Magnet {
 
 class Context {
-  Time::TimeState timeState;
   flecs::world ecs;
+  Asset::Library assetLibrary;
+  Time::TimeState timeState;
   GLFWwindow* window = nullptr;
 
  public:
@@ -23,8 +25,9 @@ class Context {
 
   void setWindow(GLFWwindow* window) { this->window = window; }
 
-  Time::TimeState& getTimeState() { return timeState; }
   flecs::world& getECS() { return ecs; }
+  Asset::Library& getAssetLibrary() { return assetLibrary; }
+  Time::TimeState& getTimeState() { return timeState; }
   GLFWwindow*& getWindow() { return window; }
 };
 

@@ -13,7 +13,6 @@ namespace Magnet::Rendering {
 
 struct PipelineSettings;
 
-void setupPipeline(const PipelineSettings& settings);
 void setupPipeline();
 
 void updatePipeline(GLFWwindow* window);

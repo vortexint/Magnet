@@ -16,7 +16,6 @@ struct PipelineConfig {
   bool VSync = false;
 };
 
-// Will re-start the pipeline with `setupPipeline()` under the new configuration.
-void setConfig(const PipelineConfig& config);
+void setupPipeline(const PipelineConfig& config);
 
 }  // namespace Magnet::Rendering

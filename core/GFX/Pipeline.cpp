@@ -9,7 +9,7 @@
 #include <magnet/Scene.hpp>
 #include <magnet/Shaders.hpp>
 
-#include "GFX/WindowManager.hpp"
+#include "GFX/Window.hpp"
 #include "UI/UserInterface.hpp"
 #include "Viewport.hpp"
 
@@ -53,6 +53,7 @@ void updatePipeline(GLFWwindow* window) {
   /* Render scene */
   glUseProgram(baseID);
 
+  /* Render Native UI*/
   UI::draw();
 
   glfwSwapBuffers(window);

@@ -10,6 +10,7 @@
  * Do not add methods/logic. Keep them clean and simple.
  */
 
+using AssetID = size_t;
 namespace Magnet::Components {
 
 /* Scene Components */
@@ -27,7 +28,7 @@ struct Transform {
 /* RENDERING */
 
 struct Skybox {
-  uint32_t AssetID; // ID of the skybox texture.
+  AssetID HDRi;  // ID of the skybox texture.
 };
 
 /**
@@ -41,7 +42,7 @@ struct Camera {
 };
 
 struct MeshRenderer {
-  uint32_t AssetID; // ID of the mesh to render.
+  AssetID mesh; // ID of the loaded mesh to render.
 };
 
 struct LightSource {

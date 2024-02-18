@@ -67,7 +67,7 @@ void DevTools(Context* ctx) {
       static ImPlotFlags flags = ImPlotAxisFlags_NoDecorations;
       static ImPlotAxisFlags axis_flags = ImPlotAxisFlags_Lock | ImPlotAxisFlags_NoDecorations;
       // circular buffer
-      static float values[1000] = {0};
+      static float values[1024];
       static int offset = 0;
       values[offset] = Time::getDelta(ctx->getTimeState());
       offset = (offset + 1) % IM_ARRAYSIZE(values);
@@ -80,9 +80,9 @@ void DevTools(Context* ctx) {
         ImPlot::EndPlot();
       }
       ImGui::NewLine();
+      
       ImGui::Text("Information");
       ImGui::Separator();
-      // resolution
       ImGui::Text("Resolution: %dx%d", static_cast<int>(work_size.x), static_cast<int>(work_size.y));
       ImGui::Text("Mouse: %s", io.WantCaptureMouse ? "Captured" : "Free");
       ImGui::Text("Cursor: %d,%d", static_cast<int>(io.MousePos.x), static_cast<int>(io.MousePos.y));
