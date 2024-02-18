@@ -22,7 +22,4 @@ void App::init() {
 }
 
 void App::update() {
-  static Asset::ID baller =
-    getAssetLibrary().addAsset(Asset::Mimetype::PNG, "ball.png", archiveMgr);
-  spdlog::info("Baller ID: {}", baller);
 }
