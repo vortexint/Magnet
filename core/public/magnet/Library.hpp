@@ -47,6 +47,8 @@ class Library {
  public:
   ID addAsset(std::unique_ptr<IAsset> asset);
   ID addAsset(Mimetype mimetype, const std::vector<uint8_t>& data);
+  ID addAsset(Mimetype mimetype, const std::string& path,
+              ArchiveManager& archive);
   void removeAsset(ID);
 
   AssetPtr getAsset(ID);
