@@ -1,12 +1,8 @@
 #include "app.hpp"
 
-
-#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
 void App::init() {
-  ArchiveManager archiveMgr(ARCH_data, ARCH_data_KEY);
-
   window = glfwGetCurrentContext();
 
   // Load icon
@@ -23,9 +19,10 @@ void App::init() {
 
     free(icons[0].pixels);
   }
-
 }
 
 void App::update() {
-  
+  static Asset::ID baller =
+    getAssetLibrary().addAsset(Asset::Mimetype::PNG, "ball.png", archiveMgr);
+  spdlog::info("Baller ID: {}", baller);
 }
