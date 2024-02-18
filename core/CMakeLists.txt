@@ -51,8 +51,9 @@ target_link_libraries(magnet-core PUBLIC
                       freetype
                       glfw
                       lua_static
-                      spdlog
                       OpenAL::OpenAL
+                      spdlog
+                      tinygltf
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")

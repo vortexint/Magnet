@@ -2,7 +2,7 @@
 
 namespace Magnet::Asset {
 
-/* Deconstructors  */
+/* Destructors  */
 
 Texture::~Texture() { glDeleteTextures(1, &id); }
 Model::~Model() {

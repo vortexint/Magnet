@@ -3,11 +3,12 @@
 #include <magnet/Library.hpp>
 
 #define QOI_IMPLEMENTATION
-#define STB_IMAGE_IMPLEMENTATION
 #define STBI_ONLY_PNG
+#define STB_IMAGE_IMPLEMENTATION
+#define TINYGLTF_IMPLEMENTATION
 
 #include "qoi.h"
-#include "stb_image.h"
+#include "tiny_gltf.h" // includes stb_image.h, won't question it! :D
 
 namespace Magnet::Asset {
 
