@@ -9,6 +9,8 @@
 // TODO: Remove when asset system is finished
 namespace Magnet {
 struct ALBuffer;
+class AudioManager;
+class ALBackend;
 }
 
 namespace Magnet::Components {
@@ -102,23 +104,28 @@ std::span<const AudioTag> allAudioTags();
 
 enum class AudioPlayState { REQUESTED_PLAY, PLAYING, STOPPED };
 
-struct AudioSource {
-  const char* trackName = nullptr;
-  ALBuffer* audioBuffer = nullptr;
-  std::optional<uint32_t> requestId = std::nullopt;
-  bool isSpatial = true;
-  // TODO: Make the previous 4 members private
+class AudioSource {
+  friend bool operator==(const AudioSource&, const AudioSource&);
+  friend bool operator!=(const AudioSource&, const AudioSource&);
+  friend class Magnet::AudioManager;
+  friend class Magnet::ALBackend;
 
+  const char* trackName = nullptr;
+  std::optional<uint32_t> requestId = std::nullopt;
+  bool mIsSpatial = true;
+
+public:
   AudioPlayState state = AudioPlayState::STOPPED;
   AudioTag tag = AudioTag::NONE;
   float volume = 1.f;
   float pitch = 1.f;
   std::optional<Cone> cone = std::nullopt;
   bool looping = false;
-  std::optional<uint32_t> effectId = std::nullopt;
   std::optional<Filter> filter;
 
-  void playSound(const char* trackName);
+  const bool isSpatial() const;
+
+  void playSound(const char* trackName, bool mIsSpatial = true);
   void stop();
 };
 

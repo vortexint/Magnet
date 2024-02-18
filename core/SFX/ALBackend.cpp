@@ -149,6 +149,12 @@ void ALSource::setCone(const Components::Cone &cone) {
     spdlog::warn("Setting cone failed");
   }
 }
+void ALSource::setFilter(ALFilter filter) {
+  alSourcei(source, AL_DIRECT_FILTER, filter.filter);
+}
+void ALSource::clearFilter() {
+  alSourcei(source, AL_DIRECT_FILTER, AL_FILTER_NULL);
+}
 std::optional<ALBuffer> ALBuffer::create(std::span<const uint8_t> bytes,
                                          AudioFormat audioFormat,
                                          size_t sampleRate) {
@@ -366,7 +372,10 @@ std::optional<ALAudioRequest> ALAudioRequest::create(uint32_t requestId) {
 }
 void ALAudioRequest::setFilter(const Components::Filter &filter) {
   this->filter.setFilter(filter);
+  this->source.setFilter(this->filter);
 }
+void ALAudioRequest::clearFilter() { source.clearFilter(); }
+void ALAudioRequest::clearCone() { source.setCone(Components::Cone{ 0.f, AL_DEFAULT_CONE_OUTER_GAINHF}); }
 void ALAudioRequest::destroy() {
   source.destroy();
   filter.destroy();
@@ -540,37 +549,41 @@ void ALBackend::setParameters(uint32_t requestId,
     } else {
       clearEnvironmentalEffect(requestId);
     }
+
     if (request->oldTransform != transform) {
-      // This only triggers if the audio source is not spatial,
-      // but the transform has changed
-      if (!component.isSpatial) {
-        spdlog::warn(
-          "The audio source is spatial but the transform is changing."
-          "The changes in position will not effect the audio source");
-      } else {
+      if (component.isSpatial()) {
         request->source.setPosition(transform.position);
         request->source.setRotationVersor(transform.rotation);
       }
     }
+    if (!component.isSpatial()) {
+      Components::Transform defaultTransform;
+
+      request->source.setPosition(defaultTransform.position);
+      request->source.setRotationVersor(defaultTransform.rotation);
+    }
+    request->oldTransform = transform;
 
     
     float finalVolume = component.volume * volumes.masterVolume *
                         volumes.volumes.at(component.tag);
     request->source.setVolume(finalVolume);
-    if (request->oldAudioSource != component) {
-      request->oldAudioSource = component;
 
-      // TODO: Use tags and master volume to adjust volume not just
-      // source.volume
+    if (request->oldAudioSource != component) {
       request->source.setPitch(component.pitch);
       if (component.cone) {
         request->source.setCone(*component.cone);
+      } else {
+        request->clearCone();
       }
       request->source.setLooping(component.looping);
       if (component.filter) {
         request->setFilter(*component.filter);
+      } else {
+        request->clearFilter();
       }
     }
+    request->oldAudioSource = component;
   }
 }
 void ALBackend::registerEffect(const std::string &name, EffectDescription description) {
@@ -639,6 +652,7 @@ void ALBackend::freeRequest(uint32_t requestId) {
     if (request->environmentalEffectSlotId) {
       clearEnvironmentalEffect(requestId);
     }
+    request->effectOverflow = false;
 
     request->filter.reset();
     request->source.reset();
@@ -662,6 +676,9 @@ void ALBackend::setEnvironmentalEffect(uint32_t requestId,
   // if the effect slot for an effect doesn't exist
   // then create it and 
   if (auto *request = getRequest(requestId)) {
+    if (request->effectOverflow) {
+      return;
+    }
 
     if (request->environmentalEffectSlotId) {
       if (auto slotIdLoc = effectsToSlots.find(name);
@@ -680,6 +697,7 @@ void ALBackend::setEnvironmentalEffect(uint32_t requestId,
     } else {
       spdlog::warn(
         "No effect slots are available, no effect will be applied");
+      request->effectOverflow = true;
       return;
     }
   } else {
@@ -708,4 +726,19 @@ void ALBackend::setListenerPos(vec3 pos) {
 void ALBackend::getListenerPos(vec3 pos) {
   alGetListenerfv(AL_POSITION, pos);
 }
+AudioManagerDebugInfo ALBackend::getDebugInfo() const {
+  size_t nonZeroReferenceCounts = 0;
+  for (auto &count : slotReferenceCounts) {
+    if (count > 0) {
+      ++nonZeroReferenceCounts;
+    }
+  }
+
+  return AudioManagerDebugInfo{
+    static_cast<uint32_t>(this->slots.size()),
+    static_cast<uint32_t>(this->usedSlots.size()),
+    static_cast<uint32_t>(nonZeroReferenceCounts)
+  };
+}
+
 }

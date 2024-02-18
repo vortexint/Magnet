@@ -75,6 +75,8 @@ struct RawAudioData {
   AudioFormat format;
   std::vector<uint8_t> data;
   size_t sampleRate;
+
+  void clear();
 };
 
 
@@ -85,12 +87,20 @@ struct VolumeAdjuster {
   float masterVolume;
 };
 
+struct AudioManagerDebugInfo {
+  uint32_t slotsCount;
+  uint32_t usedSlotsCount;
+  uint32_t nonZeroSlotReferenceCount;
+};
+
 class AudioManager {
   ALBackend *al;
   flecs::world *ecs = nullptr;
 
   VolumeAdjuster volumeAdjustor;
  public:
+  static constexpr float MAX_DISTANCE = 128.f;
+
   AudioManager();
   ~AudioManager();
 
@@ -108,13 +118,13 @@ class AudioManager {
   void handlePlaying(Components::AudioSource&, 
                     const Components::Transform&,
                     const Components::Environment&);
-  void handleStopped(Components::AudioSource&, 
-                    const Components::Transform&,
-                    const Components::Environment&);
+  void handleStopped(Components::AudioSource&);
 
   static void AudioSourceSystem(flecs::iter&, Components::Transform*, Components::AudioSource*);
   
-  static std::optional<RawAudioData> LoadAudio(std::span<const uint8_t> rawFileData);
+  static bool LoadAudio(std::span<const uint8_t> rawFileData, RawAudioData &);
+
+  static void removeSource(flecs::entity e, Components::AudioSource);
 
   void registerAudio(const std::string&, std::span<const uint8_t> data, AudioFormat format, size_t sampleRate);
   void registerEffect(const std::string& name, EffectDescription);
@@ -123,5 +133,7 @@ class AudioManager {
 
   static void getListenerPos(vec3 pos);
   static void setListenerPos(const vec3 pos);
+
+  AudioManagerDebugInfo getDebugInfo() const;
 };
 } // namespace Magnet

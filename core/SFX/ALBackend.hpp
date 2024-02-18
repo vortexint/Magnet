@@ -23,6 +23,7 @@ namespace Magnet {
 struct ALBuffer;
 struct ALEffect;
 struct ALAuxiliaryEffectSlot;
+struct ALFilter;
 
 
 struct ALSource {
@@ -43,6 +44,8 @@ struct ALSource {
   void setVolume(float);
   void setPitch(float);
   void setCone(const Components::Cone &);
+  void setFilter(ALFilter);
+  void clearFilter();
 
   void destroy();
 };
@@ -107,9 +110,14 @@ struct ALAudioRequest {
 
   std::optional<uint32_t> environmentalEffectSlotId;
 
+  bool effectOverflow = false;
+
   static std::optional<ALAudioRequest> create(uint32_t requestId);
 
   void setFilter(const Components::Filter &filter);
+  void clearFilter();
+  void clearCone();
+  void clear();
 
   void destroy();
 };
@@ -176,6 +184,8 @@ class ALBackend {
 
   static void setListenerPos(vec3 pos);
   static void getListenerPos(vec3 pos);
+
+  AudioManagerDebugInfo getDebugInfo() const;
 };
 
   

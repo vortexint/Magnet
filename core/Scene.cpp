@@ -14,7 +14,8 @@ void setupECS(flecs::world& ecs) {
 
   ecs.component<Transform>();
   ecs.component<Camera>();
-  ecs.component<AudioSource>();
+  ecs.component<AudioSource>().on_remove(AudioManager::removeSource);
+  ecs.component<Environment>();
 
   /* Scene setup */
   flecs::entity activeCamera =

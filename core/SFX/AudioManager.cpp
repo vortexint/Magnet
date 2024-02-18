@@ -37,6 +37,7 @@ size_t FormatBytesPerSample(AudioFormat format) {
   return 0;
 }
 
+void RawAudioData::clear() { data.clear(); }
 VolumeAdjuster::VolumeAdjuster() : masterVolume(1.f) {
   for (auto tag : Components::allAudioTags()) {
     volumes[tag] = 1.f;
@@ -54,7 +55,7 @@ VolumeAdjuster& AudioManager::volumes() { return volumeAdjustor; }
 void AudioManager::handleRequestedPlay(Components::AudioSource &source, 
                                       const Components::Transform &transform, 
                                       const Components::Environment &environment) {
-  assert(source.trackName != nullptr ^ source.audioBuffer != nullptr);
+  assert(source.trackName != nullptr);
 
   if (source.requestId) {
     al->freeRequest(*source.requestId);
@@ -65,20 +66,18 @@ void AudioManager::handleRequestedPlay(Components::AudioSource &source,
   source.requestId = al->newRequest();
   if (source.requestId == std::nullopt) {
     spdlog::warn("Could not play sound newAudioRequest failed");
+    source.stop();
     return;
   }
 
   std::optional<ALBuffer> buffer = std::nullopt;
   if (source.trackName) {
-    if (source.isSpatial) {
+    if (source.isSpatial()) {
       buffer = al->getMonoBuffer(source.trackName);
     } else {
       buffer = al->getBuffer(source.trackName);
     }
     source.trackName = nullptr;
-  } else if (source.audioBuffer) {
-    buffer = *source.audioBuffer;
-    source.audioBuffer = nullptr;
   }
 
   if (buffer == std::nullopt) {
@@ -95,15 +94,14 @@ void AudioManager::handleRequestedPlay(Components::AudioSource &source,
   source.state = Components::AudioPlayState::PLAYING;
 
   assert(source.trackName == nullptr);
-  assert(source.audioBuffer == nullptr);
   assert(source.requestId);
 }
 void AudioManager::handlePlaying(Components::AudioSource &source, 
                                 const Components::Transform &transform,
                                 const Components::Environment &environment) {
   assert(source.trackName == nullptr);
-  assert(source.audioBuffer == nullptr);
   assert(source.requestId);
+
 
   if (auto *request = al->getRequest(source.requestId.value())) {
     al->setParameters(source.requestId.value(), source, transform,
@@ -114,10 +112,18 @@ void AudioManager::handlePlaying(Components::AudioSource &source,
     }
   }
 
+  
+  vec3 listenerPos = {};
+  getListenerPos(listenerPos);
+  vec3 sourcePos = {transform.position[0], transform.position[1],
+                    transform.position[2]};
+
+  const float distance = glm_vec3_distance(listenerPos, sourcePos);
+  if (distance > MAX_DISTANCE) {
+    source.stop();
+  }
 }
-void AudioManager::handleStopped(Components::AudioSource &source, 
-                                const Components::Transform &transform,
-                                const Components::Environment &environment) {
+void AudioManager::handleStopped(Components::AudioSource &source) {
   if (source.requestId) {
     al->freeRequest(*source.requestId);
     source.requestId = std::nullopt;
@@ -181,13 +187,23 @@ void AudioManager::AudioSourceSystem(flecs::iter &iter, Components::Transform *t
         audioMgr.handlePlaying(source, transform, environment);
         break;
       case Components::AudioPlayState::STOPPED:
-        audioMgr.handleStopped(source, transform, environment);
+        audioMgr.handleStopped(source);
         break;
     }
   }
 }
 
-std::optional<RawAudioData> AudioManager::LoadAudio(std::span<const uint8_t> rawFileData) { 
+void AudioManager::removeSource(flecs::entity e,
+  Components::AudioSource source) {
+  if (source.requestId) {
+    auto &audioMgr = AudioManager::getInstance();
+    
+    source.stop();
+    audioMgr.handleStopped(source);
+    source.requestId = std::nullopt;
+  }
+}
+bool AudioManager::LoadAudio(std::span<const uint8_t> rawFileData, RawAudioData &rawAudio) { 
   int spacialAudioChannels = 0, sampleRate = 0;
   short* hData = nullptr;
   int samples =
@@ -196,7 +212,7 @@ std::optional<RawAudioData> AudioManager::LoadAudio(std::span<const uint8_t> raw
 
   if (hData == nullptr) {
     spdlog::error("Could not parse audio file data");
-    return std::nullopt;
+    return false;
   }
 
   AudioFormat format = AudioFormat::AUDIO_FORMAT_STEREO16;
@@ -209,11 +225,14 @@ std::optional<RawAudioData> AudioManager::LoadAudio(std::span<const uint8_t> raw
     static_cast<uint8_t*>(static_cast<void*>(hData)),
     rawDataByteSize);
 
-  return RawAudioData(
-    format,
-    std::vector<uint8_t>(bytes.begin(), bytes.end()),
-    sampleRate
-  );
+  rawAudio.clear();
+
+  rawAudio.format = format;
+  rawAudio.data.resize(bytes.size_bytes());
+  memcpy(rawAudio.data.data(), bytes.data(), bytes.size_bytes());
+  rawAudio.sampleRate = sampleRate;
+
+  return true;
 }
 void AudioManager::registerAudio(const std::string &name, std::span < const uint8_t > data, AudioFormat format, size_t sampleRate) {
   al->genBuffers(name, data, format, sampleRate);
@@ -233,6 +252,9 @@ void AudioManager::setListenerPos(const vec3 pos) {
   vec3 posCopy = {pos[0], pos[1], pos[2]};
 
   ALBackend::setListenerPos(posCopy);
+}
+AudioManagerDebugInfo AudioManager::getDebugInfo() const {
+  return al->getDebugInfo();
 }
 
 } // namespace Magnet
