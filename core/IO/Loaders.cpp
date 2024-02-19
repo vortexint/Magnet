@@ -11,7 +11,7 @@
 #include "qoi.h"
 #include "tiny_gltf.h"  // includes stb_image.h, won't question it! :D
 
-namespace Magnet::Asset {
+namespace Magnet::Asset::Loader {
 
 void setTexOptions() {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -21,8 +21,8 @@ void setTexOptions() {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
-std::unique_ptr<IAsset> AssetLoader(Mimetype mimetype,
-                                    const std::vector<uint8_t>& data) {
+std::unique_ptr<IAsset> genAsset(Mimetype mimetype,
+                                 const std::vector<uint8_t>& data) {
   std::unique_ptr<IAsset> asset;
 
   switch (mimetype) {
@@ -35,7 +35,7 @@ std::unique_ptr<IAsset> AssetLoader(Mimetype mimetype,
     case Mimetype::GLB:
       // TODO
       break;
-    case Mimetype::PNG: { // Portable Network Graphics
+    case Mimetype::PNG: {  // Portable Network Graphics
       auto texture = std::make_unique<Texture>();
       stbi_set_flip_vertically_on_load(true);
       unsigned char* img =
@@ -63,7 +63,7 @@ std::unique_ptr<IAsset> AssetLoader(Mimetype mimetype,
       asset = std::move(texture);
 
     } break;
-    case Mimetype::QOI: { // Quite OK Image format
+    case Mimetype::QOI: {  // Quite OK Image format
       auto texture = std::make_unique<Texture>();
       qoi_desc desc;
       void* img = qoi_decode(data.data(), data.size(), &desc, 4);
@@ -93,4 +93,11 @@ std::unique_ptr<IAsset> AssetLoader(Mimetype mimetype,
   return asset;
 }
 
-}  // namespace Magnet::Asset
+std::unique_ptr<IAsset> genAsset(Mimetype mimetype, const std::string& path,
+                                 ArchiveManager& archive) {
+  std::vector<uint8_t> buffer;
+  archive.loadFile(path, buffer);
+  return genAsset(mimetype, buffer);
+}
+
+}  // namespace Magnet::Asset::Loader

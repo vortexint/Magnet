@@ -33,26 +33,32 @@ enum class Mimetype : uint8_t {
 };
 
 using ID = uint32_t;
-using AssetPtr = std::shared_ptr<IAsset>;
-using AssetsList = std::map<ID, AssetPtr>;
+using Ptr = std::shared_ptr<IAsset>;
+using List = std::map<ID, Ptr>;
 
-std::unique_ptr<IAsset> AssetLoader(Mimetype mimetype,
-                                    const std::vector<uint8_t>& data);
+namespace Loader {
+
+std::unique_ptr<IAsset> genAsset(Mimetype mimetype,
+                                 const std::vector<uint8_t>& data);
+                                 
+std::unique_ptr<IAsset> genAsset(Mimetype mimetype, const std::string& path,
+                                 ArchiveManager& archive);
+
+}  // namespace Loader
 
 // owned by app context
 class Library {
-  AssetsList assets;
+  List assets;
   ID nextID = 1;
 
  public:
+  // Adds Asset to the Library
   ID addAsset(std::unique_ptr<IAsset> asset);
-  ID addAsset(Mimetype mimetype, const std::vector<uint8_t>& data);
-  ID addAsset(Mimetype mimetype, const std::string& path,
-              ArchiveManager& archive);
+
   void removeAsset(ID);
 
-  AssetPtr getAsset(ID);
-  const AssetsList& getAllAssets() const { return assets; }
+  Ptr getAsset(ID);
+  const List& getAllAssets();
 };
 
 }  // namespace Magnet::Asset

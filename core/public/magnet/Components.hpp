@@ -2,6 +2,7 @@
 
 #include <cglm/cglm.h>
 
+#include <magnet/Library.hpp>  // For AssetID, Asset types
 #include <magnet/AudioManager.hpp>  // TODO: Remove this dependency, AudioManager should hide from the public API
 
 /**
@@ -9,8 +10,6 @@
  * Components are data structures only. They represent an entity's state.
  * Do not add methods/logic. Keep them clean and simple.
  */
-
-using AssetID = size_t;
 namespace Magnet::Components {
 
 /* Scene Components */
@@ -28,7 +27,7 @@ struct Transform {
 /* RENDERING */
 
 struct Skybox {
-  AssetID HDRi;  // ID of the skybox texture.
+  Asset::Ptr HDRi;
 };
 
 /**
@@ -36,13 +35,13 @@ struct Skybox {
  * @brief Describes a virtual camera and it's view frustum.
  */
 struct Camera {
-  float fieldOfView = 60.0f;                     // Angle defining visible scene extent
+  float fieldOfView = 60.0f;             // Angle defining visible scene extent
   vec2 clippingPlanes = {0.1f, 100.0f};  // Near and far clipping planes
   vec3 up{0.0f, 1.0f, 0.0f};
 };
 
 struct MeshRenderer {
-  AssetID mesh; // ID of the loaded mesh to render.
+  Asset::ID mesh;  // ID of the loaded mesh to render.
 };
 
 struct LightSource {
