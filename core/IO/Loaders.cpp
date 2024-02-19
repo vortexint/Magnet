@@ -11,8 +11,9 @@
 #include "qoi.h"
 #include "tiny_gltf.h"  // includes stb_image.h, won't question it! :D
 
-namespace Magnet::Asset::Loader {
+namespace Magnet::Library::Loader {
 
+// TODO: Move to rendering pipeline...?
 void setTexOptions() {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -21,9 +22,8 @@ void setTexOptions() {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
-std::unique_ptr<IAsset> genAsset(Mimetype mimetype,
-                                 const std::vector<uint8_t>& data) {
-  std::unique_ptr<IAsset> asset;
+ID generateAsset(Mimetype mimetype, const std::vector<uint8_t>& data) {
+  Library::Asset asset;
 
   switch (mimetype) {
     case Mimetype::EXR:
@@ -35,69 +35,62 @@ std::unique_ptr<IAsset> genAsset(Mimetype mimetype,
     case Mimetype::GLB:
       // TODO
       break;
-    case Mimetype::PNG: {  // Portable Network Graphics
-      auto texture = std::make_unique<Texture>();
-      stbi_set_flip_vertically_on_load(true);
+    case Mimetype::PNG: {
+      Texture texture;
+
       unsigned char* img =
-        stbi_load_from_memory(data.data(), data.size(), &texture->width,
-                              &texture->height, &texture->channels, 0);
+        stbi_load_from_memory(&data[0], data.size(), &texture.width,
+                              &texture.height, &texture.channels, 0);
       if (img == nullptr) {
-        spdlog::error("Failed to load PNG data!");
-        return nullptr;
+        spdlog::error("Failed to load PNG!");
+        return 0;
       }
-      glGenTextures(1, &(texture->id));
-      glBindTexture(GL_TEXTURE_2D, texture->id);
 
+      glGenTextures(1, &texture.id);
+      glBindTexture(GL_TEXTURE_2D, texture.id);
       setTexOptions();
-
-      if (texture->channels == 3)
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture->width, texture->height,
-                     0, GL_RGB, GL_UNSIGNED_BYTE, img);
-      else if (texture->channels == 4)
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture->width, texture->height,
-                     0, GL_RGBA, GL_UNSIGNED_BYTE, img);
-
       glGenerateMipmap(GL_TEXTURE_2D);
 
       free(img);
-      asset = std::move(texture);
 
-    } break;
-    case Mimetype::QOI: {  // Quite OK Image format
-      auto texture = std::make_unique<Texture>();
+      asset.type = AssetType::Texture;
+      asset.data = std::move(texture);
+      ID id = addAsset(std::move(asset));
+      return id;
+    }
+    case Mimetype::QOI: {
+      Texture texture;
       qoi_desc desc;
       void* img = qoi_decode(data.data(), data.size(), &desc, 4);
+      
       if (img == nullptr) {
-        spdlog::error("Failed to load QOI data!");
-        return nullptr;
+        spdlog::error("Failed to load QOI!");
+        return 0;
       }
-
-      texture->width = desc.width;
-      texture->height = desc.height;
-      texture->channels = desc.channels;
-
-      glGenTextures(1, &(texture->id));
-      glBindTexture(GL_TEXTURE_2D, texture->id);
-
+      
+      glGenTextures(1, &texture.id);
+      glBindTexture(GL_TEXTURE_2D, texture.id);
       setTexOptions();
-
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture->width, texture->height,
-                   0, GL_RGBA, GL_UNSIGNED_BYTE, img);
-
       glGenerateMipmap(GL_TEXTURE_2D);
 
       free(img);
-      asset = std::move(texture);
-    } break;
+
+      asset.type = AssetType::Texture;
+      asset.data = std::move(texture);
+      ID id = addAsset(std::move(asset));
+      return id;
+    }
   }
-  return asset;
+  // No asset was generated
+  spdlog::error("mimetype not supported!");
+  return 0;
 }
 
-std::unique_ptr<IAsset> genAsset(Mimetype mimetype, const std::string& path,
-                                 ArchiveManager& archive) {
-  std::vector<uint8_t> buffer;
-  archive.loadFile(path, buffer);
-  return genAsset(mimetype, buffer);
+ID generateAsset(Mimetype mimetype, ArchiveManager& archiveMgr,
+                 const std::string& filename) {
+  std::vector<uint8_t> data;
+  archiveMgr.loadFile(filename, data);
+  return generateAsset(mimetype, data);
 }
 
-}  // namespace Magnet::Asset::Loader
+}  // namespace Magnet::Library::Loader

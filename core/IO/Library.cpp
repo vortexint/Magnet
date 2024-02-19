@@ -2,28 +2,29 @@
 
 #include <magnet/Library.hpp>
 
-namespace Magnet::Asset {
+namespace Magnet::Library {
 
-ID Library::addAsset(std::unique_ptr<IAsset> asset) {
-  ID id = nextID++;
+AssetsList& getAllAssets() {
+  static AssetsList assets;
+  return assets;
+}
+
+ID addAsset(Asset asset) {
+  static ID id = 0;
+  AssetsList& assets = getAllAssets();
   assets[id] = std::move(asset);
-  return id;
+  return id++;
 }
 
-Ptr Library::getAsset(ID id) {
-  auto asset = assets.find(id);
-  if (asset == assets.end()) {
-    spdlog::error("Failed to find asset {}", id);
-    return nullptr;
-  }
-  return asset->second;
+Asset getAsset(ID id) {
+  AssetsList& assets = getAllAssets();
+  return assets[id];
 }
 
-void Library::removeAsset(ID id) {
-  auto removed = assets.erase(id);
-  if (removed == 0) {
-    spdlog::error("Failed to remove asset {}", id);
-  }
+void removeAsset(ID id) {
+  AssetsList& assets = getAllAssets();
+  assets.erase(id);
 }
 
-}  // namespace Magnet::Asset
+
+}  // namespace Magnet::Library

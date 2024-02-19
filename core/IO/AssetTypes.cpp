@@ -1,6 +1,6 @@
 #include <magnet/Library.hpp>
 
-namespace Magnet::Asset {
+namespace Magnet::Library {
 
 /* Destructors  */
 
@@ -11,4 +11,4 @@ Model::~Model() {
   glDeleteBuffers(1, &ebo);
 }
 
-}  // namespace Magnet::Asset
+}  // namespace Magnet::Library

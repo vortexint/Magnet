@@ -3,26 +3,36 @@
 #include <glad/glad.h>
 
 #include <magnet/ArchiveManager.hpp>
-#include <map>
 #include <memory>
 #include <string>
+#include <unordered_map>
+#include <variant>
 
-namespace Magnet::Asset {
+namespace Magnet::Library {
 
-struct IAsset {
-  virtual ~IAsset() = default;
-};
-
-struct Texture : public IAsset {
+struct Texture {
   int width = 0, height = 0, channels = 0;
   GLuint id = 0;
-  virtual ~Texture();
+  ~Texture();
+};
+struct Model {
+  GLuint vao = 0, vbo = 0, ebo = 0;
+  ~Model();
 };
 
-struct Model : public IAsset {
-  GLuint vao = 0, vbo = 0, ebo = 0;
-  virtual ~Model();
+enum class AssetType {
+  Texture,
+  Model,
+  Audio,
 };
+
+struct Asset {
+  AssetType type;
+  std::variant<Texture, Model> data;
+};
+
+using ID = uint32_t;
+using AssetsList = std::unordered_map<ID, Asset>;
 
 enum class Mimetype : uint8_t {
   EXR,   // OpenEXR
@@ -32,33 +42,19 @@ enum class Mimetype : uint8_t {
   QOI,   // Quite OK Image format
 };
 
-using ID = uint32_t;
-using Ptr = std::shared_ptr<IAsset>;
-using List = std::map<ID, Ptr>;
-
+AssetsList& getAllAssets();
 namespace Loader {
+// AssetType is determined by mimetype
 
-std::unique_ptr<IAsset> genAsset(Mimetype mimetype,
-                                 const std::vector<uint8_t>& data);
-                                 
-std::unique_ptr<IAsset> genAsset(Mimetype mimetype, const std::string& path,
-                                 ArchiveManager& archive);
-
+ID generateAsset(Mimetype mimetype, const std::vector<uint8_t>& data);
+ID generateAsset(Mimetype mimetype, ArchiveManager& archiveMgr,
+                 const std::string& filename);
+                 
 }  // namespace Loader
 
-// owned by app context
-class Library {
-  List assets;
-  ID nextID = 1;
+ID addAsset(Asset asset);
+Asset getAsset(ID);
 
- public:
-  // Adds Asset to the Library
-  ID addAsset(std::unique_ptr<IAsset> asset);
+void removeAsset(ID);
 
-  void removeAsset(ID);
-
-  Ptr getAsset(ID);
-  const List& getAllAssets();
-};
-
-}  // namespace Magnet::Asset
+}  // namespace Magnet::Library

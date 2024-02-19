@@ -2,7 +2,7 @@
 
 #include <cglm/cglm.h>
 
-#include <magnet/Library.hpp>  // For AssetID, Asset types
+#include <magnet/Library.hpp>  // For ID
 #include <magnet/AudioManager.hpp>  // TODO: Remove this dependency, AudioManager should hide from the public API
 
 /**
@@ -27,7 +27,7 @@ struct Transform {
 /* RENDERING */
 
 struct Skybox {
-  Asset::Ptr HDRi;
+  Library::ID HDRi;
 };
 
 /**
@@ -41,7 +41,7 @@ struct Camera {
 };
 
 struct MeshRenderer {
-  Asset::ID mesh;  // ID of the loaded mesh to render.
+  Library::ID mesh;  // ID of the loaded mesh to render.
 };
 
 struct LightSource {

@@ -15,7 +15,6 @@ namespace Magnet {
 
 class Context {
   flecs::world ecs;
-  Asset::Library assetLibrary;
   Time::TimeState timeState;
   GLFWwindow* window = nullptr;
  public:
@@ -25,7 +24,6 @@ class Context {
   void setWindow(GLFWwindow* window) { this->window = window; }
 
   flecs::world& getECS() { return ecs; }
-  Asset::Library& getAssetLibrary() { return assetLibrary; }
   Time::TimeState& getTimeState() { return timeState; }
   GLFWwindow*& getWindow() { return window; }
 };
