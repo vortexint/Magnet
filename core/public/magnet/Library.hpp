@@ -12,6 +12,7 @@ namespace Magnet::Library {
 
 struct Texture {
   int width = 0, height = 0, channels = 0;
+  unsigned char* data = nullptr;
   GLuint id = 0;
   ~Texture();
 };
@@ -49,7 +50,7 @@ namespace Loader {
 ID generateAsset(Mimetype mimetype, const std::vector<uint8_t>& data);
 ID generateAsset(Mimetype mimetype, ArchiveManager& archiveMgr,
                  const std::string& filename);
-                 
+
 }  // namespace Loader
 
 ID addAsset(Asset asset);

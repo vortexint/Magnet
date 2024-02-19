@@ -13,14 +13,16 @@
 
 namespace Magnet::Library::Loader {
 
-// TODO: Move to rendering pipeline...?
+// TODO: Move to rendering pipeline...
 void setTexOptions() {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
                   GL_LINEAR_MIPMAP_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glGenerateMipmap(GL_TEXTURE_2D);
 }
+
 
 ID generateAsset(Mimetype mimetype, const std::vector<uint8_t>& data) {
   Library::Asset asset;
@@ -38,20 +40,21 @@ ID generateAsset(Mimetype mimetype, const std::vector<uint8_t>& data) {
     case Mimetype::PNG: {
       Texture texture;
 
-      unsigned char* img =
+      texture.data =
         stbi_load_from_memory(&data[0], data.size(), &texture.width,
                               &texture.height, &texture.channels, 0);
-      if (img == nullptr) {
+      if (texture.data == nullptr) {
         spdlog::error("Failed to load PNG!");
         return 0;
       }
 
       glGenTextures(1, &texture.id);
       glBindTexture(GL_TEXTURE_2D, texture.id);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.width, texture.height, 0,
+                   GL_RGBA, GL_UNSIGNED_BYTE, texture.data);
       setTexOptions();
-      glGenerateMipmap(GL_TEXTURE_2D);
 
-      free(img);
+      free(texture.data);
 
       asset.type = AssetType::Texture;
       asset.data = std::move(texture);
@@ -61,19 +64,21 @@ ID generateAsset(Mimetype mimetype, const std::vector<uint8_t>& data) {
     case Mimetype::QOI: {
       Texture texture;
       qoi_desc desc;
-      void* img = qoi_decode(data.data(), data.size(), &desc, 4);
-      
-      if (img == nullptr) {
+      texture.data = static_cast<unsigned char*>(
+        qoi_decode(data.data(), data.size(), &desc, 4));
+
+      if (texture.data == nullptr) {
         spdlog::error("Failed to load QOI!");
         return 0;
       }
-      
+
       glGenTextures(1, &texture.id);
       glBindTexture(GL_TEXTURE_2D, texture.id);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, desc.width, desc.height, 0,
+                   GL_RGBA, GL_UNSIGNED_BYTE, texture.data);
       setTexOptions();
-      glGenerateMipmap(GL_TEXTURE_2D);
 
-      free(img);
+      free(texture.data);
 
       asset.type = AssetType::Texture;
       asset.data = std::move(texture);
