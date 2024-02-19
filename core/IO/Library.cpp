@@ -10,21 +10,20 @@ AssetsList& getAllAssets() {
 }
 
 ID addAsset(Asset asset) {
-  static ID id = 0;
+  static ID current_id = 0;
   AssetsList& assets = getAllAssets();
-  assets[id] = std::move(asset);
-  return id++;
+  assets[++current_id] = std::make_shared<Asset>(std::move(asset));
+  return current_id;
 }
 
-Asset getAsset(ID id) {
+std::shared_ptr<Asset> getAsset(ID id) {
   AssetsList& assets = getAllAssets();
-  return assets[id];
+  return assets.at(id);
 }
 
 void removeAsset(ID id) {
   AssetsList& assets = getAllAssets();
   assets.erase(id);
 }
-
 
 }  // namespace Magnet::Library

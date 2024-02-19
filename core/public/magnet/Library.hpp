@@ -33,7 +33,7 @@ struct Asset {
 };
 
 using ID = uint32_t;
-using AssetsList = std::unordered_map<ID, Asset>;
+using AssetsList = std::unordered_map<ID, std::shared_ptr<Asset>>;
 
 enum class Mimetype : uint8_t {
   EXR,   // OpenEXR
@@ -54,7 +54,7 @@ ID generateAsset(Mimetype mimetype, ArchiveManager& archiveMgr,
 }  // namespace Loader
 
 ID addAsset(Asset asset);
-Asset getAsset(ID);
+std::shared_ptr<Asset> getAsset(ID);
 
 void removeAsset(ID);
 
