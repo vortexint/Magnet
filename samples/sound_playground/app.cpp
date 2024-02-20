@@ -190,6 +190,10 @@ if (selectedTrackId < trackNames.size()) {
 }
 if (ImGui::BeginCombo("Tracks", selectedTrackName)) {
   for (size_t i = 0; i < trackNames.size(); ++i) {
+    if (i == selectedTrackId) {
+      continue;
+    }
+
     std::string trackName = trackNames[i] + "##Tracks" +
       std::to_string(i);
     if (ImGui::Selectable(trackName.c_str(), selectedTrackId == i)) {
@@ -204,6 +208,10 @@ if (ImGui::BeginCombo("Tracks", selectedTrackName)) {
 }
 
 static bool playTrackIsSpatial = true;
+const bool sourceIsSelected = 0 <= selectedSourceId && selectedSourceId < sourceIds.size();
+if (!sourceIsSelected) {
+  ImGui::BeginDisabled();
+}
 if (ImGui::Button("Play Track with selected source") &&
   selectedSourceId < sourceIds.size() &&
   selectedTrackId < trackNames.size()) {
@@ -214,6 +222,9 @@ if (ImGui::Button("Play Track with selected source") &&
   audioSource->playSound(trackNames[selectedTrackId].c_str(), playTrackIsSpatial);
 }
 ImGui::Checkbox("Is Spatial##PlayTrack", &playTrackIsSpatial);
+if (!sourceIsSelected) {
+  ImGui::EndDisabled();
+}
 ImGui::Separator();
 if (ImGui::Button("New Audio Source")) {
   newAudioSource(ecs);
@@ -397,8 +408,9 @@ void App::audioDebugInit(flecs::world &ecs) {
       auto entity = ecs.entity(sourceId);
       auto *source = entity.get_mut<Components::AudioSource>();
 
-      source->volume = 0.01f;
-      source->playSound(TEST_AUDIO_FILES[0]);
+      source->volume = 0.0f;
+      source->looping = true;
+      source->playSound("tracks/surprise-sound-effect-99300.ogg");
 
       entity.modified<Components::AudioSource>();
     }

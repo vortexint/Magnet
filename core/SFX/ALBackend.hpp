@@ -147,13 +147,16 @@ class ALBackend {
   std::unordered_set<uint32_t> freeSlots;
   std::unordered_set<uint32_t> usedSlots;
 
+
+  std::optional<uint32_t> incrementOrCreateEffectSlot(const std::string& effectName);
+  void decrementEffectSlot(uint32_t);
+  void setEnvironmentalEffect(uint32_t, const std::string &);
+  void clearEnvironmentalEffect(uint32_t);
+
  public:
   static int MAX_CHANNELS();
   static int MAX_SLOTS();
   static int MAX_SLOTS_PER_CHANNEL();
-
-  std::optional<uint32_t> incrementOrCreateEffectSlot(const std::string& effectName);
-  void decrementEffectSlot(uint32_t);
 
   ALBackend();
   ~ALBackend();
@@ -179,8 +182,6 @@ class ALBackend {
   std::optional<uint32_t> newRequest();
   void freeRequest(uint32_t);
   ALAudioRequest* getRequest(uint32_t);
-  void setEnvironmentalEffect(uint32_t, const std::string&);
-  void clearEnvironmentalEffect(uint32_t);
 
   static void setListenerPos(vec3 pos);
   static void getListenerPos(vec3 pos);
