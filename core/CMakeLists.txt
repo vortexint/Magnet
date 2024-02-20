@@ -14,7 +14,7 @@ add_subdirectory(UTILS) # Utilities
 
 if(MSVC)
   target_compile_options(magnet-core PUBLIC
-    $<$<CONFIG:Release>:/O2>
+    $<$<CONFIG:Release>:/O3>
     $<$<CONFIG:Release>:/Os>
     $<$<CONFIG:Release>:/Gy>
     $<$<CONFIG:Release>:/OPT:REF>
@@ -24,7 +24,7 @@ else()
   target_compile_options(magnet-core PUBLIC
     -Wall
     -Wextra
-    $<$<CONFIG:Release>:-O2>
+    $<$<CONFIG:Release>:-O3>
     $<$<CONFIG:Release>:-Os>
     $<$<CONFIG:Release>:-fdata-sections>
     $<$<CONFIG:Release>:-Wl,--gc-sections>
@@ -55,8 +55,9 @@ target_link_libraries(magnet-core PUBLIC
                       freetype
                       glfw
                       lua_static
-                      spdlog
                       OpenAL::OpenAL
+                      spdlog
+                      tinygltf
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")

@@ -12,7 +12,13 @@ struct ALBuffer;
 class AudioManager;
 class ALBackend;
 }
+#include <magnet/Library.hpp>  // For ID
 
+/**
+ * ECS Component Guideline:
+ * Components are data structures only. They represent an entity's state.
+ * Do not add methods/logic. Keep them clean and simple.
+ */
 namespace Magnet::Components {
 
 /* Scene Components */
@@ -33,7 +39,7 @@ bool operator!=(const Transform&, const Transform&);
 /* RENDERING */
 
 struct Skybox {
-  uint32_t AssetID; // ID of the skybox texture.
+  Library::ID HDRi;
 };
 
 /**
@@ -41,13 +47,13 @@ struct Skybox {
  * @brief Describes a virtual camera and it's view frustum.
  */
 struct Camera {
-  float fieldOfView = 60.0f;                     // Angle defining visible scene extent
+  float fieldOfView = 60.0f;             // Angle defining visible scene extent
   vec2 clippingPlanes = {0.1f, 100.0f};  // Near and far clipping planes
   vec3 up{0.0f, 1.0f, 0.0f};
 };
 
 struct MeshRenderer {
-  uint32_t AssetID; // ID of the mesh to render.
+  Library::ID mesh;  // ID of the loaded mesh to render.
 };
 
 struct LightSource {

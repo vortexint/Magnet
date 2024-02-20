@@ -1,14 +1,8 @@
 #include "app.hpp"
 
-#include <GLFW/glfw3.h>
-#include <spdlog/spdlog.h>
-
-#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
 void App::init() {
-  ArchiveManager archiveMgr(ARCH_data, ARCH_data_KEY);
-
   window = glfwGetCurrentContext();
 
   // Load icon
@@ -25,9 +19,6 @@ void App::init() {
 
     free(icons[0].pixels);
   }
-
 }
 
-void App::update() {
-
-}
+void App::update() {}
