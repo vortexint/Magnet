@@ -21,4 +21,5 @@ void App::init() {
   }
 }
 
-void App::update() {}
+void App::update() {
+}

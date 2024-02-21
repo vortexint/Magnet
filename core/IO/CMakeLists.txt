@@ -3,5 +3,4 @@ target_sources(magnet-core PRIVATE
   AssetTypes.cpp
   Input.cpp
   Library.cpp
-  Loaders.cpp
 )
