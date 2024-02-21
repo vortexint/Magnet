@@ -44,14 +44,15 @@ void setupPipeline(const PipelineConfig& config) {
 }
 
 void updatePipeline(GLFWwindow* window) {
-  Viewport::updateFrustum(baseID);
-
   /* Assuming that we'll always render something to all pixels, this
    * is not necessary but is considered good practice */
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   /* Render scene */
   glUseProgram(baseID);
+
+  Viewport::updateFrustum(baseID);
+
 
   /* Render Native UI*/
   UI::draw();
