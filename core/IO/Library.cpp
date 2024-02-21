@@ -36,10 +36,10 @@ Asset* getDummyAsset(AssetType type) {
   }
 }
 
-ID enqueueLoad(Mimetype mimetype, uint8_t* data, size_t size) {
+ID enqueueLoad(Mimetype mimetype, std::vector<uint8_t> data) {
   std::lock_guard<std::mutex> lock(assetMutex);
 
-  if (assets.size() >= MaxAssets)
+  if (assets.size() > MaxAssets)
     throw std::runtime_error("Exceeded asset limit");
 
   ID newID = generateID();
@@ -63,18 +63,20 @@ ID enqueueLoad(Mimetype mimetype, uint8_t* data, size_t size) {
       throw std::invalid_argument("Unsupported mimetype");
   }
 
-  holder.status = AssetStatus::Loading;
-  holder.loadFuture = std::async(std::launch::async, [&, newID]() {
-    try {
-      assets[newID].asset->load(mimetype, data, size);
-      assets[newID].status = AssetStatus::Loaded;
-    } catch (const std::exception& e) {
-      assets[newID].status = AssetStatus::Error;
-      spdlog::error("Failed to load asset: {}", e.what());
-    }
-  });
-
   assets[newID] = std::move(holder);
+
+  assets[newID].status = AssetStatus::Loading;
+  assets[newID].loadFuture =
+    std::async(std::launch::async, [data = std::move(data), newID, mimetype]() {
+      try {
+        assets[newID].asset->load(mimetype, data.data(), data.size());
+        assets[newID].status = AssetStatus::Loaded;
+      } catch (const std::exception& e) {
+        assets[newID].status = AssetStatus::Error;
+        spdlog::error("Failed to load asset: {}", e.what());
+      }
+    });
+
   return newID;
 }
 
@@ -83,13 +85,14 @@ ID enqueueLoad(Mimetype mimetype, ArchiveManager& archiveMgr,
   std::vector<uint8_t> buffer;
   archiveMgr.loadFile(filename, buffer);
 
-  return enqueueLoad(mimetype, buffer.data(), buffer.size());
+  return enqueueLoad(mimetype, std::move(buffer));
 }
 
 Asset* getAsset(ID id) {
   std::lock_guard<std::mutex> lock(assetMutex);
 
-  if (id >= assets.size()) {
+  if (id >= MaxAssets || !assetSlots[id]) {  // Fixed the condition to check if
+                                             // the slot is occupied.
     spdlog::error("Invalid asset ID: {}", id);
     return nullptr;
   }
@@ -106,8 +109,7 @@ Asset* getAsset(ID id) {
         std::future_status::ready)
     holder.status = AssetStatus::Loaded;
 
-  if (holder.status == AssetStatus::Loading)
-    return getDummyAsset(holder.type);
+  if (holder.status == AssetStatus::Loading) return getDummyAsset(holder.type);
 
   return holder.asset.get();
 }
@@ -120,9 +122,13 @@ void removeAsset(ID id) {
 
   AssetHolder& holder = assets[id];
 
-  if (holder.status == AssetStatus::Loading && holder.loadFuture.valid())
-    throw std::runtime_error(
-      "Cannot remove an asset that is still loading");
+  if (holder.loadFuture.valid()) {
+    if (holder.status == AssetStatus::Loading)
+      throw std::runtime_error("Cannot remove an asset that is still loading");
+
+    holder.loadFuture
+      .wait();  // Wait for the loading to complete if not already done.
+  }
 
   assetSlots[id] = false;  // free the slot
 }

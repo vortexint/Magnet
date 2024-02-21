@@ -66,6 +66,8 @@ struct Model : public Asset {
 struct Audio : public Asset {
  public:
   uint8_t* data;
+
+  ~Audio();
   void load(Mimetype mimetype, const uint8_t* inputData, size_t size) override;
 };
 
@@ -79,7 +81,7 @@ struct AssetHolder {
   std::future<void> loadFuture;
 };
 
-ID enqueueLoad(Mimetype mimetype, uint8_t* data, size_t size);
+ID enqueueLoad(Mimetype mimetype, std::vector<uint8_t> data);
 ID enqueueLoad(Mimetype mimetype, ArchiveManager& archiveMgr,
                const std::string& filename);
 

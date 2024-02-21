@@ -10,6 +10,7 @@
 const char* const GAME_TITLE = "Sandbox";
 
 using namespace Magnet;
+using namespace Magnet::Library;
 
 class App : public Magnet::Context {
   GLFWwindow* window;

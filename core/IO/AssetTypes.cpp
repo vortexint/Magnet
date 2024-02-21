@@ -65,6 +65,9 @@ void Model::load(Mimetype mimetype, const uint8_t* inputData, size_t size) {
   }
 }
 
+void Audio::load(Mimetype mimetype, const uint8_t* inputData, size_t size) {
+}
+
 /* Destructors  */
 
 Texture::~Texture() {
@@ -76,6 +79,8 @@ Model::~Model() {
   // glDeleteVertexArrays(1, &vao);
   // glDeleteBuffers(1, &vbo);
   // glDeleteBuffers(1, &ebo);
+}
+Audio::~Audio() {
 }
 
 }  // namespace Magnet::Library
