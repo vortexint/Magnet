@@ -1,60 +1,92 @@
 #pragma once
 
-#include <glad/glad.h>
-
+#include <future>
 #include <magnet/ArchiveManager.hpp>
 #include <memory>
 #include <string>
-#include <unordered_map>
-#include <variant>
+
+#include "tiny_gltf.h"  // includes stb_image.h, won't question it! :D
 
 namespace Magnet::Library {
 
-struct Texture {
-  int width = 0, height = 0, channels = 0;
-  unsigned char* data = nullptr;
-  GLuint id = 0;
-  ~Texture();
-};
-struct Model {
-  GLuint vao = 0, vbo = 0, ebo = 0;
-  ~Model();
+enum class AssetStatus {
+  Idle,
+  Loading,
+  Loaded,
+  Error,
 };
 
-enum class AssetType {
+enum class AssetType : uint8_t {
   Texture,
   Model,
   Audio,
 };
 
-struct Asset {
-  AssetType type;
-  std::variant<Texture, Model> data;
-};
-
-using ID = uint32_t;
-using AssetsList = std::unordered_map<ID, std::shared_ptr<Asset>>;
-
 enum class Mimetype : uint8_t {
-  EXR,   // OpenEXR
-  GLTF,  // GL Transmission Format
+  /* Texture */
+  EXR,  // OpenEXR
+  PNG,  // Portable Network Graphics
+  QOI,  // Quite OK Image format
+  /* Model */
   GLB,   // glTF Binary
-  PNG,   // Portable Network Graphics
-  QOI,   // Quite OK Image format
+  GLTF,  // GL Transmission Format
+  /* Audio */
+  OGG,  // Ogg Vorbis
+  WAV,  // Waveform Audio File Format
 };
 
-AssetsList& getAllAssets();
-namespace Loader {
-// AssetType is determined by mimetype
+class Asset {
+ public:
+  virtual ~Asset() = default;
+  virtual void load(Mimetype mimetype, const uint8_t* inputData,
+                    size_t size) = 0;
+  AssetStatus getStatus() const;
 
-ID generateAsset(Mimetype mimetype, const std::vector<uint8_t>& data);
-ID generateAsset(Mimetype mimetype, ArchiveManager& archiveMgr,
-                 const std::string& filename);
+ protected:
+  AssetStatus status = AssetStatus::Idle;
+};
 
-}  // namespace Loader
+struct Texture : public Asset {
+ public:
+  int width = 0, height = 0, channels = 0;
+  uint8_t* data;
 
-ID addAsset(Asset asset);
-std::shared_ptr<Asset> getAsset(ID);
+  ~Texture();
+  void load(Mimetype mimetype, const uint8_t* inputData, size_t size) override;
+};
+
+struct Model : public Asset {
+ public:
+  tinygltf::Model model;
+
+  ~Model();
+  void load(Mimetype mimetype, const uint8_t* inputData, size_t size) override;
+};
+
+struct Audio : public Asset {
+ public:
+  uint8_t* data;
+
+  ~Audio();
+  void load(Mimetype mimetype, const uint8_t* inputData, size_t size) override;
+};
+
+using ID = uint16_t;
+constexpr size_t MaxAssets = 1024;
+
+struct AssetHolder {
+  std::unique_ptr<Asset> asset;
+  AssetType type;
+  AssetStatus status = AssetStatus::Idle;
+  std::future<void> loadFuture;
+};
+
+ID enqueueLoad(Mimetype mimetype, std::vector<uint8_t> data);
+ID enqueueLoad(Mimetype mimetype, ArchiveManager& archiveMgr,
+               const std::string& filename);
+
+// returns nullptr if error
+Asset* getAsset(ID id);
 
 void removeAsset(ID);
 

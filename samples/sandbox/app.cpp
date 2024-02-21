@@ -19,6 +19,7 @@ void App::init() {
 
     free(icons[0].pixels);
   }
+
 }
 
 void App::update() {}
