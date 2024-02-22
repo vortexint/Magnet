@@ -3,6 +3,8 @@
 #include <bitset>
 #include <magnet/Library.hpp>
 
+#include "FallbackAssets.hpp"
+
 namespace Magnet::Library {
 
 std::bitset<MaxAssets> assetSlots;
@@ -10,15 +12,13 @@ std::array<AssetHolder, MaxAssets> assets;
 std::mutex assetMutex;
 
 ID generateID() {
-  // Try to find a free slot.
+  // Find a free slot.
   for (ID i = 0; i < MaxAssets; ++i) {
     if (!assetSlots[i]) {    // If the slot is free
       assetSlots[i] = true;  // Occupy the slot
       return i;              // Return the ID (which is the array index)
     }
   }
-
-  // If all slots are occupied.
   throw std::runtime_error("Exceeded asset limit");
 }
 
@@ -49,14 +49,17 @@ ID enqueueLoad(Mimetype mimetype, std::vector<uint8_t> data) {
     case Mimetype::EXR:
     case Mimetype::PNG:
     case Mimetype::QOI:
+      holder.type = AssetType::Texture;
       holder.asset = std::make_unique<Texture>();
       break;
     case Mimetype::GLB:
     case Mimetype::GLTF:
+      holder.type = AssetType::Model;
       holder.asset = std::make_unique<Model>();
       break;
     case Mimetype::OGG:
     case Mimetype::WAV:
+      holder.type = AssetType::Audio;
       holder.asset = std::make_unique<Audio>();
       break;
     default:
@@ -91,8 +94,7 @@ ID enqueueLoad(Mimetype mimetype, ArchiveManager& archiveMgr,
 Asset* getAsset(ID id) {
   std::lock_guard<std::mutex> lock(assetMutex);
 
-  if (id >= MaxAssets || !assetSlots[id]) {  // Fixed the condition to check if
-                                             // the slot is occupied.
+  if (id >= MaxAssets || !assetSlots[id]) {
     spdlog::error("Invalid asset ID: {}", id);
     return nullptr;
   }
@@ -104,14 +106,30 @@ Asset* getAsset(ID id) {
     return nullptr;
   }
 
-  if (holder.loadFuture.valid() &&
-      holder.loadFuture.wait_for(std::chrono::seconds(0)) ==
-        std::future_status::ready)
-    holder.status = AssetStatus::Loaded;
-
+  // return a dummy asset if the status is AssetStatus::Loading
   if (holder.status == AssetStatus::Loading) return getDummyAsset(holder.type);
 
   return holder.asset.get();
+}
+
+bool isAssetLoaded(ID id) {
+  std::lock_guard<std::mutex> lock(assetMutex);
+
+  if (id >= MaxAssets || !assetSlots[id]) {
+    spdlog::error("Invalid asset ID: {}", id);
+    return false;
+  }
+
+  AssetHolder& holder = assets[id];
+
+  if (holder.loadFuture.valid() &&
+      holder.loadFuture.wait_for(std::chrono::seconds(0)) ==
+        std::future_status::ready) {
+    holder.status = AssetStatus::Loaded;
+    return true;
+  }
+
+  return false;
 }
 
 void removeAsset(ID id) {
@@ -131,6 +149,11 @@ void removeAsset(ID id) {
   }
 
   assetSlots[id] = false;  // free the slot
+}
+
+void loadFallbackAssets(ArchiveManager& archiveMgr) {
+  enqueueLoad(Mimetype::PNG, archiveMgr, "textures/fallback.png");
+  enqueueLoad(Mimetype::GLB, archiveMgr, "models/fallback.glb");
 }
 
 }  // namespace Magnet::Library

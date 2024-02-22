@@ -6,7 +6,6 @@
 #include <string>
 
 #include "tiny_gltf.h"  // includes stb_image.h, won't question it! :D
-
 namespace Magnet::Library {
 
 enum class AssetStatus {
@@ -85,9 +84,8 @@ ID enqueueLoad(Mimetype mimetype, std::vector<uint8_t> data);
 ID enqueueLoad(Mimetype mimetype, ArchiveManager& archiveMgr,
                const std::string& filename);
 
-// returns nullptr if error
+bool isAssetLoaded(ID id);
 Asset* getAsset(ID id);
-
 void removeAsset(ID);
 
 }  // namespace Magnet::Library

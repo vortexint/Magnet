@@ -1,25 +1,28 @@
 #include "app.hpp"
 
-#include <stb_image.h>
-
 void App::init() {
   window = glfwGetCurrentContext();
 
   // Load icon
   {
-    std::vector<unsigned char> imageData;
-    archiveMgr.loadFile("icon.png", imageData);
+    ID iconID = enqueueLoad(Mimetype::PNG, archiveMgr, "icon.png");
+    Asset* iconAsset = nullptr;
 
-    GLFWimage icons[1] = {};
-    icons[0].pixels =
-      stbi_load_from_memory(imageData.data(), imageData.size(), &icons[0].width,
-                            &icons[0].height, nullptr, STBI_rgb_alpha);
+    //while (!isAssetLoaded(iconID)) {
+    //  std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    //}
 
-    glfwSetWindowIcon(window, 1, icons);
+    iconAsset = getAsset(iconID);
 
-    free(icons[0].pixels);
+    Magnet::Library::Texture* iconTexture =
+      dynamic_cast<Magnet::Library::Texture*>(iconAsset);
+
+    GLFWimage windowIcon;
+    windowIcon.width = iconTexture->width;
+    windowIcon.height = iconTexture->height;
+    windowIcon.pixels = iconTexture->data;
+    glfwSetWindowIcon(window, 1, &windowIcon);
   }
-
 }
 
 void App::update() {}
