@@ -10,15 +10,18 @@
 
 #include "GFX/Pipeline.hpp"
 #include "GFX/UI/UserInterface.hpp"
-#include "GFX/WindowManager.hpp"
+#include "GFX/Window.hpp"
+#include "IO/FallbackAssets.hpp"
 
 namespace Magnet::Application {
 
 spdlog::logger logger("Magnet");
-ArchiveManager archiveManager(ARCH_core, ARCH_core_KEY);
 Context* appContext;
 
-ArchiveManager& getArchiveManager() { return archiveManager; }
+ArchiveManager& getArchiveManager() {
+  static ArchiveManager archiveManager(ARCH_core, ARCH_core_KEY);
+  return archiveManager;
+}
 
 void registerContext(Context& applicationContext, const char* const title) {
   appContext = &applicationContext;
@@ -26,35 +29,34 @@ void registerContext(Context& applicationContext, const char* const title) {
   Rendering::setupPipeline();
 }
 
-void initialize() {
-  if (appContext == nullptr) {
-    logger.critical("Application context not registered!");
-  }
-
-  /* Logging Setup */
-  {
+void setupLogging() {
 #if defined(DEBUG)
-    static auto consoleSink =
-      std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-    consoleSink->set_level(spdlog::level::debug);
-    logger.sinks().push_back(consoleSink);
+  static auto consoleSink =
+    std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+  consoleSink->set_level(spdlog::level::debug);
+  logger.sinks().push_back(consoleSink);
 #endif
 
-    static auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(
-      DEFAULT_LOG_FILENAME, true);
-    logger.sinks().push_back(fileSink);
+  static auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(
+    DEFAULT_LOG_FILENAME, true);
+  logger.sinks().push_back(fileSink);
 
-    spdlog::set_default_logger(std::make_shared<spdlog::logger>(logger));
-  }
+  spdlog::set_default_logger(std::make_shared<spdlog::logger>(logger));
+}
 
-  /* Initialize Systems */
-
+void initializeSystems() {
   Scene::setupECS(appContext->getECS());
-  auto& ecs = appContext->getECS();
-  AudioManager::getInstance().setupECS(&ecs);
-  UI::setup(archiveManager);
-
+  UI::setup(getArchiveManager());
+  Library::loadFallbackAssets(getArchiveManager());
   appContext->init();
+}
+
+void initialize() {
+  if (appContext == nullptr)
+    logger.critical("Application context not registered!");
+
+  setupLogging();
+  initializeSystems();
 
   /* Main loop */
 
