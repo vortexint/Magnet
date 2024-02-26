@@ -2,6 +2,11 @@
 
 /* ENTRY POINT */
 
+#include <magnet/Components.hpp>
+#include <cglm/cglm.h>
+
+#include <iostream>
+
 int main(void) {
   App application;
 

@@ -1,15 +1,25 @@
 #pragma once
 
+#include <optional>
+#include <span>
+#include <string>
+
 #include <cglm/cglm.h>
 
 #include <magnet/Library.hpp>  // For ID
-#include <magnet/AudioManager.hpp>  // TODO: Remove this dependency, AudioManager should hide from the public API
 
 /**
  * ECS Component Guideline:
  * Components are data structures only. They represent an entity's state.
  * Do not add methods/logic. Keep them clean and simple.
  */
+// TODO: Remove when asset system is finished
+namespace Magnet {
+struct ALBuffer;
+class AudioManager;
+class ALBackend;
+}
+
 namespace Magnet::Components {
 
 /* Scene Components */
@@ -19,10 +29,13 @@ namespace Magnet::Components {
  * @brief An entity's transformation relative to its parent.
  */
 struct Transform {
-  vec3 position{0.0f, 0.0f, 0.0f};
-  versor rotation{0.0f, 0.0f, 0.0f, 0.0f};
-  vec3 scale{1.0f, 1.0f, 1.0f};
+  vec3   position{0.0f, 0.0f, 0.0f};
+  versor rotation{0.0f, 0.0f, 0.0f, 1.0f};
+  vec3   scale{1.0f, 1.0f, 1.0f};
 };
+
+bool operator==(const Transform&, const Transform&);
+bool operator!=(const Transform&, const Transform&);
 
 /* RENDERING */
 
@@ -63,28 +76,69 @@ struct AreaLight : public LightSource {
 
 /* AUDIO */
 
-enum class AudioSourcePlayState { REQUESTED_PLAY, PLAYING, STOPPED };
 
-struct AudioSource {
-  AudioSourcePlayState playState;
-  std::optional<SpatialAudioChannel> channel = std::nullopt;
+struct Environment {
+  std::optional<const char*> effectName;
+};
+
+struct Cone {
+  float angleDeg = 0.f;
+  float outerGain = 0.f;
+  
+};
+bool operator==(const Cone&, const Cone&);
+bool operator!=(const Cone&, const Cone&);
+
+
+
+enum class FilterType { LOWPASS, HIGHPASS, BANDPASS };
+
+struct Filter {
+  FilterType type = FilterType::BANDPASS;
+  float gain = 1.f;
+  float gainHighFrequency = 1.f;
+  float gainLowFrequency = 1.f;
+};
+bool operator==(const Filter&, const Filter&);
+bool operator!=(const Filter&, const Filter&);
+
+
+enum class AudioTag { VOICE, SOUND_EFFECTS, MUSIC, NONE };
+std::optional<AudioTag> from_string(const std::string&);
+std::string to_string(AudioTag);
+std::span<const AudioTag> allAudioTags();
+
+
+enum class AudioPlayState { REQUESTED_PLAY, PLAYING, STOPPED };
+
+class AudioSource {
+  friend bool operator==(const AudioSource&, const AudioSource&);
+  friend bool operator!=(const AudioSource&, const AudioSource&);
+  friend class Magnet::AudioManager;
+  friend class Magnet::ALBackend;
+
   const char* trackName = nullptr;
-  double timestampStartedS = 0.0;
+  std::optional<uint32_t> requestId = std::nullopt;
+  bool mIsSpatial = true;
 
-  void reset();
-  AudioSource();
-
+public:
+  AudioPlayState state = AudioPlayState::STOPPED;
   AudioTag tag = AudioTag::NONE;
   float volume = 1.f;
   float pitch = 1.f;
-  std::optional<Cone> cone;
+  std::optional<Cone> cone = std::nullopt;
   bool looping = false;
+  std::optional<Filter> filter;
 
-  void play_sound(const char* name, AudioTag tag = AudioTag::NONE,
-                  bool looping = false, float volume = 1.f);
+  const bool isSpatial() const;
 
+  void playSound(const char* trackName, bool mIsSpatial = true);
   void stop();
 };
+
+bool operator==(const AudioSource&, const AudioSource&);
+bool operator!=(const AudioSource&, const AudioSource&);
+
 
 /* PHYSICS */
 

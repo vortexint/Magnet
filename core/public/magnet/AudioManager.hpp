@@ -1,27 +1,67 @@
 #pragma once
-#include <cglm/cglm.h>
-#include <flecs.h>
 
-#include <magnet/ArchiveManager.hpp>
-#include <magnet/Scene.hpp>
-#include <memory>
 #include <optional>
+#include <memory>
 #include <span>
+#include <vector>
 #include <string>
 #include <unordered_map>
-#include <unordered_set>
-#include <vector>
 
-struct ALCdevice;
-struct ALCcontext;
+#include <cglm/cglm.h>
 
-namespace Magnet {
-struct SpatialAudioChannel;
+#include <flecs.h>
 
-namespace Components {
+#include <magnet/Components.hpp>
+
+namespace Magnet::Components {
 struct AudioSource;
 struct Transform;
-}  // namespace Components
+struct Environment;
+}  // namespace Magnet::Components
+namespace flecs {
+struct world;
+}
+
+namespace Magnet {
+struct ALBuffer;
+struct ALBackend;
+struct ALAudioRequest;
+
+struct ReverbDescription {
+  float density;
+  float diffusion;
+  float gain;
+  float gainHF;
+  float gainLF;
+  float decayTime;
+  float decayHFRatio;
+  float decayLFRatio;
+  float reflectionsGain;
+  float reflectionsDelay;
+  vec3 reflectionsPan;
+  float lateReverbGain;
+  float lateReverbDelay;
+  vec3 lateReverbPan;
+  float echoTime;
+  float echoDepth;
+  float modulationTime;
+  float modulationDepth;
+  float airAbsorptionGainHF;
+  float hFReference;
+  float lFReference;
+  float roomRolloffFactor;
+  int   decayHFLimit;
+};
+
+enum class EffectType { REVERB };
+
+struct EffectDescription {
+  EffectType type;
+  union {
+    ReverbDescription reverb;
+  };
+  EffectDescription(ReverbDescription);
+};
 
 enum class AudioFormat {
   AUDIO_FORMAT_MONO8,
@@ -29,172 +69,71 @@ enum class AudioFormat {
   AUDIO_FORMAT_STEREO8,
   AUDIO_FORMAT_STEREO16
 };
+size_t FormatBytesPerSample(AudioFormat format);
 
-struct AudioBuffer {
-  uint32_t originalBuffer = 0;
-  uint32_t monoBuffer = 0;
-  uint64_t samples = 0;
-  uint64_t sampleRate = 0;
+struct RawAudioData {
+  AudioFormat format;
+  std::vector<uint8_t> data;
+  size_t sampleRate;
 
-  static std::optional<AudioBuffer> create(std::span<uint8_t> bytes,
-                                           AudioFormat, size_t samples,
-                                           size_t sampleRate);
-  static std::optional<uint32_t> createMonoBuffer(std::span<uint8_t> bytes,
-                                                  AudioFormat, size_t samples,
-                                                  size_t sampleRate);
-  void destroy() const;
-  double length() const;
+  void clear();
 };
 
-enum class AudioTag {
-  VOICE = 0,
-  SOUND_EFFECTS = 1,
-  MUSIC = 2,
-  NONE,
+
+struct VolumeAdjuster {
+  VolumeAdjuster();
+
+  std::unordered_map<Components::AudioTag, float> volumes;
+  float masterVolume;
 };
 
-struct SpatialAudioChannel;
-
-struct Cone {
-  float angleDeg = 0.f;
-  float outerGain = 0.f;
-};
-
-struct AudioChannel {
-  uint32_t source = 0;
-
-  static std::optional<AudioChannel> create();
-  /*
-    Stops the current track and changes the AudioBuffer for the channel
-    There can only be one audio buffer per channel
-  */
-  virtual void assign(const AudioBuffer&);
-  void play();
-  bool is_currently_playing();
-  void pause();
-  void stop();
-  // Resets the channel to have no settings applied to it
-  // also stops the audio
-  void reset();
-  bool is_stopped();
-  bool is_looping();
-  void set_looping(bool);
-  void destroy() const;
-  void set_volume(float vol = 1.f);
-  void set_pitch(float pitch = 1.f);
-
-  void check_if_initialized() const;
-};
-
-struct SpatialAudioChannel {
-  uint32_t source = 0;
-
-  bool operator==(const AudioChannel& rhs) const noexcept;
-  bool operator!=(const AudioChannel& rhs) const noexcept;
-  static std::optional<SpatialAudioChannel> create();
-
-  void play();
-  bool is_currently_playing();
-  void pause();
-  void stop();
-  // Resets the channel to have no settings applied to it
-  // also stops the audio
-  void reset();
-  bool is_stopped();
-  bool is_looping();
-  void set_looping(bool);
-  void destroy() const;
-  void set_volume(float vol = 1.f);
-  void set_pitch(float pitch = 1.f);
-
-  void assign(const AudioBuffer&);
-  void set_position(vec3 pos);
-  void set_velocity(vec3 vel);
-  void set_direction(vec3 dir);
-
-  void check_if_initialized() const;
-
-  /*
-    Creates a cone pointing in the previously set direction,
-    with an angle of angleRad in radians
-    The outerVolume sets how much a listener would hear if they
-    were outside the cone
-  */
-  void set_cone(float angleDeg = 180.f, float outerVolume = 0.f);
-};
-
-struct SpatialAudioRequest {
-  const char* trackName = nullptr;
-  AudioTag tag = AudioTag::NONE;
-  double timestampStartedS = 0;
-  float volume = 1.f;
-  float pitch = 1.f;
-  std::optional<SpatialAudioChannel> channel;
-  std::optional<Cone> coneSettings;
-  bool looping = false;
-  bool user_requests_stop = false;
-
-  size_t hash() const;
-  void stop();
-  void setPitch(float pitch = 1.f);
-  void setVolume(float volume = 1.f);
-  float getPitch() const;
-  float getVolume() const;
-  std::optional<SpatialAudioChannel>& getChannel();
-};
-
-struct AudioTagParameters {
-  float volume = 1.f;
+struct AudioManagerDebugInfo {
+  uint32_t slotsCount;
+  uint32_t usedSlotsCount;
+  uint32_t nonZeroSlotReferenceCount;
 };
 
 class AudioManager {
-  ArchiveManager* archiveMgr;
-  std::unordered_map<std::string, AudioBuffer> tracks;
+  ALBackend *al;
+  flecs::world *ecs = nullptr;
 
-  AudioChannel background;
-  std::unordered_set<uint32_t> freeSpatialAudioChannels;
-  std::unordered_set<uint32_t> borrowedSpatialAudioChannels;
-
-  std::unordered_map<AudioTag, AudioTagParameters> tagModifier;
-  AudioTagParameters masterTagModifier;
-
-  ALCdevice* audioDevice;
-  ALCcontext* alContext;
-
-  int32_t MAX_CHANNELS = 0;
-  int32_t AUDIO_CHANNELS = 0;
-  int32_t SPATIAL_AUDIO_CHANNELS = 0;
-
+  VolumeAdjuster volumeAdjustor;
  public:
-  static AudioManager& getInstance() {
-    static AudioManager audioManager;
-    return audioManager;
-  }
+  static constexpr float MAX_DISTANCE = 128.f;
 
   AudioManager();
   ~AudioManager();
 
-  AudioManager(const AudioManager&) = delete;
-  AudioManager& operator=(const AudioManager&) = delete;
+  static AudioManager& getInstance() {
+    static AudioManager audioMgr;
+    return audioMgr;
+  }
 
-  std::optional<SpatialAudioChannel> borrowChannel();
-  void returnChannel(SpatialAudioChannel channel);
+  void setupECS(flecs::world* ecs);
+  VolumeAdjuster& volumes();
 
-  std::optional<AudioBuffer> getTrack(const char* track);
+  void handleRequestedPlay(Components::AudioSource&, 
+                          const Components::Transform&,
+                          const Components::Environment&);
+  void handlePlaying(Components::AudioSource&, 
+                    const Components::Transform&,
+                    const Components::Environment&);
+  void handleStopped(Components::AudioSource&);
+
+  static void AudioSourceSystem(flecs::iter&, Components::Transform*, Components::AudioSource*);
   
-  
-  void playTrackBackground(const char* track);
-  void deleteTrack(const char* track);
+  static bool LoadAudio(std::span<const uint8_t> rawFileData, RawAudioData &);
 
-  static void updateListener();
+  static void removeSource(flecs::entity e, Components::AudioSource);
 
-  static void AudioSourceSystem(flecs::iter&, Components::Transform*,
-                                Components::AudioSource*);
+  void registerAudio(const std::string&, std::span<const uint8_t> data, AudioFormat format, size_t sampleRate);
+  void registerEffect(const std::string& name, EffectDescription);
 
+  void registerAllEfxPresets();
 
-  AudioTagParameters& getTagModifier(AudioTag);
-  AudioTagParameters& getMaster() { return masterTagModifier; }
+  static void getListenerPos(vec3 pos);
+  static void setListenerPos(const vec3 pos);
+
+  AudioManagerDebugInfo getDebugInfo() const;
 };
-
-std::string to_string(Magnet::AudioTag);
-}  // namespace Magnet
+} // namespace Magnet

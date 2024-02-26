@@ -3,6 +3,7 @@
 
 #include <magnet/Application.hpp>
 #include <magnet/ArchiveManager.hpp>
+#include <magnet/AudioManager.hpp>
 #include <magnet/Scene.hpp>
 #include <magnet/Shaders.hpp>
 #include <magnet/Widgets.hpp>

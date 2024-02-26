@@ -1,668 +1,260 @@
-#include <AL/al.h>
-#include <AL/alc.h>
-#include <cglm/cglm.h>
 #include <spdlog/spdlog.h>
 
-#include <magnet/Application.hpp>
-#include <magnet/ArchiveManager.hpp>
+#include <SFX/ALBackend.hpp>
+#include <SFX/EfxPresetList.hpp>
 #include <magnet/AudioManager.hpp>
 #include <magnet/Components.hpp>
 #include <magnet/Scene.hpp>
-#include <magnet/Time.hpp>
+#include <magnet/Geometry.hpp>
 
 #define STB_VORBIS_IMPLEMENTATION
 #include <stb_vorbis.h>
 
-#include "GFX/Viewport.hpp"
-
 namespace Magnet {
-using namespace Components;
 
-const char* alGetErrorString(int err) {
-  switch (err) {
-    case AL_NO_ERROR:
-      return "AL_NO_ERROR";
-    case AL_INVALID_ENUM:
-      return "AL_INVALID_ENUM";
-    case AL_INVALID_VALUE:
-      return "AL_INVALID_VALUE";
-    case AL_OUT_OF_MEMORY:
-      return "AL_OUT_OF_MEMORY";
-    default:
-      return "Unknown error code";
-  }
-}
-AudioTagParameters& AudioManager::getTagModifier(AudioTag tag) {
-  return tagModifier[tag];
-}
-void AudioManager::AudioSourceSystem(flecs::iter& iter, Transform* transforms,
-                                     AudioSource* sources) {
-  AudioManager& audioManager = AudioManager::getInstance();
-
-
-  for (size_t row : iter) {
-    auto& transform = transforms[row];
-    auto& audioSource = sources[row];
-
-    if (audioSource.playState == AudioSourcePlayState::REQUESTED_PLAY) {
-      audioSource.channel = audioManager.borrowChannel();
-
-      auto track = audioManager.getTrack(audioSource.trackName);
-
-      if (track && audioSource.channel) {
-        audioSource.channel->reset();
-        audioSource.channel->assign(*track);
-        audioSource.channel->play();
-      } else {
-        audioSource.channel = std::nullopt;
-      }
-
-      audioSource.playState = AudioSourcePlayState::PLAYING;
-    }
-    if (audioSource.playState == AudioSourcePlayState::PLAYING) {
-
-      float finalVolume = audioSource.volume *
-        audioManager.getTagModifier(audioSource.tag).volume *
-        audioManager.getMaster().volume;
-
-      audioSource.channel->set_volume(finalVolume);
-      audioSource.channel->set_position(transform.position);
-
-      vec3 forward = { 1.f, 0.f, 0.f };
-      vec3 forwardRes = {};
-
-      glm_quat_rotatev(transform.rotation, forward, forwardRes);
-      audioSource.channel->set_direction(forwardRes);
-
-      audioSource.channel->set_pitch(audioSource.pitch);
-    }
-
-    if (
-      audioSource.playState == AudioSourcePlayState::STOPPED || 
-      !audioSource.channel ||
-      audioSource.channel->is_stopped()
-    ) {
-      if (audioSource.channel) {
-        audioManager.returnChannel(*audioSource.channel);
-      }
-
-      audioSource.stop();
-    }
-  }
-
-  // If the user plays a sound from the same AudioSource twice,
-  // the old channel will be set to std::nullopt.
-  // That will prevent this system from returning it
-
-  for (
-    auto borrowedIter = audioManager.borrowedSpatialAudioChannels.begin();
-    borrowedIter != audioManager.borrowedSpatialAudioChannels.end();
-  ) {
-    SpatialAudioChannel channel{ *borrowedIter };
-
-    if (channel.is_stopped()) {
-      borrowedIter = audioManager.borrowedSpatialAudioChannels.erase(borrowedIter);
-      audioManager.returnChannel(channel);
-    } else {
-      ++borrowedIter;
-    }
-  }
-}
-std::optional<SpatialAudioChannel> AudioManager::borrowChannel() {
-  if (freeSpatialAudioChannels.size() == 0) {
-    spdlog::warn("There are no more free audio channels!");
-    return std::nullopt;
-  }
-
-  auto channel =
-    freeSpatialAudioChannels.extract(freeSpatialAudioChannels.begin()).value();
-
-  borrowedSpatialAudioChannels.insert(channel);
-
-  return SpatialAudioChannel{channel};
-}
-void AudioManager::returnChannel(SpatialAudioChannel channel) {
-  if (auto channelLoc = borrowedSpatialAudioChannels.find(channel.source);
-      channelLoc != borrowedSpatialAudioChannels.end()) {
-    borrowedSpatialAudioChannels.extract(channelLoc);
-
-    freeSpatialAudioChannels.insert(channel.source);
-  } else {
-    spdlog::error(
-      "Channel {} was already returned. This is basically a use after free",
-      channel.source);
-  }
+EffectDescription::EffectDescription(ReverbDescription reverb)
+  : type(EffectType::REVERB), reverb{} {
+  this->type = EffectType::REVERB;
+  this->reverb = reverb;
 }
 
-void AudioManager::updateListener() {
-  Transform* cameraTranform = Viewport::activeCamera.get_mut<Transform>();
-
-  /* Position */
-  alListener3f(AL_POSITION, cameraTranform->position[0],
-               cameraTranform->position[1], cameraTranform->position[2]);
-  
-  /* Orientation */
-  {
-    vec3 forward = {1.f, 0.f, 0.f};
-    vec3 up = {0.f, 1.f, 0.f};
-
-    vec3 new_foward = {};
-    glm_quat_rotatev(cameraTranform->rotation, forward, new_foward);
-
-    vec3 new_up = {};
-    glm_quat_rotatev(cameraTranform->rotation, up, new_up);
-
-    float f[] = {
-      forward[0], forward[1], forward[2], up[0], up[1], up[2],
-    };
-
-    alListenerfv(AL_ORIENTATION, f);
-  }
-
-  /* Velocity */
-  // alListener3f(AL_VELOCITY, vel[0], vel[1], vel[2]);
-}
-
-// From OpenAL-soft version 1.17,
-// no source or buffer will have the value of 0
-// https://stackoverflow.com/questions/71095893/can-an-openal-source-ever-be-0
-std::optional<AudioBuffer> AudioBuffer::create(std::span<uint8_t> bytes,
-                                               AudioFormat audio_format,
-                                               size_t samples,
-                                               size_t sampleRate) {
-  ALenum alFormat = AL_FORMAT_STEREO16;
-  switch (audio_format) {
-    case AudioFormat::AUDIO_FORMAT_MONO8:
-      alFormat = AL_FORMAT_MONO8;
-      break;
-    case AudioFormat::AUDIO_FORMAT_MONO16:
-      alFormat = AL_FORMAT_MONO16;
-      break;
-    case AudioFormat::AUDIO_FORMAT_STEREO8:
-      alFormat = AL_FORMAT_STEREO8;
-      break;
-    case AudioFormat::AUDIO_FORMAT_STEREO16:
-      alFormat = AL_FORMAT_STEREO16;
-      break;
-  }
-
-  ALuint originalBuffer = 0;
-  alGenBuffers(1, &originalBuffer);
-  alBufferData(originalBuffer, alFormat, bytes.data(), bytes.size_bytes(),
-               sampleRate);
-  if (originalBuffer == 0 || alGetError() != AL_NO_ERROR) {
-    auto err = alGetError();
-    spdlog::error("Failed to create AL buffer data {}", alGetErrorString(err));
-    return std::nullopt;
-  }
-
-  auto monoBufferRes =
-    createMonoBuffer(bytes, audio_format, samples, sampleRate);
-
-  if (!monoBufferRes) {
-    return std::nullopt;
-  }
-
-  return AudioBuffer{originalBuffer, *monoBufferRes, samples, sampleRate};
-}
-std::optional<uint32_t> AudioBuffer::createMonoBuffer(std::span<uint8_t> bytes,
-                                                      AudioFormat format,
-                                                      size_t samples,
-                                                      size_t sampleRate) {
-  ALenum alFormat = AL_FORMAT_STEREO16;
+size_t FormatBytesPerSample(AudioFormat format) {
   switch (format) {
-    case AudioFormat::AUDIO_FORMAT_MONO8:
-      alFormat = AL_FORMAT_MONO8;
+    case Magnet::AudioFormat::AUDIO_FORMAT_MONO16:
+      return sizeof(uint16_t);
       break;
-    case AudioFormat::AUDIO_FORMAT_MONO16:
-      alFormat = AL_FORMAT_MONO16;
+    case Magnet::AudioFormat::AUDIO_FORMAT_STEREO16:
+      return sizeof(uint16_t) * 2;
       break;
-    case AudioFormat::AUDIO_FORMAT_STEREO8:
-      alFormat = AL_FORMAT_STEREO8;
+    case Magnet::AudioFormat::AUDIO_FORMAT_STEREO8:
+      return sizeof(uint8_t) * 2;
       break;
-    case AudioFormat::AUDIO_FORMAT_STEREO16:
-      alFormat = AL_FORMAT_STEREO16;
+    case Magnet::AudioFormat::AUDIO_FORMAT_MONO8:
+      return sizeof(uint8_t);
       break;
   }
+  assert(false);
+  return 0;
+}
 
-  uint32_t monoBufferSizeBytes = 0;
-  ALenum monoBufferFormat = 0;
-  if (alFormat == AL_FORMAT_MONO8 || alFormat == AL_FORMAT_MONO16) {
-    monoBufferSizeBytes = bytes.size_bytes();
-  } else {
-    assert(alFormat == AL_FORMAT_STEREO8 || alFormat == AL_FORMAT_STEREO16);
-    assert(bytes.size_bytes() % 2 == 0);
+void RawAudioData::clear() { data.clear(); }
+VolumeAdjuster::VolumeAdjuster() : masterVolume(1.f) {
+  for (auto tag : Components::allAudioTags()) {
+    volumes[tag] = 1.f;
+  }
+}
 
-    monoBufferSizeBytes = bytes.size_bytes() / 2;
+AudioManager::AudioManager()
+  : al(new ALBackend()) {
 
-    if (alFormat == AL_FORMAT_STEREO16) {
-      short* stereoBytes = reinterpret_cast<short*>(bytes.data());
+}
+AudioManager::~AudioManager() { delete al; }
 
-      for (size_t i = 0; i < bytes.size_bytes() / (2 * sizeof(short)); ++i) {
-        stereoBytes[i] = (stereoBytes[2 * i] + stereoBytes[2 * i + 1]) / 2;
-      }
+void AudioManager::setupECS(flecs::world* ecs) { this->ecs = ecs; }
+VolumeAdjuster& AudioManager::volumes() { return volumeAdjustor; }
+void AudioManager::handleRequestedPlay(Components::AudioSource &source, 
+                                      const Components::Transform &transform, 
+                                      const Components::Environment &environment) {
+  assert(source.trackName != nullptr);
+
+  if (source.requestId) {
+    al->freeRequest(*source.requestId);
+    source.requestId = std::nullopt;
+  }
+
+
+  source.requestId = al->newRequest();
+  if (source.requestId == std::nullopt) {
+    spdlog::warn("Could not play sound newAudioRequest failed");
+    source.stop();
+    return;
+  }
+
+  std::optional<ALBuffer> buffer = std::nullopt;
+  if (source.trackName) {
+    if (source.isSpatial()) {
+      buffer = al->getMonoBuffer(source.trackName);
     } else {
-      uint8_t* stereoBytes = bytes.data();
-      for (size_t i = 0; i < bytes.size_bytes() / (2 * sizeof(uint8_t)); ++i) {
-        stereoBytes[i] = (stereoBytes[2 * i] + stereoBytes[2 * i + 1]) / 2;
+      buffer = al->getBuffer(source.trackName);
+    }
+    source.trackName = nullptr;
+  }
+
+  if (buffer == std::nullopt) {
+    spdlog::error("Failed to get track");
+    source.state = Components::AudioPlayState::STOPPED;
+    return;
+  }
+
+  if (auto *request = al->getRequest(source.requestId.value()); request && buffer) {
+    al->setParameters(source.requestId.value(), source, transform, environment, volumeAdjustor);
+    request->source.setBuffer(*buffer);
+    request->source.play();
+  }
+  source.state = Components::AudioPlayState::PLAYING;
+
+  assert(source.trackName == nullptr);
+  assert(source.requestId);
+}
+void AudioManager::handlePlaying(Components::AudioSource &source, 
+                                const Components::Transform &transform,
+                                const Components::Environment &environment) {
+  assert(source.trackName == nullptr);
+  assert(source.requestId);
+
+
+  if (auto *request = al->getRequest(source.requestId.value())) {
+    al->setParameters(source.requestId.value(), source, transform,
+                           environment, volumeAdjustor);
+
+    if (request->source.isStopped()) {
+      source.state = Components::AudioPlayState::STOPPED;
+    }
+  }
+
+  
+  vec3 listenerPos = {};
+  getListenerPos(listenerPos);
+  vec3 sourcePos = {transform.position[0], transform.position[1],
+                    transform.position[2]};
+
+  const float distance = glm_vec3_distance(listenerPos, sourcePos);
+  if (distance > MAX_DISTANCE) {
+    source.stop();
+  }
+}
+void AudioManager::handleStopped(Components::AudioSource &source) {
+  if (source.requestId) {
+    al->freeRequest(*source.requestId);
+    source.requestId = std::nullopt;
+  }
+}
+
+void AudioManager::AudioSourceSystem(flecs::iter &iter, Components::Transform *transforms, Components::AudioSource *sources) {
+  auto &audioMgr = AudioManager::getInstance();
+  
+  
+  flecs::filter<Components::Transform, Components::Environment> environments_query =
+    audioMgr.ecs->filter<Components::Transform, Components::Environment>();
+
+  std::vector<std::pair<Components::Transform, Components::Environment>>
+    environments;
+  const int ENV_DISTANCE = 1000;
+  vec3 listenerPos = { 0.f, 0.f, 0.f };
+  ALBackend::getListenerPos(listenerPos);
+  environments_query.iter(
+    [&listenerPos, ENV_DISTANCE, &environments](flecs::iter& it, Components::Transform* transform,
+      Components::Environment* environment) {
+      for (size_t row : it) {
+        AABB envBoundingBox = AABB::fromTransform(transform[row]);
+        bool cornerIsWithinDistance = false;
+        for (auto corner : envBoundingBox.corners()) {
+          cornerIsWithinDistance |= 
+            glm_vec3_distance2(corner.data(), listenerPos) <= ENV_DISTANCE * ENV_DISTANCE;
+        }
+  
+        if (cornerIsWithinDistance) {
+          environments.push_back(std::make_pair(transform[row], environment[row]));
+        }
+      }
+  });
+
+  auto findEnvironment = [&](vec3 pos)->std::optional < Components::Environment > {
+    for (auto &[transform, environment]: environments) {
+      auto aabb = AABB::fromPositionAndSize(transform.position, transform.scale);
+      if (aabb.rotatedAABBContains(transform.rotation, pos)) {
+        return environment;
       }
     }
-  }
 
-  if (alFormat == AL_FORMAT_STEREO16) {
-    monoBufferFormat = AL_FORMAT_MONO16;
-  } else if (alFormat == AL_FORMAT_STEREO8) {
-    monoBufferFormat = AL_FORMAT_MONO8;
-  } else {
-    monoBufferFormat = alFormat;
-  }
-
-  ALuint monoBuffer = 0;
-  alGenBuffers(1, &monoBuffer);
-  alBufferData(monoBuffer, monoBufferFormat, bytes.data(), monoBufferSizeBytes,
-               sampleRate);
-  if (monoBuffer == 0 || alGetError() != AL_NO_ERROR) {
-    auto err = alGetError();
-    spdlog::error("Failed to create AL mono buffer data {}",
-                  alGetErrorString(err));
     return std::nullopt;
-  }
+  };
 
-  return monoBuffer;
-}
-void AudioBuffer::destroy() const {
-  alDeleteBuffers(1, &originalBuffer);
-  alDeleteBuffers(1, &monoBuffer);
-}
-double AudioBuffer::length() const {
-  float scale = 1.f;
-  double seconds =
-    static_cast<double>(samples) / static_cast<double>(sampleRate);
-  return seconds;
-}
+  for (size_t i: iter) {
+    auto &transform = transforms[i];
+    auto &source = sources[i];
 
-size_t SpatialAudioRequest::hash() const {
-  size_t trackNameHash = std::hash<const char*>()(trackName);
-  size_t timestampHash = std::hash<double>()(timestampStartedS);
+    Components::Environment environment;
+    if (auto environmentOpt = findEnvironment(transform.position)) {
+      environment = *environmentOpt;
+    }
 
-  size_t finalHash = trackNameHash;
-  finalHash ^= timestampHash + 0x9e3779b9 + (finalHash << 6) + (finalHash >> 2);
-
-  return finalHash;
-}
-void SpatialAudioRequest::stop() {
-  if (channel) {
-    channel->stop();
-  }
-}
-void SpatialAudioRequest::setPitch(float pitch) { this->pitch = pitch; }
-void SpatialAudioRequest::setVolume(float volume) { this->volume = volume; }
-float SpatialAudioRequest::getPitch() const { return this->pitch; }
-float SpatialAudioRequest::getVolume() const { return this->volume; }
-
-void AudioChannel::reset() {
-  stop();
-  alSourcei(source, AL_BUFFER, 0);
-  alSourcef(source, AL_ROLLOFF_FACTOR, 1.f);
-
-  vec4 zero_vec = {0.f, 0.f, 0.f, 0.f};
-  alSourcefv(source, AL_POSITION, zero_vec);
-  alSourcefv(source, AL_VELOCITY, zero_vec);
-  alSourcefv(source, AL_DIRECTION, zero_vec);
-
-  set_looping(false);
-}
-std::optional<AudioChannel> AudioChannel::create() {
-  AudioChannel source;
-  alGenSources(1, &source.source);
-  if (source.source == 0) {
-    auto err = alGetError();
-    spdlog::error("Failed to create AL source {}", alGetErrorString(err));
-    return std::nullopt;
-  }
-  return source;
-}
-
-void AudioChannel::assign(const AudioBuffer& buffer) {
-  if (!is_stopped()) {
-    stop();
-  }
-  alSourcei(source, AL_BUFFER, buffer.originalBuffer);
-  if (alGetError() != AL_NO_ERROR) {
-    auto err = alGetError();
-    spdlog::error("Failed to assign AL source to buffer {}",
-                  alGetErrorString(err));
-  }
-}
-void AudioChannel::play() {
-  check_if_initialized();
-
-  alSourcePlay(source);
-  if (alGetError() != AL_NO_ERROR) {
-    auto err = alGetError();
-    spdlog::error("Failed to play track {}", alGetErrorString(err));
-  }
-}
-bool AudioChannel::is_currently_playing() {
-  ALint state = 0;
-  alGetSourcei(source, AL_SOURCE_STATE, &state);
-  return state == AL_PLAYING;
-}
-void AudioChannel::stop() {
-  check_if_initialized();
-
-  alSourceStop(source);
-}
-bool AudioChannel::is_stopped() {
-  check_if_initialized();
-
-  ALint sourceState = 0;
-  alGetSourcei(source, AL_SOURCE_STATE, &sourceState);
-  return sourceState == AL_STOPPED;
-}
-void AudioChannel::pause() {
-  check_if_initialized();
-
-  alSourcePause(source);
-}
-bool AudioChannel::is_looping() {
-  check_if_initialized();
-
-  ALint looping = AL_FALSE;
-  alGetSourcei(source, AL_LOOPING, &looping);
-  return looping == AL_TRUE;
-}
-void AudioChannel::set_looping(bool should_loop) {
-  check_if_initialized();
-
-  ALint al_should_loop = should_loop ? AL_TRUE : AL_FALSE;
-  alSourcei(source, AL_LOOPING, al_should_loop);
-}
-void AudioChannel::destroy() const { alDeleteSources(1, &source); }
-void AudioChannel::set_volume(float vol) { alSourcef(source, AL_GAIN, vol); }
-void AudioChannel::set_pitch(float pitch) {
-  AL_PITCH;
-  alSourcef(source, AL_PITCH, pitch);
-}
-void AudioChannel::check_if_initialized() const {
-  if (source == 0) {
-    spdlog::warn("source is 0, did you forget to initialize it?");
-  }
-}
-
-std::optional<SpatialAudioChannel> SpatialAudioChannel::create() {
-  SpatialAudioChannel source;
-  alGenSources(1, &source.source);
-  if (source.source == 0) {
-    auto err = alGetError();
-    spdlog::error("Failed to create AL source {}", alGetErrorString(err));
-    return std::nullopt;
-  }
-  return source;
-}
-void SpatialAudioChannel::assign(const AudioBuffer& buffer) {
-  if (!is_stopped()) {
-    stop();
-  }
-  alSourcei(source, AL_BUFFER, buffer.monoBuffer);
-  if (alGetError() != AL_NO_ERROR) {
-    auto err = alGetError();
-    spdlog::error("Failed to assign AL source to buffer {}",
-                  alGetErrorString(err));
-  }
-}
-void SpatialAudioChannel::play() {
-  check_if_initialized();
-
-  alSourcePlay(source);
-  if (alGetError() != AL_NO_ERROR) {
-    auto err = alGetError();
-    spdlog::error("Failed to play track {}", alGetErrorString(err));
-  }
-}
-bool SpatialAudioChannel::is_currently_playing() {
-  ALint state = 0;
-  alGetSourcei(source, AL_SOURCE_STATE, &state);
-  return state == AL_PLAYING;
-}
-void SpatialAudioChannel::stop() {
-  check_if_initialized();
-
-  alSourceStop(source);
-}
-void SpatialAudioChannel::reset() {
-  stop();
-  alSourcei(source, AL_BUFFER, 0);
-  alSourcef(source, AL_ROLLOFF_FACTOR, 1.f);
-
-  vec4 zero_vec = {0.f, 0.f, 0.f, 0.f};
-  alSourcefv(source, AL_POSITION, zero_vec);
-  alSourcefv(source, AL_VELOCITY, zero_vec);
-  alSourcefv(source, AL_DIRECTION, zero_vec);
-
-  set_looping(false);
-}
-bool SpatialAudioChannel::is_stopped() {
-  check_if_initialized();
-
-  ALint sourceState = 0;
-  alGetSourcei(source, AL_SOURCE_STATE, &sourceState);
-  return sourceState == AL_STOPPED;
-}
-void SpatialAudioChannel::pause() {
-  check_if_initialized();
-
-  alSourcePause(source);
-}
-bool SpatialAudioChannel::is_looping() {
-  check_if_initialized();
-
-  ALint looping = AL_FALSE;
-  alGetSourcei(source, AL_LOOPING, &looping);
-  return looping == AL_TRUE;
-}
-void SpatialAudioChannel::set_looping(bool should_loop) {
-  check_if_initialized();
-
-  ALint al_should_loop = should_loop ? AL_TRUE : AL_FALSE;
-  alSourcei(source, AL_LOOPING, al_should_loop);
-}
-void SpatialAudioChannel::destroy() const { alDeleteSources(1, &source); }
-void SpatialAudioChannel::set_volume(float vol) {
-  alSourcef(source, AL_GAIN, vol);
-}
-void SpatialAudioChannel::set_pitch(float pitch) {
-  AL_PITCH;
-  alSourcef(source, AL_PITCH, pitch);
-}
-void SpatialAudioChannel::set_position(vec3 pos) {
-  alSourcefv(source, AL_POSITION, pos);
-  if (alGetError() != AL_NO_ERROR) {
-    assert(false);
-  }
-}
-void SpatialAudioChannel::set_velocity(vec3 vel) {
-  alSourcefv(source, AL_VELOCITY, vel);
-}
-void SpatialAudioChannel::set_direction(vec3 dir) {
-  alSourcefv(source, AL_DIRECTION, dir);
-}
-void SpatialAudioChannel::check_if_initialized() const {
-  if (source == 0) {
-    spdlog::warn("source is 0, did you forget to initialize it?");
-  }
-}
-void SpatialAudioChannel::set_cone(float angleDeg, float outerVolume) {
-  if (fabs(angleDeg) < 0.001f) {
-    alSourcef(source, AL_CONE_OUTER_ANGLE, 360.f);
-  }
-  // Openal uses degrees
-  alSourcef(source, AL_CONE_INNER_ANGLE, angleDeg);
-  alSourcef(source, AL_CONE_OUTER_GAIN, outerVolume);
-}
-
-AudioManager::AudioManager() : archiveMgr(nullptr) {
-  archiveMgr = new ArchiveManager("data.magnet", nullptr);
-  audioDevice = alcOpenDevice(nullptr);
-  alContext = alcCreateContext(audioDevice, nullptr);
-
-  if (!audioDevice || !alContext) {
-    spdlog::error("Failed to create openal device or context");
-    throw std::runtime_error("Failed to create openal device or context");
-  }
-
-  alcGetIntegerv(audioDevice, ALC_MONO_SOURCES, 1, &MAX_CHANNELS);
-  AUDIO_CHANNELS = 1;
-  SPATIAL_AUDIO_CHANNELS = MAX_CHANNELS - AUDIO_CHANNELS;
-
-  alcMakeContextCurrent(alContext);
-
-  alDistanceModel(AL_INVERSE_DISTANCE);
-
-  background = AudioChannel::create().value();
-
-  for (int i = 0; i < SPATIAL_AUDIO_CHANNELS; ++i) {
-    if (auto channel = SpatialAudioChannel::create()) {
-      freeSpatialAudioChannels.insert(channel->source);
+    switch (source.state) {
+      case Components::AudioPlayState::REQUESTED_PLAY:
+        audioMgr.handleRequestedPlay(source, transform, environment);
+        break;
+      case Components::AudioPlayState::PLAYING:
+        audioMgr.handlePlaying(source, transform, environment);
+        break;
+      case Components::AudioPlayState::STOPPED:
+        audioMgr.handleStopped(source);
+        break;
     }
   }
-
-  for (auto tag : {AudioTag::NONE, AudioTag::VOICE, AudioTag::SOUND_EFFECTS,
-                   AudioTag::MUSIC}) {
-    tagModifier[tag] = AudioTagParameters{};
-  }
-}
-AudioManager::~AudioManager() {
-  for (auto& spatialAudioChannel : freeSpatialAudioChannels) {
-    SpatialAudioChannel{spatialAudioChannel}.destroy();
-  }
-  freeSpatialAudioChannels.clear();
-  for (auto& spatialAudioChannel : borrowedSpatialAudioChannels) {
-    SpatialAudioChannel{spatialAudioChannel}.destroy();
-  }
-  borrowedSpatialAudioChannels.clear();
-
-  for (auto& [trackPath, trackData] : tracks) {
-    trackData.destroy();
-  }
-
-  tracks.clear();
-
-  alcMakeContextCurrent(nullptr);
-  alcDestroyContext(alContext);
-  alcCloseDevice(audioDevice);
 }
 
-struct DeleteStbVorbisData {
-  void operator()(short* ptr) const { free(ptr); }
-};
-
-std::optional<AudioBuffer> AudioManager::getTrack(const char* track) {
-  assert(track);
-
-  if (auto trackLoc = tracks.find(track); trackLoc != tracks.end()) {
-    return trackLoc->second;
+void AudioManager::removeSource(flecs::entity e,
+  Components::AudioSource source) {
+  if (source.requestId) {
+    auto &audioMgr = AudioManager::getInstance();
+    
+    source.stop();
+    audioMgr.handleStopped(source);
+    source.requestId = std::nullopt;
   }
-
+}
+bool AudioManager::LoadAudio(std::span<const uint8_t> rawFileData, RawAudioData &rawAudio) { 
   int spacialAudioChannels = 0, sampleRate = 0;
   short* hData = nullptr;
-
-  std::vector<uint8_t> fileBuffer;
-  archiveMgr->loadFile(track, fileBuffer);
-  if (fileBuffer.size() == 0) {
-    spdlog::error("Failed to open file {}", track);
-    return std::nullopt;
-  }
-
   int samples =
-    stb_vorbis_decode_memory(fileBuffer.data(), fileBuffer.size(),
+    stb_vorbis_decode_memory(rawFileData.data(), rawFileData.size(),
                              &spacialAudioChannels, &sampleRate, &hData);
-  std::unique_ptr<short, DeleteStbVorbisData> data(hData);
-  if (data == nullptr) {
-    spdlog::error("Failed to open file {}", track);
-    return std::nullopt;
+
+  if (hData == nullptr) {
+    spdlog::error("Could not parse audio file data");
+    return false;
   }
-  auto format = AudioFormat::AUDIO_FORMAT_STEREO16;
+
+  AudioFormat format = AudioFormat::AUDIO_FORMAT_STEREO16;
   if (spacialAudioChannels == 1) {
     format = AudioFormat::AUDIO_FORMAT_MONO16;
   }
+  size_t rawDataByteSize = FormatBytesPerSample(format) * samples;
 
-  std::span<uint8_t> samplesData(reinterpret_cast<uint8_t*>(data.get()),
-                                 samples * sizeof(short));
+  std::span<const uint8_t> bytes(
+    static_cast<uint8_t*>(static_cast<void*>(hData)),
+    rawDataByteSize);
 
-  if (auto buffer =
-        AudioBuffer::create(samplesData, format, samples, sampleRate)) {
-    tracks[track] = *buffer;
+  rawAudio.clear();
 
-    return *buffer;
-  }
+  rawAudio.format = format;
+  rawAudio.data.resize(bytes.size_bytes());
+  memcpy(rawAudio.data.data(), bytes.data(), bytes.size_bytes());
+  rawAudio.sampleRate = sampleRate;
 
-  return std::nullopt;
+  return true;
 }
-/*
-std::optional<uint32_t>
-AudioManager::handleSpatialAudioRequest(SpatialAudioRequest request, vec3 pos) {
-  uint32_t freeChannelIndex = 0;
-  for (; freeChannelIndex < spacialAudioChannels.size(); ++freeChannelIndex) {
-    if (!spacialAudioChannels[freeChannelIndex].is_currently_playing()) {
-      break;
-    }
-  }
-  if (freeChannelIndex == spacialAudioChannels.size()) {
-    return std::nullopt;
-  }
-
-  SpatialAudioChannel& freeChannel = spacialAudioChannels[freeChannelIndex];
-  AudioBuffer* buffer = nullptr;
-  if (auto bufferLoc = tracks.find(request.trackName); bufferLoc !=
-tracks.end()) { buffer = &bufferLoc->second;
-  }
-  if (!buffer) {
-    return std::nullopt;
-  }
-
-
-  freeChannel.reset();
-  freeChannel.set_looping(request.looping);
-  freeChannel.assign(*buffer);
-  freeChannel.set_position(pos);
-  freeChannel.play();
-
-  return freeChannelIndex;
+void AudioManager::registerAudio(const std::string &name, std::span < const uint8_t > data, AudioFormat format, size_t sampleRate) {
+  al->genBuffers(name, data, format, sampleRate);
 }
-*/
-void AudioManager::playTrackBackground(const char* track) {
-  if (auto trackLoc = tracks.find(track); trackLoc != tracks.end()) {
-    background.assign(trackLoc->second);
-    background.play();
-    if (alGetError() != AL_NO_ERROR) {
-      auto err = alGetError();
-      spdlog::error("Failed to play track {} {}", track, alGetErrorString(err));
-    }
-  } else {
-    spdlog::warn("Track could not be played track was not found {}", track);
+void AudioManager::registerEffect(const std::string& name, EffectDescription desc) {
+  al->registerEffect(name, desc);
+}
+void AudioManager::registerAllEfxPresets() {
+  for (auto &[name, reverb] : getEFXPresets()) {
+    this->registerEffect(name, reverb);
   }
 }
 
-void AudioManager::deleteTrack(const char* track) {
-  if (auto trackLoc = tracks.find(track); trackLoc != tracks.end()) {
-    trackLoc->second.destroy();
-    tracks.erase(trackLoc);
-  } else {
-    spdlog::error("Track {} was not found and could not be deleted", track);
-  }
+
+void AudioManager::getListenerPos(vec3 pos) { ALBackend::getListenerPos(pos); }
+void AudioManager::setListenerPos(const vec3 pos) {
+  vec3 posCopy = {pos[0], pos[1], pos[2]};
+
+  ALBackend::setListenerPos(posCopy);
+}
+AudioManagerDebugInfo AudioManager::getDebugInfo() const {
+  return al->getDebugInfo();
 }
 
-std::string to_string(Magnet::AudioTag tag) {
-  switch (tag) {
-    case Magnet::AudioTag::VOICE:
-      return "VOICE";
-    case Magnet::AudioTag::SOUND_EFFECTS:
-      return "SOUND_EFFECTS";
-    case Magnet::AudioTag::MUSIC:
-      return "MUSIC";
-    case Magnet::AudioTag::NONE:
-      return "NONE";
-  };
-}
-}  // namespace Magnet
+} // namespace Magnet
