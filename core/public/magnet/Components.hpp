@@ -6,6 +6,8 @@
 
 #include <cglm/cglm.h>
 
+#include <magnet/Library.hpp>
+
 // TODO: Remove when asset system is finished
 namespace Magnet {
 struct ALBuffer;
