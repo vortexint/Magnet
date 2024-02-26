@@ -4,6 +4,7 @@ target_sources(magnet-core PRIVATE
   Shaders.cpp
   Viewport.cpp
   Window.cpp
+  Model.cpp
 )
 
 add_subdirectory(UI)

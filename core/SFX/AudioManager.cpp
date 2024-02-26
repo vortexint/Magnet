@@ -587,7 +587,7 @@ std::optional<AudioBuffer> AudioManager::getTrack(const char* track) {
     format = AudioFormat::AUDIO_FORMAT_MONO16;
   }
 
-  std::span<uint8_t> samplesData(reinterpret_cast<uint8_t*>(data.get()),
+  std::span<uint8_t> samplesData(static_cast<uint8_t*>(static_cast<void*>(data.get())),
                                  samples * sizeof(short));
 
   if (auto buffer =

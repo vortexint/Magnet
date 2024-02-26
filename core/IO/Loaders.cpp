@@ -1,4 +1,5 @@
 #include <spdlog/spdlog.h>
+#include <glad/glad.h>
 
 #include <magnet/Library.hpp>
 

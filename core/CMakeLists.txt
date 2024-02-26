@@ -5,7 +5,7 @@ target_sources(magnet-core PRIVATE
   Application.cpp
   Scene.cpp
   Components.cpp
-)
+ "GFX/Model.cpp")
 
 add_subdirectory(GFX)   # Graphics
 add_subdirectory(SFX)   # Sound

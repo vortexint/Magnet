@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glad/glad.h>
+//#include <glad/glad.h>
 
 #include <magnet/ArchiveManager.hpp>
 #include <memory>
@@ -13,23 +13,23 @@ namespace Magnet::Library {
 struct Texture {
   int width = 0, height = 0, channels = 0;
   unsigned char* data = nullptr;
-  GLuint id = 0;
+  unsigned int id = 0;
   ~Texture();
 };
-struct Model {
-  GLuint vao = 0, vbo = 0, ebo = 0;
-  ~Model();
+struct Mesh {
+  unsigned int vao = 0, vbo = 0, ebo = 0;
+  ~Mesh();
 };
 
 enum class AssetType {
   Texture,
-  Model,
+  Mesh,
   Audio,
 };
 
 struct Asset {
   AssetType type;
-  std::variant<Texture, Model> data;
+  std::variant<Texture, Mesh> data;
 };
 
 using ID = uint32_t;
