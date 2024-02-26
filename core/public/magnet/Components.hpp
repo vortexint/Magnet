@@ -6,8 +6,13 @@
 
 #include <cglm/cglm.h>
 
-#include <magnet/Library.hpp>
+#include <magnet/Library.hpp>  // For ID
 
+/**
+ * ECS Component Guideline:
+ * Components are data structures only. They represent an entity's state.
+ * Do not add methods/logic. Keep them clean and simple.
+ */
 // TODO: Remove when asset system is finished
 namespace Magnet {
 struct ALBuffer;
@@ -15,11 +20,6 @@ class AudioManager;
 class ALBackend;
 }
 
-/**
- * ECS Component Guideline:
- * Components are data structures only. They represent an entity's state.
- * Do not add methods/logic. Keep them clean and simple.
- */
 namespace Magnet::Components {
 
 /* Scene Components */

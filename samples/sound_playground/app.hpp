@@ -22,7 +22,7 @@ class App : public Magnet::Context {
   std::vector<std::string> trackNames;
 
  
-  static constexpr bool AUDIO_DEBUG_ENABLED = true;
+  static constexpr bool AUDIO_DEBUG_ENABLED = false;
   void audioDebugInit();
   void audioDebugInit(flecs::world &ecs);
 
