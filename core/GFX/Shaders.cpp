@@ -110,5 +110,9 @@ void setMat4(GLuint shaderID, const char* name, const mat4 matrix) {
   glUniformMatrix4fv(glGetUniformLocation(shaderID, name), 1, GL_FALSE,
                      (const GLfloat*)matrix);
 }
+void setVec4(GLuint shaderID, const char* name, const vec4 value) {
+  glUniform4f(glGetUniformLocation(shaderID, name), value[0], value[1],
+              value[2], value[3]);
+}
 
 }  // namespace Magnet::Shaders

@@ -17,7 +17,7 @@ public:
     ArchiveManager archiveMgr("assets.magnet");
 
     std::vector<uint8_t> buffer;
-
+    /*
     buffer.clear();
     archiveMgr.loadFile("cone.glb", buffer);
     cone = Model::create(buffer).value();
@@ -32,6 +32,11 @@ public:
     archiveMgr.loadFile("cube.glb", buffer);
     cube = Model::create(buffer).value();
     TempModelRenderer::get().models.push_back(cube);
+    */
+    buffer.clear();
+    archiveMgr.loadFile("hoewa_Forsteriana.glb", buffer);
+    auto hoewaForsteriana = Model::create(buffer).value();
+    TempModelRenderer::get().models.push_back(hoewaForsteriana);
   }
 
   void update() override {
@@ -48,6 +53,9 @@ public:
         ImGui::DragFloat3("pos##Primitive_ModelPos", model.pos, 0.01f);
         ImGui::DragFloat3("scale##Primitive_ModelScale", model.scale, 0.01f);
         ImGui::DragFloat4("rot##Primitive_ModelRot", model.rot, 0.01f);
+        float len = glm_vec4_dot(model.rot, model.rot);
+        glm_vec4_divs(model.rot, glm_vec4_norm(model.rot), model.rot);
+
         
       }
     }

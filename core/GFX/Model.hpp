@@ -14,18 +14,32 @@ namespace Magnet {
 // Reference: https://github.khronos.org/glTF-Tutorials/gltfTutorial/
 
 struct Model {
-  struct Mesh {
+  struct MeshPrimitive {
     std::vector<unsigned> vbo;
     unsigned ebo, vao;
     int mode;
     size_t count;
     int componentType;
     size_t byteOffset;
+    vec4 baseColorFactor;
+    std::optional<int> baseColorTexture;
   };
+  struct Mesh {
+    std::vector<MeshPrimitive> primitives;
+  };
+  struct Node {
+    int meshIndex;
+    std::vector<int> childIndexes;
 
-  std::vector<Mesh> meshes;
-
-
+    vec3 pos = {0.f, 0.f, 0.f};
+    vec3 scale = {1.f, 1.f, 1.f};
+    vec4 rot = {0.f, 0.f, 0.f, 1.f};
+    bool hasChanged = false;
+  };
+  int parentNodeIndex;
+  std::unordered_map<int, Mesh> meshes;
+  std::unordered_map<int, Node> nodes;
+  std::unordered_map<int, unsigned> textures;
 
   static std::optional<Model> create(std::span<const uint8_t> mem);
 
