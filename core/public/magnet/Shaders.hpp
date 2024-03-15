@@ -26,7 +26,7 @@ void updateUniformBuffer(GLuint ubo, GLintptr offset, GLsizeiptr size,
 void bindUniformBuffer(GLuint ubo, GLuint bindingPoint);
 
 /* Setters - These are SLOW and should only be used for debugging.
-   Prefer uniform buffers, very superior in terms of performance. */
+   Prefer uniform buffers, very superior in performance. */
 
 void setBool(GLuint shaderID, const char* name, bool value);
 void setInt(GLuint shaderID, const char* name, int value);

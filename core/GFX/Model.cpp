@@ -35,11 +35,7 @@ are oriented
 
 */
 
-// Don't #define STBI_ONLY_PNG because some models use jpeg images inside of them
-#define STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#define TINYGLTF_IMPLEMENTATION
-#include "tiny_gltf.h"
+#include <magnet/Library.hpp>
 
 namespace Magnet {
 static constexpr int VERTEX_ATTRIB_LOC        = 0;

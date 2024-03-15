@@ -3,6 +3,7 @@
 
 #include <magnet/Application.hpp>
 #include <magnet/ArchiveManager.hpp>
+#include <magnet/AudioManager.hpp>
 #include <magnet/Scene.hpp>
 #include <magnet/Shaders.hpp>
 #include <magnet/Widgets.hpp>
@@ -10,14 +11,17 @@
 #include "GFX/Pipeline.hpp"
 #include "GFX/UI/UserInterface.hpp"
 #include "GFX/Window.hpp"
+#include "IO/FallbackAssets.hpp"
 
 namespace Magnet::Application {
 
 spdlog::logger logger("Magnet");
-ArchiveManager archiveManager(ARCH_core, ARCH_core_KEY);
 Context* appContext;
 
-ArchiveManager& getArchiveManager() { return archiveManager; }
+ArchiveManager& getArchiveManager() {
+  static ArchiveManager archiveManager(ARCH_core, ARCH_core_KEY);
+  return archiveManager;
+}
 
 void registerContext(Context& applicationContext, const char* const title) {
   appContext = &applicationContext;
@@ -42,7 +46,8 @@ void setupLogging() {
 
 void initializeSystems() {
   Scene::setupECS(appContext->getECS());
-  UI::setup(archiveManager);
+  UI::setup(getArchiveManager());
+  Library::loadFallbackAssets(getArchiveManager());
   appContext->init();
 }
 
@@ -52,6 +57,9 @@ void initialize() {
 
   setupLogging();
   initializeSystems();
+
+  auto& ecs = appContext->getECS();
+  AudioManager::getInstance().setupECS(&ecs);
 
   /* Main loop */
 
