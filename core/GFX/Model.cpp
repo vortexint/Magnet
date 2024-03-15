@@ -598,7 +598,6 @@ void Model::destroy() {
     glDeleteTextures(1, &tex);
   }
 }
-Model::~Model() { destroy(); }
 
 TempModelRenderer::ModelAndTransform::ModelAndTransform(Model model) {
   this->model = model;
