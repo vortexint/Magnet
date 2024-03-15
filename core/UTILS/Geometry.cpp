@@ -99,7 +99,7 @@ void AABB::getCenter(vec3 center) {
 }
 
 void GET_FORWARD(vec3 v) {
-  vec3 forward = {1.f, 0.f, 0.f};
+  vec3 forward = {0.f, 0.f, -1.f};
   glm_vec3_copy(forward, v);
 }
 void GET_UP(vec3 v) { 
@@ -107,7 +107,7 @@ void GET_UP(vec3 v) {
   glm_vec3_copy(up, v);
 }
 void GET_RIGHT(vec3 v) {
-  vec3 right = {0.f, 0.f, 1.f};
+  vec3 right = {1.f, 0.f, 0.f};
   glm_vec3_copy(right, v);
 }
 

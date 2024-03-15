@@ -1,109 +1,106 @@
-#include <string>
-#include <memory>
-
-#include <glad/glad.h>
-#include <GFX/Model.hpp>
-#include <magnet/Shaders.hpp>
-
-#include <spdlog/spdlog.h>
 #include <cglm/mat4.h>
+#include <glad/glad.h>
+#include <spdlog/spdlog.h>
 
-// Usefull tools: 
-// Use glTF: Import from GLB command to convert a glb file to gltf for debugging 
-// https://marketplace.visualstudio.com/items?itemName=cesium.gltf-vscode <-- MAKE SURE TO USE THIS
-// https://github.khronos.org/glTF-Validator/
+#include <GFX/Model.hpp>
+#include <magnet/Library.hpp>
+#include <magnet/Shaders.hpp>
+#include <magnet/Geometry.hpp>
+#include <memory>
+#include <string>
+
+// Usefull tools:
+// Use glTF: Import from GLB command to convert a glb file to gltf for debugging
+// https://marketplace.visualstudio.com/items?itemName=cesium.gltf-vscode <--
+// MAKE SURE TO USE THIS https://github.khronos.org/glTF-Validator/
 // https://github.com/KhronosGroup/glTF-Sample-Assets
 // https://gltf-viewer.donmccurdy.com/
 // https://sandbox.babylonjs.com/
-// 
-// TODO: Implement more of PBR data https://gltf-viewer-tutorial.gitlab.io/physically-based-materials/
-// PBR Implementation https://github.com/Nadrin/PBR/tree/master
-
-// TODO: There are two TINYGLTF_IMPLEMENTATION's in this
-// and Loaders.cpp, we should unify them in some way
+//
+// TODO: Implement more of PBR data
+// https://gltf-viewer-tutorial.gitlab.io/physically-based-materials/ PBR
+// Implementation https://github.com/Nadrin/PBR/tree/master
 
 /*
-Manually tested 90 sample models from https://github.com/KhronosGroup/glTF-Sample-Assets
-Models that are still not visible 6
+Make sure to always test OrientationTest.glb whenever you make modifications to
+this file
+
+Manually tested 90 sample models from
+https://github.com/KhronosGroup/glTF-Sample-Assets Models that are still not
+visible 5
  - [ ] Fix AnimatedMorphCube.glb
  - [ ] AnisotropyDiscTest.glb
  - [ ] BoxAnimated.glb
  - [ ] BoxInterleaved.glb
- - [ ] OrientationTest.glb - There is something wrong with how the quaternions
 are oriented
  - [ ] UnlitTest.glb
-
 */
 
-#include <magnet/Library.hpp>
-
 namespace Magnet {
-static constexpr int VERTEX_ATTRIB_LOC        = 0;
-static constexpr int NORMAL_ATTRIB_LOC        = 1;
-static constexpr int TANGENT_ATTRIB_LOC       = 2;
-static constexpr int TEX_COORD_0_ATTRIB_LOC   = 3;
-static constexpr int TEX_COLOR_0_ATTRIB_LOC   = 4;
-static constexpr int TEX_JOINTS_0_ATTRIB_LOC  = 5;
+static constexpr int VERTEX_ATTRIB_LOC = 0;
+static constexpr int NORMAL_ATTRIB_LOC = 1;
+static constexpr int TANGENT_ATTRIB_LOC = 2;
+static constexpr int TEX_COORD_0_ATTRIB_LOC = 3;
+static constexpr int TEX_COLOR_0_ATTRIB_LOC = 4;
+static constexpr int TEX_JOINTS_0_ATTRIB_LOC = 5;
 static constexpr int TEX_WEIGHTS_0_ATTRIB_LOC = 6;
 
-// Given a buffer size and a mode return the count of elements there are for drawing
+// Given a buffer size and a mode return the count of elements there are for
+// drawing
 int glModeCount(int mode, size_t bufferSize) {
   switch (mode) {
-  case GL_POINTS:
-    return bufferSize / (sizeof(float) * 3);
-    break;
-  case GL_LINE_STRIP:
-    return (bufferSize / (sizeof(float) * 3)) - 1;
-    break;
-  case GL_LINE_LOOP:
-    return bufferSize / (sizeof(float) * 3);
-    break;
-  case GL_LINES:
-    return bufferSize / (sizeof(float) * 3 * 2);
-    break;
-  case GL_TRIANGLE_STRIP:
-    return (bufferSize / (sizeof(float) * 3)) - 2;
-    break;
-  case GL_TRIANGLE_FAN:
-    return ((bufferSize / (sizeof(float) * 3)) - 1) / 2;
-    break;
-  case GL_TRIANGLES:
-    return bufferSize / (sizeof(float) * 3 * 3);
-    break;
-  default:
-    assert(false);
+    case GL_POINTS:
+      return bufferSize / (sizeof(float) * 3);
+      break;
+    case GL_LINE_STRIP:
+      return (bufferSize / (sizeof(float) * 3)) - 1;
+      break;
+    case GL_LINE_LOOP:
+      return bufferSize / (sizeof(float) * 3);
+      break;
+    case GL_LINES:
+      return bufferSize / (sizeof(float) * 3 * 2);
+      break;
+    case GL_TRIANGLE_STRIP:
+      return (bufferSize / (sizeof(float) * 3)) - 2;
+      break;
+    case GL_TRIANGLE_FAN:
+      return ((bufferSize / (sizeof(float) * 3)) - 1) / 2;
+      break;
+    case GL_TRIANGLES:
+      return bufferSize / (sizeof(float) * 3 * 3);
+      break;
+    default:
+      assert(false);
   }
 
   return 1;
 }
-bool validIndex(int index, size_t size) {
-  return (0 <= index && index < size);
-}
+bool validIndex(int index, size_t size) { return (0 <= index && index < size); }
 
-void createMesh(Model &magnetModel, const tinygltf::Model& model,
+void createMesh(Model& magnetModel, const tinygltf::Model& model,
                 const tinygltf::Mesh& mesh, int meshIndex) {
-  
   std::vector<Model::MeshPrimitive> primitives;
 
   for (size_t i = 0; i < mesh.primitives.size(); ++i) {
     const tinygltf::Primitive& primitive = mesh.primitives[i];
-    
+
     std::vector<unsigned> vbos;
     GLuint vao = 0;
 
     // the model might not have indices so we have to consider that case
-    if (primitive.indices != -1 && !validIndex(primitive.indices, model.accessors.size())) {
+    if (primitive.indices != -1 &&
+        !validIndex(primitive.indices, model.accessors.size())) {
       spdlog::error("primitive.indices is out of bounds");
       continue;
     }
-    
 
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
     std::optional<DrawArrays> drawArrays;
     std::optional<DrawElements> drawElements;
-    
+
     if (primitive.indices != -1) {
       GLuint ebo = 0;
       const tinygltf::Accessor& indexAccessor =
@@ -124,16 +121,13 @@ void createMesh(Model &magnetModel, const tinygltf::Model& model,
                    &indexBuffer.data[indexBufferView.byteOffset],
                    GL_STATIC_DRAW);
 
-      drawElements = DrawElements{
-        ebo,
-        primitive.mode,
-        indexAccessor.count,
-        indexAccessor.componentType,
-        indexAccessor.byteOffset
-      };
+      drawElements =
+        DrawElements{ebo, primitive.mode, indexAccessor.count,
+                     indexAccessor.componentType, indexAccessor.byteOffset};
     } else if (primitive.attributes.size() > 0 &&
                primitive.attributes.contains("POSITION") &&
-               validIndex(primitive.attributes.at("POSITION"), model.accessors.size())) {
+               validIndex(primitive.attributes.at("POSITION"),
+                          model.accessors.size())) {
       // Case case where there is not EBO
       assert(primitive.attributes.size() > 0);
 
@@ -149,9 +143,9 @@ void createMesh(Model &magnetModel, const tinygltf::Model& model,
     for (auto& [attribName, attribAccessorIndex] : primitive.attributes) {
       const tinygltf::Accessor& accessor = model.accessors[attribAccessorIndex];
 
-      const tinygltf::BufferView &bufferView = model.bufferViews[accessor.bufferView];
+      const tinygltf::BufferView& bufferView =
+        model.bufferViews[accessor.bufferView];
       const tinygltf::Buffer& buffer = model.buffers[bufferView.buffer];
-
 
       if (bufferView.target != GL_ARRAY_BUFFER) {
         spdlog::warn("Unkown target, skipping mesh");
@@ -172,24 +166,23 @@ void createMesh(Model &magnetModel, const tinygltf::Model& model,
         continue;
       }
 
-
       GLuint vbo = 0;
       glGenBuffers(1, &vbo);
       glBindBuffer(bufferView.target, vbo);
       glBufferData(bufferView.target, bufferView.byteLength,
-                   &buffer.data[bufferView.byteOffset], GL_STATIC_DRAW); 
+                   &buffer.data[bufferView.byteOffset], GL_STATIC_DRAW);
 
       vbos.push_back(vbo);
 
-      int byteStride =
-        accessor.ByteStride(bufferView);
+      int byteStride = accessor.ByteStride(bufferView);
 
       int size = 1;
       if (accessor.type != TINYGLTF_TYPE_SCALAR) {
         size = accessor.type;
       }
 
-      auto matchesPrefix = [](const std::string& view, const std::string& prefix, int &index) {
+      auto matchesPrefix = [](const std::string& view,
+                              const std::string& prefix, int& index) {
         if (prefix.size() > view.size()) {
           return false;
         }
@@ -217,7 +210,7 @@ void createMesh(Model &magnetModel, const tinygltf::Model& model,
         return true;
       };
 
-      Model::MeshPrimitive::Config config;
+      bool colorFormatIsVec3ElseVec4;
 
       int vaa = -1;
       int index = -1;
@@ -228,7 +221,6 @@ void createMesh(Model &magnetModel, const tinygltf::Model& model,
       } else if (attribName == "TANGENT") {
         vaa = TANGENT_ATTRIB_LOC;
       } else if (matchesPrefix(attribName, "TEXCOORD_", index)) {
-        config.textures = std::max(config.textures, index + 1);
         if (index == 0) {
           vaa = TEX_COORD_0_ATTRIB_LOC;
         } else {
@@ -238,10 +230,10 @@ void createMesh(Model &magnetModel, const tinygltf::Model& model,
             index);
         }
       } else if (matchesPrefix(attribName, "COLOR_", index)) {
-        config.colors = std::max(config.colors, index + 1);
-        config.colorFormatIsVec3ElseVec4 = (byteStride == sizeof(GLfloat) * 3);
+        colorFormatIsVec3ElseVec4 = (byteStride == sizeof(GLfloat) * 3);
 
-        // COLOR_n can be either vec3 or vec4 we need two shaders to handle this case
+        // COLOR_n can be either vec3 or vec4 we need two shaders to handle this
+        // case
         if (index == 0) {
           vaa = TEX_COLOR_0_ATTRIB_LOC;
 
@@ -252,7 +244,6 @@ void createMesh(Model &magnetModel, const tinygltf::Model& model,
             index);
         }
       } else if (matchesPrefix(attribName, "JOINTS_", index)) {
-        config.joints = std::max(config.joints, index + 1);
         if (index == 0) {
           vaa = TEX_JOINTS_0_ATTRIB_LOC;
         } else {
@@ -262,7 +253,6 @@ void createMesh(Model &magnetModel, const tinygltf::Model& model,
             index);
         }
       } else if (matchesPrefix(attribName, "WEIGHTS_", index)) {
-        config.joints = std::max(config.weights, index + 1);
         if (index == 0) {
           vaa = TEX_WEIGHTS_0_ATTRIB_LOC;
         } else {
@@ -282,8 +272,9 @@ void createMesh(Model &magnetModel, const tinygltf::Model& model,
       }
     }
 
-    Model::MeshPrimitive meshPrimitive{
-      std::move(vbos), vao, drawElements, drawArrays, {1.f, 1.f, 1.f, 1.f}, std::nullopt};
+    Model::MeshPrimitive meshPrimitive{std::move(vbos),      vao,
+                                       drawElements,         drawArrays,
+                                       {1.f, 1.f, 1.f, 1.f}, std::nullopt};
 
     if (0 <= primitive.material &&
         primitive.material < model.materials.size()) {
@@ -297,9 +288,10 @@ void createMesh(Model &magnetModel, const tinygltf::Model& model,
         meshPrimitive.baseColorFactor[2] = baseColorFactor[2];
         meshPrimitive.baseColorFactor[3] = baseColorFactor[3];
       }
-      
+
       auto& baseColorTexture = material.pbrMetallicRoughness.baseColorTexture;
-      if (0 <= baseColorTexture.index && baseColorTexture.index < model.textures.size()) {
+      if (0 <= baseColorTexture.index &&
+          baseColorTexture.index < model.textures.size()) {
         meshPrimitive.baseColorTexture =
           magnetModel.textures.at(baseColorTexture.index);
       }
@@ -338,7 +330,6 @@ void createMesh(Model &magnetModel, const tinygltf::Model& model,
           magnetModel.textures.at(normalTexture.index);
       }
     }
-   
 
     primitives.push_back(meshPrimitive);
 
@@ -354,7 +345,7 @@ void traverseNodes(Model& magnetModel, tinygltf::Model& model,
                    tinygltf::Node& node, int nodeIndex) {
   if (0 <= node.mesh && node.mesh < model.meshes.size()) {
     createMesh(magnetModel, model, model.meshes[node.mesh], node.mesh);
-  } else if (node.mesh != -1) { // tinygltf uses -1 a flag for none
+  } else if (node.mesh != -1) {  // tinygltf uses -1 a flag for none
     spdlog::error("Invalid mesh index {}", node.mesh);
   }
 
@@ -364,20 +355,19 @@ void traverseNodes(Model& magnetModel, tinygltf::Model& model,
                     childNodeIndex);
     } else {
       spdlog::error("Model Error: Invalid node index {}", childNodeIndex);
-    }              
+    }
   }
 
-  Model::Node magnetNode{ node.mesh, node.children };
+  Model::Node magnetNode{node.mesh, node.children};
   if (node.matrix.size() == 16) {
     // node.matrix column major order
     mat4 mat = {
       {node.matrix[0], node.matrix[1], node.matrix[2], node.matrix[3]},
       {node.matrix[4], node.matrix[5], node.matrix[6], node.matrix[7]},
       {node.matrix[8], node.matrix[9], node.matrix[10], node.matrix[11]},
-      {node.matrix[12], node.matrix[13], node.matrix[14], node.matrix[15]}
-    };
+      {node.matrix[12], node.matrix[13], node.matrix[14], node.matrix[15]}};
 
-    vec4 translation; // This has to be vec4 for glm_decompose
+    vec4 translation;  // This has to be vec4 for glm_decompose
     mat4 rotMatrix;
     vec3 scale;
     glm_decompose(mat, translation, rotMatrix, scale);
@@ -388,9 +378,10 @@ void traverseNodes(Model& magnetModel, tinygltf::Model& model,
     glm_vec3_copy(translation, magnetNode.pos);
     glm_vec3_copy(scale, magnetNode.scale);
     glm_vec4_copy(rotation, magnetNode.rot);
-    
-  } else  {
-    // TODO: Assert this if (node.translation.size() == 3 && node.scale.size() == 3 && node.rotation.size() == 4)
+
+  } else {
+    // TODO: Assert this if (node.translation.size() == 3 && node.scale.size()
+    // == 3 && node.rotation.size() == 4)
     if (node.translation.size() == 3) {
       vec3 translation = {node.translation[0], node.translation[1],
                           node.translation[2]};
@@ -420,7 +411,8 @@ struct TextureOptions {
   GLenum minFilter = GL_LINEAR, magFilter = GL_LINEAR;
   GLenum wrapS = GL_REPEAT, wrapP = GL_REPEAT;
 };
-  // TODO: Go through all model.xxx[index] and add a check to make sure that index is valid
+// TODO: Go through all model.xxx[index] and add a check to make sure that index
+// is valid
 void loadTextures(Model& magnetModel, const tinygltf::Model& model) {
   for (size_t i = 0; i < model.textures.size(); ++i) {
     const auto& texture = model.textures[i];
@@ -471,19 +463,17 @@ void loadTextures(Model& magnetModel, const tinygltf::Model& model) {
           continue;
         }
 
-
         GLuint tex = 0;
         glGenTextures(1, &tex);
         glBindTexture(GL_TEXTURE_2D, tex);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-        
         int minFilter = GL_LINEAR, magFilter = GL_LINEAR, wrapS = GL_REPEAT,
-          wrapT = GL_REPEAT;
+            wrapT = GL_REPEAT;
         if (texture.sampler != -1 &&
             validIndex(texture.sampler, model.samplers.size())) {
           const auto& sampler = model.samplers[texture.sampler];
-          
+
           if (sampler.minFilter != -1) {
             minFilter = sampler.minFilter;
           }
@@ -503,13 +493,12 @@ void loadTextures(Model& magnetModel, const tinygltf::Model& model) {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapS);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapT);
 
-        
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.width, image.height, 0,
                      format, type, &image.image.at(0));
         // don't remove, needed because some gltf minFilter's require having
         // mipmaps
         glGenerateMipmap(GL_TEXTURE_2D);
-        
+
         magnetModel.textures.insert({i, tex});
 
         glBindTexture(GL_TEXTURE_2D, 0);
@@ -536,7 +525,8 @@ std::optional<Model> Model::create(std::span<const uint8_t> bytes) {
     if (!err.empty()) {
       spdlog::error("{}", err);
     }
-
+    spdlog::error(
+      "Tinygltf could not load binary file. File should end with glb.");
     return std::nullopt;
   }
 
@@ -600,7 +590,7 @@ TempModelRenderer::ModelAndTransform::ModelAndTransform(Model model) {
 }
 
 TempModelRenderer::TempModelRenderer()
-  : archiveManager(ARCH_core, ARCH_core_KEY){ 
+  : archiveManager(ARCH_core, ARCH_core_KEY) {
   this->init();
   if (this->shader == 0) {
     spdlog::error("Failed to load shader");
@@ -640,31 +630,32 @@ unsigned TempModelRenderer::generateWhiteTexture() {
 }
 
 void TempModelRenderer::init() {
-  
   std::string vertexShaderCode, fragmentShaderCode;
   this->archiveManager.loadFile("shaders/temp.vert", vertexShaderCode);
   this->archiveManager.loadFile("shaders/temp.frag", fragmentShaderCode);
 
   shader = Shaders::generate(vertexShaderCode, fragmentShaderCode);
 }
-void TempModelRenderer::update() {
-
-}
+void TempModelRenderer::update() {}
 void TempCamera::getForward(vec3 newForward) {
-  vec3 forward = {0.f, 0.f, -1.f};
+  vec3 forward = {};
+  Magnet::GET_FORWARD(forward);
   glm_quat_rotatev(rot, forward, newForward);
 }
 void TempCamera::getRight(vec3 newRight) {
-  vec3 right = {1.f, 0.f, 0.f};
+  vec3 right = {};
+  Magnet::GET_RIGHT(right);
   glm_quat_rotatev(rot, right, newRight);
 }
 void TempCamera::getUp(vec3 newUp) {
-  vec3 up = {0.f, 1.f, 0.f};
+  vec3 up = {};
+  Magnet::GET_UP(up);
   glm_quat_rotatev(rot, up, newUp);
 }
 
 void TempCamera::lookAt(vec3 target) {
-  vec3 up = {0.f, 1.f, 0.f};
+  vec3 up = {};
+  Magnet::GET_UP(up);
   glm_quat_forp(pos, target, up, rot);
 }
 void TempCamera::setPos(vec3 pos) { glm_vec3_copy(pos, pos); }
@@ -700,14 +691,13 @@ void TempModelRenderer::draw() {
     }
 
     mat4 projection = {};
-    glm_perspective(glm_rad(45.0), width / height, 0.1f, 100.f, projection);
+    glm_perspective(glm_rad(45.0), width / height, 0.1f, 500.f, projection);
 
     mat4 mvp = {};
     glm_mat4_identity(mvp);
     glm_mat4_mul(model, mvp, mvp);
     glm_mat4_mul(view, mvp, mvp);
     glm_mat4_mul(projection, mvp, mvp);
-
 
     for (auto& model : models) {
       for (auto nodeIndex : model.model.parentNodeIndices) {
@@ -717,9 +707,9 @@ void TempModelRenderer::draw() {
     glUseProgram(0);
   }
 }
-void TempModelRenderer::recursivelyDrawNodes(const mat4 parentMVP, int nodeIndex,
-                                              Magnet::Model& model) {
-  
+void TempModelRenderer::recursivelyDrawNodes(const mat4 parentMVP,
+                                             int nodeIndex,
+                                             Magnet::Model& model) {
   if (!model.nodes.contains(nodeIndex)) {
     return;
   }
@@ -742,19 +732,14 @@ void TempModelRenderer::recursivelyDrawNodes(const mat4 parentMVP, int nodeIndex
     glm_mat4_mul(translate, modelMat, modelMat);
   }
 
-  
   mat4 mvp = {};
   {
     mat4 parentMVPCopy = {};
     memcpy(parentMVPCopy, parentMVP, sizeof(mat4));
-    
-    // Right multiply
 
     glm_mat4_mul(parentMVPCopy, modelMat, mvp);
   }
 
-
- 
   Shaders::setMat4(shader, "MVP", mvp);
   bool oldColorFormatBool = true;
   Shaders::setBool(shader, "isColorVec3ElseVec4", oldColorFormatBool);
@@ -762,12 +747,10 @@ void TempModelRenderer::recursivelyDrawNodes(const mat4 parentMVP, int nodeIndex
   if (model.meshes.contains(node.meshIndex)) {
     auto& mesh = model.meshes.at(node.meshIndex);
     for (auto& meshPrimitive : mesh.primitives) {
-
-      if (meshPrimitive.config.colorFormatIsVec3ElseVec4 !=
-          oldColorFormatBool) {
+      if (meshPrimitive.colorFormatIsVec3ElseVec4 != oldColorFormatBool) {
         Shaders::setBool(shader, "isColorVec3ElseVec4",
-                         meshPrimitive.config.colorFormatIsVec3ElseVec4);
-        oldColorFormatBool = meshPrimitive.config.colorFormatIsVec3ElseVec4;
+                         meshPrimitive.colorFormatIsVec3ElseVec4);
+        oldColorFormatBool = meshPrimitive.colorFormatIsVec3ElseVec4;
       }
 
       Shaders::setVec4(this->shader, "baseColorFactor",
@@ -780,9 +763,8 @@ void TempModelRenderer::recursivelyDrawNodes(const mat4 parentMVP, int nodeIndex
 
       Shaders::setVec3(shader, "emissiveFactor", meshPrimitive.emissiveFactor);
 
-
       glBindVertexArray(meshPrimitive.vao);
-      
+
       if (meshPrimitive.baseColorTexture) {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, *meshPrimitive.baseColorTexture);
