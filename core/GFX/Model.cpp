@@ -26,8 +26,8 @@ Make sure to always test OrientationTest.glb whenever you make modifications to
 this file
 
 Manually tested 90 sample models from
-https://github.com/KhronosGroup/glTF-Sample-Assets Models that are still not
-visible 5
+https://github.com/KhronosGroup/glTF-Sample-Assets 
+Models that are still not visible 5
  - [ ] Fix AnimatedMorphCube.glb
  - [ ] AnisotropyDiscTest.glb
  - [ ] BoxAnimated.glb
@@ -248,7 +248,7 @@ void createMesh(Model& magnetModel, const tinygltf::Model& model,
           vaa = TEX_JOINTS_0_ATTRIB_LOC;
         } else {
           spdlog::warn(
-            "Color index {} greater than 0, only COLOR_0 is currently "
+            "Joint index {} greater than 0, only JOINTS_0 is currently "
             "implemented",
             index);
         }
@@ -257,7 +257,7 @@ void createMesh(Model& magnetModel, const tinygltf::Model& model,
           vaa = TEX_WEIGHTS_0_ATTRIB_LOC;
         } else {
           spdlog::warn(
-            "Color index {} greater than 0, only COLOR_0 is currently "
+            "Weight index {} greater than 0, only Weights_0 is currently "
             "implemented",
             index);
         }
