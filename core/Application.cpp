@@ -58,6 +58,9 @@ void initialize() {
   setupLogging();
   initializeSystems();
 
+  auto& ecs = appContext->getECS();
+  AudioManager::getInstance().setupECS(&ecs);
+
   /* Main loop */
 
   while (!glfwWindowShouldClose(appContext->getWindow())) {

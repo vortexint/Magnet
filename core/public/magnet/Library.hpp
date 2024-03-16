@@ -17,8 +17,9 @@ enum class AssetStatus {
 
 enum class AssetType : uint8_t {
   Texture,
-  Model,
+  Mesh,
   Audio,
+  Model
 };
 
 enum class Mimetype : uint8_t {

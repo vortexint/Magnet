@@ -32,5 +32,7 @@ void setBool(GLuint shaderID, const char* name, bool value);
 void setInt(GLuint shaderID, const char* name, int value);
 void setFloat(GLuint shaderID, const char* name, float value);
 void setMat4(GLuint shaderID, const char* name, const mat4 matrix);
+void setVec4(GLuint shaderID, const char* name, const vec4 value);
+void setVec3(GLuint shaderID, const char* name, const vec3 value);
 
 }  // namespace Magnet::Shaders

@@ -9,6 +9,7 @@
 #include <magnet/Scene.hpp>
 #include <magnet/Shaders.hpp>
 
+#include "GFX/Model.hpp"
 #include "GFX/Window.hpp"
 #include "UI/UserInterface.hpp"
 #include "Viewport.hpp"
@@ -20,7 +21,7 @@ GLuint baseID;
 
 void setupPipeline() {
   /* OpenGL state configuration */
-  glClearColor(0.f, 0.f, 0.f, 1.0f);
+  glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
   glEnable(GL_DEPTH_TEST);
 
   /* Generate default Shader(s) */
@@ -48,14 +49,18 @@ void updatePipeline(GLFWwindow* window) {
    * is not necessary but is considered good practice */
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+  
+  TempModelRenderer::get().draw();
+
   /* Render scene */
   glUseProgram(baseID);
 
+  
   Viewport::updateFrustum(baseID);
-
 
   /* Render Native UI*/
   UI::draw();
+
 
   glfwSwapBuffers(window);
 }

@@ -51,7 +51,6 @@ void initialize(Context& context, const char* title) {
   context.setWindow(window);
 }
 
-
 const char* sourceToStr(GLenum source);
 const char* severityToStr(GLenum severity);
 const char* typeToStr(GLenum type);

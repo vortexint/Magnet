@@ -4,8 +4,7 @@ add_library(magnet::core ALIAS magnet-core)
 target_sources(magnet-core PRIVATE
   Application.cpp
   Scene.cpp
-  Components.cpp
- "UTILS/Geometry.cpp")
+  Components.cpp)
 
 add_subdirectory(GFX)   # Graphics
 add_subdirectory(SFX)   # Sound
