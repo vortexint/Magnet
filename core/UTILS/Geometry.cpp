@@ -98,6 +98,22 @@ void AABB::getCenter(vec3 center) {
   glm_aabb_center(hBox, center);
 }
 
+
+void TRS::toMat4(mat4 m) {
+  glm_mat4_identity(m);
+  mat4 rot = {};
+  glm_quat_mat4(this->rotation, rot);
+  glm_mat4_mul(rot, m, m);
+
+  mat4 scale = {};
+  glm_scale_make(scale, this->scale);
+  glm_mat4_mul(scale, m, m);
+
+  mat4 translate = {};
+  glm_translate_make(translate, this->translation);
+  glm_mat4_mul(translate, m, m);
+}
+
 void GET_FORWARD(vec3 v) {
   vec3 forward = {0.f, 0.f, -1.f};
   glm_vec3_copy(forward, v);

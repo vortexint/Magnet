@@ -26,6 +26,14 @@ struct AABB {
   void getCenter(vec3);
 };
 
+struct TRS {
+  vec3 translation;
+  versor rotation;
+  vec3 scale;
+
+  void toMat4(mat4);
+};
+
 void GET_FORWARD(vec3);
 void GET_UP(vec3);
 void GET_RIGHT(vec3);
