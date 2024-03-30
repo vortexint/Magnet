@@ -27,9 +27,9 @@ struct AABB {
 };
 
 struct TRS {
-  vec3 translation;
-  versor rotation;
-  vec3 scale;
+  vec3 translation = {0.f, 0.f, 0.f};
+  versor rotation = {0.f, 0.f, 0.f, 1.f};
+  vec3 scale = {1.f, 1.f, 1.f};
 
   void toMat4(mat4);
 };
