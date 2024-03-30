@@ -331,7 +331,7 @@ void traverseNodes(Model& magnetModel, tinygltf::Model& model,
     }
   }
 
-  Node magnetNode{node.mesh, node.children};
+  ModelNode magnetNode{node.mesh, node.children};
   if (node.matrix.size() == 16) {
     // node.matrix column major order
     mat4 mat = {
@@ -348,9 +348,9 @@ void traverseNodes(Model& magnetModel, tinygltf::Model& model,
     versor rotation = {};
     glm_mat4_quat(rotMatrix, rotation);
 
-    glm_vec3_copy(translation, magnetNode.pos);
-    glm_vec3_copy(scale, magnetNode.scale);
-    glm_vec4_copy(rotation, magnetNode.rot);
+    glm_vec3_copy(translation, magnetNode.trs.translation);
+    glm_vec3_copy(scale, magnetNode.trs.scale);
+    glm_vec4_copy(rotation, magnetNode.trs.scale);
 
   } else {
     // TODO: Assert this if (node.translation.size() == 3 && node.scale.size()
@@ -359,16 +359,16 @@ void traverseNodes(Model& magnetModel, tinygltf::Model& model,
       vec3 translation = {node.translation[0], node.translation[1],
                           node.translation[2]};
 
-      glm_vec3_copy(translation, magnetNode.pos);
+      glm_vec3_copy(translation, magnetNode.trs.translation);
     }
     if (node.rotation.size() == 4) {
       versor rotation = {node.rotation[0], node.rotation[1], node.rotation[2],
                          node.rotation[3]};
-      glm_vec4_copy(rotation, magnetNode.rot);
+      glm_vec4_copy(rotation, magnetNode.trs.rotation);
     }
     if (node.scale.size() == 3) {
       vec3 scale = {node.scale[0], node.scale[1], node.scale[2]};
-      glm_vec3_copy(scale, magnetNode.scale);
+      glm_vec3_copy(scale, magnetNode.trs.scale);
     }
     if (0 <= node.mesh && node.mesh < model.meshes.size()) {
       magnetNode.meshIndex = node.mesh;
@@ -482,6 +482,62 @@ void loadTextures(Model& magnetModel, const tinygltf::Model& model) {
     }
   }
 }
+
+void loadAnimations(Model& magnetModel, const tinygltf::Model& model) {
+
+  int i = 0;
+  for (auto& animation : model.animations) {
+    ModelAnimation magnetAnimation = {};
+    magnetAnimation.name = animation.name;
+
+    magnetAnimation.samplers.reserve(animation.samplers.size());
+    for (auto& sampler : animation.samplers) {
+      ModelAnimation::Sampler magnetSampler = {};
+
+      magnetSampler.input = sampler.input;
+      if (sampler.interpolation == "LINEAR") {
+        magnetSampler.interpolation = ModelAnimation::LINEAR;
+      } else if (sampler.interpolation == "STEP") {
+        magnetSampler.interpolation = ModelAnimation::STEP;
+      } else if (sampler.interpolation == "CUBICSPLINE") {
+        magnetSampler.interpolation = ModelAnimation::CUBICSPLINE;
+      } else {
+        spdlog::error(
+          "Invalid sampler interpolation type {}. Using STEP instead",
+          sampler.interpolation);
+
+        magnetSampler.interpolation = ModelAnimation::STEP;
+      } 
+
+      magnetAnimation.samplers.push_back(magnetSampler);
+    }
+
+    magnetAnimation.channels.reserve(animation.channels.size());
+    for (auto& channel : animation.channels) {
+      ModelAnimation::Channel magnetChannel = {};
+
+      magnetChannel.sampler = channel.sampler;
+
+      magnetChannel.target.node = channel.target_node;
+      if (channel.target_path == "translation") {
+        magnetChannel.target.path = ModelAnimation::ChannelPath::TRANSLATION;
+      } else if (channel.target_path == "rotation") {
+        magnetChannel.target.path = ModelAnimation::ChannelPath::ROTATION;
+      } else if (channel.target_path == "scale") {
+        magnetChannel.target.path = ModelAnimation::ChannelPath::SCALE;
+      } else if (channel.target_path == "weights") {
+        magnetChannel.target.path = ModelAnimation::ChannelPath::WEIGHTS;
+      } else {
+        spdlog::error("Invalid channel target path. Skipping channel");
+      }
+
+      magnetAnimation.channels.push_back(magnetChannel);
+    }
+
+    magnetModel.animations[i] = magnetAnimation;
+    ++i;
+  }
+}
 std::optional<Model> Model::create(std::span<const uint8_t> bytes) {
   tinygltf::TinyGLTF loader;
 
@@ -513,6 +569,7 @@ std::optional<Model> Model::create(std::span<const uint8_t> bytes) {
   Magnet::Model magnetModel;
 
   loadTextures(magnetModel, model);
+  loadAnimations(magnetModel, model);
 
   if (model.scenes.size() == 0) {
     spdlog::warn("Loaded model has no scenes");
@@ -613,23 +670,23 @@ void TempModelRenderer::update() {}
 void TempCamera::getForward(vec3 newForward) {
   vec3 forward = {};
   Magnet::GET_FORWARD(forward);
-  glm_quat_rotatev(rot, forward, newForward);
+  glm_quat_rotatev(trs.rotation, forward, newForward);
 }
 void TempCamera::getRight(vec3 newRight) {
   vec3 right = {};
   Magnet::GET_RIGHT(right);
-  glm_quat_rotatev(rot, right, newRight);
+  glm_quat_rotatev(trs.rotation, right, newRight);
 }
 void TempCamera::getUp(vec3 newUp) {
   vec3 up = {};
   Magnet::GET_UP(up);
-  glm_quat_rotatev(rot, up, newUp);
+  glm_quat_rotatev(trs.rotation, up, newUp);
 }
 
 void TempCamera::lookAt(vec3 target) {
   vec3 up = {};
   Magnet::GET_UP(up);
-  glm_quat_forp(pos, target, up, rot);
+  glm_quat_forp(trs.translation, target, up, trs.rotation);
 }
 void TempCamera::setPos(vec3 pos) { glm_vec3_copy(pos, pos); }
 void TempModelRenderer::draw() {
@@ -637,20 +694,7 @@ void TempModelRenderer::draw() {
 
   for (auto& modelAndTransform : models) {
     mat4 model = {};
-    glm_mat4_identity(model);
-    {
-      mat4 rot = {};
-      glm_quat_mat4(modelAndTransform.rot, rot);
-      glm_mat4_mul(rot, model, model);
-
-      mat4 scale = {};
-      glm_scale_make(scale, modelAndTransform.scale);
-      glm_mat4_mul(scale, model, model);
-
-      mat4 translate = {};
-      glm_translate_make(translate, modelAndTransform.pos);
-      glm_mat4_mul(translate, model, model);
-    }
+    modelAndTransform.trs.toMat4(model);
 
     mat4 view = {};
     {
@@ -660,7 +704,7 @@ void TempModelRenderer::draw() {
       vec3 forward = {};
       camera.getForward(forward);
 
-      glm_look(camera.pos, forward, up, view);
+      glm_look(camera.trs.translation, forward, up, view);
     }
 
     mat4 projection = {};
@@ -690,20 +734,7 @@ void TempModelRenderer::recursivelyDrawNodes(const mat4 parentMVP,
   auto& node = model.nodes.at(nodeIndex);
 
   mat4 modelMat = {};
-  glm_mat4_identity(modelMat);
-  {
-    mat4 rot = {};
-    glm_quat_mat4(node.rot, rot);
-    glm_mat4_mul(rot, modelMat, modelMat);
-
-    mat4 scale = {};
-    glm_scale_make(scale, node.scale);
-    glm_mat4_mul(scale, modelMat, modelMat);
-
-    mat4 translate = {};
-    glm_translate_make(translate, node.pos);
-    glm_mat4_mul(translate, modelMat, modelMat);
-  }
+  node.trs.toMat4(modelMat);
 
   mat4 mvp = {};
   {

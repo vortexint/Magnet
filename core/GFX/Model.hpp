@@ -4,12 +4,14 @@
 
 #include <array>
 #include <cstdint>
-#include <magnet/ArchiveManager.hpp>
 #include <memory>
 #include <optional>
 #include <span>
 #include <unordered_map>
 #include <vector>
+
+#include <magnet/ArchiveManager.hpp>
+#include <magnet/Geometry.hpp>
 
 
 // Usefull tools:
@@ -19,6 +21,7 @@
 // https://github.com/KhronosGroup/glTF-Sample-Assets
 // https://gltf-viewer.donmccurdy.com/
 // https://sandbox.babylonjs.com/
+// https://lisyarus.github.io/blog/graphics/2023/07/03/gltf-animation.html
 //
 // TODO: Implement more of PBR data
 // https://gltf-viewer-tutorial.gitlab.io/physically-based-materials/ PBR
@@ -78,17 +81,15 @@ struct MeshPrimitive {
 struct Mesh {
   std::vector<MeshPrimitive> primitives;
 };
-struct Node {
+struct ModelNode {
   int meshIndex = -1;
   std::vector<int> childIndexes;
 
-  vec3 pos = {0.f, 0.f, 0.f};
-  vec3 scale = {1.f, 1.f, 1.f};
-  vec4 rot = {0.f, 0.f, 0.f, 1.f};
+  TRS trs = {};
   bool hasChanged = false;
 };
-struct Animation {
-  enum SamplerIntepolation { LINEAR };
+struct ModelAnimation {
+  enum SamplerIntepolation { LINEAR, STEP, CUBICSPLINE };
   enum ChannelPath { TRANSLATION, ROTATION, SCALE, WEIGHTS };
   struct Sampler {
     int input;
@@ -112,10 +113,10 @@ struct Animation {
 struct Model {
   std::vector<int> parentNodeIndices;
   std::unordered_map<int, Mesh> meshes;
-  std::unordered_map<int, Node> nodes;
+  std::unordered_map<int, ModelNode> nodes;
   std::unordered_map<int, unsigned> textures;
   std::unordered_map<int, unsigned> buffers;
-  std::unordered_map<int, Animation> animations;
+  std::unordered_map<int, ModelAnimation> animations;
 
   static std::optional<Model> create(std::span<const uint8_t> mem);
 
@@ -124,12 +125,10 @@ struct Model {
 };
 
 struct AnimationState {
-  vec3 pos = {0.f, 0.f, 0.f};
-  vec3 scale = {1.f, 1.f, 1.f};
-  vec4 rot = {0.f, 0.f, 0.f, 1.f};
+  TRS trs;
 };
 struct ModelAnimationState {
-  // Maps a node to it's animation state
+  // Maps a nodeIndex to it's animation state
   std::unordered_map<int, AnimationState> states;
 };
 
@@ -137,8 +136,7 @@ struct ModelAnimationState {
 // implemented This will be removed
 
 struct TempCamera {
-  vec3 pos = {0.f, 0.f, 0.f};
-  versor rot = {0.f, 0.f, 0.f, 1.f};
+  TRS trs;
 
   void getForward(vec3);
   void getRight(vec3);
@@ -161,9 +159,7 @@ class TempModelRenderer {
 
   struct ModelAndTransform {
     Model model;
-    vec3 pos = {0.f, 1.5f, -4.f};
-    vec3 scale = {1.f, 1.f, 1.f};
-    versor rot = {0.f, 0.f, 0.f, 1.0f};
+    TRS trs;
 
     ModelAndTransform(Model);
   };
