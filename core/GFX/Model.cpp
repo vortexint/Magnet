@@ -9,33 +9,6 @@
 #include <memory>
 #include <string>
 
-// Usefull tools:
-// Use glTF: Import from GLB command to convert a glb file to gltf for debugging
-// https://marketplace.visualstudio.com/items?itemName=cesium.gltf-vscode <--
-// MAKE SURE TO USE THIS https://github.khronos.org/glTF-Validator/
-// https://github.com/KhronosGroup/glTF-Sample-Assets
-// https://gltf-viewer.donmccurdy.com/
-// https://sandbox.babylonjs.com/
-//
-// TODO: Implement more of PBR data
-// https://gltf-viewer-tutorial.gitlab.io/physically-based-materials/ PBR
-// Implementation https://github.com/Nadrin/PBR/tree/master
-
-/*
-Make sure to always test OrientationTest.glb whenever you make modifications to
-this file
-
-Manually tested 90 sample models from
-https://github.com/KhronosGroup/glTF-Sample-Assets 
-Models that are still not visible 5
- - [ ] Fix AnimatedMorphCube.glb
- - [ ] AnisotropyDiscTest.glb
- - [ ] BoxAnimated.glb
- - [ ] BoxInterleaved.glb
-are oriented
- - [ ] UnlitTest.glb
-*/
-
 namespace Magnet {
 static constexpr int VERTEX_ATTRIB_LOC = 0;
 static constexpr int NORMAL_ATTRIB_LOC = 1;
@@ -80,7 +53,7 @@ bool validIndex(int index, size_t size) { return (0 <= index && index < size); }
 
 void createMesh(Model& magnetModel, const tinygltf::Model& model,
                 const tinygltf::Mesh& mesh, int meshIndex) {
-  std::vector<Model::MeshPrimitive> primitives;
+  std::vector<MeshPrimitive> primitives;
 
   for (size_t i = 0; i < mesh.primitives.size(); ++i) {
     const tinygltf::Primitive& primitive = mesh.primitives[i];
@@ -272,7 +245,7 @@ void createMesh(Model& magnetModel, const tinygltf::Model& model,
       }
     }
 
-    Model::MeshPrimitive meshPrimitive{std::move(vbos),      vao,
+    MeshPrimitive meshPrimitive{std::move(vbos),      vao,
                                        drawElements,         drawArrays,
                                        {1.f, 1.f, 1.f, 1.f}, std::nullopt};
 
@@ -338,7 +311,7 @@ void createMesh(Model& magnetModel, const tinygltf::Model& model,
     glBindBuffer(GL_ARRAY_BUFFER, 0);
   }
 
-  magnetModel.meshes.insert({meshIndex, Model::Mesh{primitives}});
+  magnetModel.meshes.insert({meshIndex, Mesh{primitives}});
 }
 
 void traverseNodes(Model& magnetModel, tinygltf::Model& model,
@@ -358,7 +331,7 @@ void traverseNodes(Model& magnetModel, tinygltf::Model& model,
     }
   }
 
-  Model::Node magnetNode{node.mesh, node.children};
+  Node magnetNode{node.mesh, node.children};
   if (node.matrix.size() == 16) {
     // node.matrix column major order
     mat4 mat = {
