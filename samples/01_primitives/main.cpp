@@ -35,38 +35,38 @@ class App : public Magnet::Context, public Magnet::Input::Observer {
         vec3 forward = {};
         camera.getForward(forward);
         glm_vec3_scale(forward, MOVE_SPEED, forward);
-        glm_vec3_add(camera.pos, forward, camera.pos);
+        glm_vec3_add(camera.trs.translation, forward, camera.trs.translation);
       } break;
       case GLFW_KEY_A: {
         vec3 right = {};
         camera.getRight(right);
         glm_vec3_scale(right, -MOVE_SPEED, right);
-        glm_vec3_add(camera.pos, right, camera.pos);
+        glm_vec3_add(camera.trs.translation, right, camera.trs.translation);
       } break;
       case GLFW_KEY_S: {
         vec3 forward = {};
         camera.getForward(forward);
         glm_vec3_scale(forward, -MOVE_SPEED, forward);
-        glm_vec3_add(camera.pos, forward, camera.pos);
+        glm_vec3_add(camera.trs.translation, forward, camera.trs.translation);
       } break;
       case GLFW_KEY_D: {
         vec3 right = {};
         camera.getRight(right);
         glm_vec3_scale(right, MOVE_SPEED, right);
-        glm_vec3_add(camera.pos, right, camera.pos);
+        glm_vec3_add(camera.trs.translation, right, camera.trs.translation);
       } break;
       case GLFW_KEY_UP: {
         vec3 up = {};
         camera.getUp(up);
         glm_vec3_scale(up, 1 / 60.f, up);
-        glm_vec3_add(camera.pos, up, camera.pos);
+        glm_vec3_add(camera.trs.translation, up, camera.trs.translation);
 
       } break;
       case GLFW_KEY_DOWN: {
         vec3 up = {};
         camera.getUp(up);
         glm_vec3_scale(up, -1 / 60.f, up);
-        glm_vec3_add(camera.pos, up, camera.pos);
+        glm_vec3_add(camera.trs.translation, up, camera.trs.translation);
 
       } break;
     }
@@ -115,10 +115,10 @@ class App : public Magnet::Context, public Magnet::Input::Observer {
     std::vector<uint8_t> buffer;
 
     buffer.clear();
-    archiveMgr.loadFile("sphere.glb", buffer);
+    archiveMgr.loadFile("Fox.glb", buffer);
     auto modelExample = Model::create(buffer).value();
     TempModelRenderer::get().models.push_back(modelExample);
-    TempModelRenderer::get().camera.pos[2] = 12;
+    TempModelRenderer::get().camera.trs.translation[2] = 12;
 
     {
       auto* window = this->getWindow();
@@ -132,10 +132,10 @@ class App : public Magnet::Context, public Magnet::Input::Observer {
   void update() override {
     ImGui::Begin("Primitives");
     {
-      auto* cameraRot = TempModelRenderer::get().camera.rot;
+      auto* cameraRot = TempModelRenderer::get().camera.trs.rotation;
       ImGui::DragFloat4("camera rot", cameraRot, 0.01f);
       glm_vec4_divs(cameraRot, glm_vec4_norm(cameraRot), cameraRot);
-      ImGui::DragFloat3("camera pos", TempModelRenderer::get().camera.pos,
+      ImGui::DragFloat3("camera pos", TempModelRenderer::get().camera.trs.translation,
                         0.01f);
       vec3 forward = {0.f, 0.f, -1.f};
       glm_quat_rotatev(cameraRot, forward, forward);
@@ -156,10 +156,11 @@ class App : public Magnet::Context, public Magnet::Input::Observer {
       }
       if (selectedModelIndex == i) {
         auto& model = TempModelRenderer::get().models[i];
-        ImGui::DragFloat3("pos##Primitive_ModelPos", model.pos, 0.01f);
-        ImGui::DragFloat3("scale##Primitive_ModelScale", model.scale, 0.01f);
-        ImGui::DragFloat4("rot##Primitive_ModelRot", model.rot, 0.01f);
-        glm_vec4_divs(model.rot, glm_vec4_norm(model.rot), model.rot);
+        ImGui::DragFloat3("pos##Primitive_ModelPos", model.trs.translation, 0.01f);
+        ImGui::DragFloat3("scale##Primitive_ModelScale", model.trs.scale, 0.01f);
+        ImGui::DragFloat4("rot##Primitive_ModelRot", model.trs.rotation, 0.01f);
+        glm_vec4_divs(model.trs.rotation, glm_vec4_norm(model.trs.rotation),
+                      model.trs.rotation);
       }
     }
     ImGui::End();
@@ -188,7 +189,7 @@ class App : public Magnet::Context, public Magnet::Input::Observer {
 
     versor deltaCameraRot = {};
     glm_quat_from_vecs(cameraForward, newOffset, deltaCameraRot);
-    glm_quat_mul(deltaCameraRot, camera.rot, camera.rot);
+    glm_quat_mul(deltaCameraRot, camera.trs.rotation, camera.trs.rotation);
   }
 };
 
