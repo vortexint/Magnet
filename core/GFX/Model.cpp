@@ -236,6 +236,7 @@ void createMesh(Model& magnetModel, const tinygltf::Model& model,
         }
       }
       if (vaa > -1) {
+        GL_BYTE;
         glEnableVertexAttribArray(vaa);
         glVertexAttribPointer(vaa, size, accessor.componentType,
                               accessor.normalized ? GL_TRUE : GL_FALSE,
@@ -315,17 +316,25 @@ void createMesh(Model& magnetModel, const tinygltf::Model& model,
 }
 
 void traverseNodes(Model& magnetModel, tinygltf::Model& model,
-                   tinygltf::Node& node, int nodeIndex) {
+                   tinygltf::Node& node, int nodeIndex, std::vector<bool> &hasTraversedNode) {
+
+  if (hasTraversedNode[nodeIndex]) {
+    return;
+  } else {
+    hasTraversedNode[nodeIndex] = true;
+  }
+
   if (0 <= node.mesh && node.mesh < model.meshes.size()) {
     createMesh(magnetModel, model, model.meshes[node.mesh], node.mesh);
   } else if (node.mesh != -1) {  // tinygltf uses -1 a flag for none
     spdlog::error("Invalid mesh index {}", node.mesh);
   }
 
+
   for (auto childNodeIndex : node.children) {
     if (0 <= childNodeIndex && childNodeIndex < model.nodes.size()) {
       traverseNodes(magnetModel, model, model.nodes[childNodeIndex],
-                    childNodeIndex);
+                    childNodeIndex, hasTraversedNode);
     } else {
       spdlog::error("Model Error: Invalid node index {}", childNodeIndex);
     }
@@ -503,10 +512,10 @@ void loadAnimations(Model& magnetModel, const tinygltf::Model& model) {
         magnetSampler.interpolation = ModelAnimation::CUBICSPLINE;
       } else {
         spdlog::error(
-          "Invalid sampler interpolation type {}. Using STEP instead",
+          "Invalid sampler interpolation type '{}'. Using LINEAR instead",
           sampler.interpolation);
 
-        magnetSampler.interpolation = ModelAnimation::STEP;
+        magnetSampler.interpolation = ModelAnimation::LINEAR;
       } 
 
       magnetAnimation.samplers.push_back(magnetSampler);
@@ -519,6 +528,14 @@ void loadAnimations(Model& magnetModel, const tinygltf::Model& model) {
       magnetChannel.sampler = channel.sampler;
 
       magnetChannel.target.node = channel.target_node;
+      if (0 > channel.target_node ||
+          channel.target_node >= model.nodes.size()) {
+        spdlog::error(
+          "Invalid target node {}. This may be due to a unsupported extension "
+          "being used. Ignoring channel",
+          channel.target_node);
+        continue;
+      }
       if (channel.target_path == "translation") {
         magnetChannel.target.path = ModelAnimation::ChannelPath::TRANSLATION;
       } else if (channel.target_path == "rotation") {
@@ -585,14 +602,17 @@ std::optional<Model> Model::create(std::span<const uint8_t> bytes) {
       scenes.push_back(i);
     }
   }
-  for (auto& sceneIndex : scenes) {
-    for (auto& nodeIndex : model.scenes[sceneIndex].nodes) {
-      assert(0 <= nodeIndex && nodeIndex < model.nodes.size());
 
-      traverseNodes(magnetModel, model, model.nodes[nodeIndex], nodeIndex);
-      magnetModel.parentNodeIndices.push_back(nodeIndex);
-    }
+  std::vector<bool> hasTraversedNode;
+  hasTraversedNode.resize(model.nodes.size(), false);
+
+
+  for (int nodeIndex = 0; nodeIndex < model.nodes.size(); ++nodeIndex) {
+    traverseNodes(magnetModel, model, model.nodes[nodeIndex], nodeIndex,
+                  hasTraversedNode);
+    magnetModel.parentNodeIndices.push_back(nodeIndex);
   }
+
   return magnetModel;
 }
 
@@ -615,7 +635,18 @@ void Model::destroy() {
   }
 }
 
-TempModelRenderer::ModelAndTransform::ModelAndTransform(Model model) {
+
+ModelAnimationState::ModelAnimationState(const Model& magnetModel) {
+  for (auto& [nodeIndex, node] : magnetModel.nodes) {
+    this->states[nodeIndex] = {};
+    for (const auto& childNodexIndex : node.childIndexes) {
+      this->states[childNodexIndex].parent = nodeIndex;
+    }
+  }
+}
+
+TempModelRenderer::ModelData::ModelData(Model model) :
+  animation(model) {
   this->model = model;
 }
 
@@ -689,6 +720,65 @@ void TempCamera::lookAt(vec3 target) {
   glm_quat_forp(trs.translation, target, up, trs.rotation);
 }
 void TempCamera::setPos(vec3 pos) { glm_vec3_copy(pos, pos); }
+
+void TempModelRenderer::calculateAndSetJointTransforms(
+  std::span<GlmObj<mat4>> jointTransforms,
+  const Model& model,
+  const ModelAnimationState& animationState) {
+
+  mat4 transform = {};
+  glm_mat4_identity(transform);
+
+  size_t i = 0;
+
+  for (auto nodeIndex : model.parentNodeIndices) {
+    calculateAndSetJointTransforms(jointTransforms, model, animationState, transform, nodeIndex);
+  }
+}
+void TempModelRenderer::calculateAndSetJointTransforms(
+  std::span<GlmObj<mat4>> jointTransforms, const Model& model,
+  const ModelAnimationState& animationState, mat4 transform, int nodeIndex) {
+
+  // The jointTransforms is a matrix of transforms corresponding 
+  // to the joint id which is the same as the node id
+  assert(jointTransforms.size() >= model.nodes.size());
+  assert(0 <= nodeIndex && nodeIndex < model.nodes.size());
+  assert(nodeIndex < jointTransforms.size());
+
+  const auto& state = animationState.states.at(nodeIndex);
+
+  mat4 localTransform = {};
+  state.trs.toMat4(localTransform);
+
+  mat4 parentTransform = {};
+  if (0 <= state.parent && state.parent < jointTransforms.size()) {
+    glm_mat4_copy(*jointTransforms[state.parent], parentTransform);
+  } else {
+    if (state.parent != -1) {
+      spdlog::error(
+        "state.parent({}) is out of bounds and is not -1. This indicates that "
+        "there may be a bug where incorrent indices have been introduced", state.parent);
+    }
+
+    glm_mat4_identity(parentTransform);
+  }
+
+  // TODO:
+  // - [ ] CREATE TEST CASES FOR VERY SIMPLE ANIMATION STATES
+  // AND VERY SIMPLE MODEL AND PRINT OUT THE MATRICES EMITTED FROM IT
+  // COMPARE THAT TO THE MATRICES THAT ARE OUTPUTED BY THIS ALGORITHM
+  //
+  // - [ ] WRITE SOME CODE THAT TAKES THE BASE64 BINARY OF JOINTS_N 
+  // AND PRINT IT OUT TO A FILE AND INSPECT THE HEX VALUES
+
+  // The order of multiplication matters it is always Parent * local
+  glm_mat4_mul(parentTransform, localTransform, *jointTransforms[nodeIndex]);
+
+  for (auto& nodeChildIndex: model.nodes.at(nodeIndex).childIndexes) {
+    calculateAndSetJointTransforms(jointTransforms, model, animationState,
+                                   parentTransform, nodeChildIndex);
+  }
+}
 void TempModelRenderer::draw() {
   glUseProgram(shader);
 
@@ -715,6 +805,22 @@ void TempModelRenderer::draw() {
     glm_mat4_mul(model, mvp, mvp);
     glm_mat4_mul(view, mvp, mvp);
     glm_mat4_mul(projection, mvp, mvp);
+
+    
+    std::vector<GlmObj<mat4>> jointTransforms;
+    jointTransforms.resize(modelAndTransform.model.nodes.size());
+    for (size_t i = 0; i < jointTransforms.size(); ++i) {
+      glm_mat4_identity(*jointTransforms[i]);
+    }
+
+    calculateAndSetJointTransforms(jointTransforms, modelAndTransform.model,
+                                   modelAndTransform.animation);
+
+    for (size_t i = 0; i < jointTransforms.size(); ++i) {
+      std::string uniformName =
+        "globalBoneTransforms[" + std::to_string(i) + "]";
+      Shaders::setMat4(shader, uniformName.c_str(), *(jointTransforms[i]));
+    }
 
     for (auto& model : models) {
       for (auto nodeIndex : model.model.parentNodeIndices) {
@@ -810,6 +916,7 @@ void TempModelRenderer::recursivelyDrawNodes(const mat4 parentMVP,
       }
     }
   }
+
 
   for (auto nodeChildIndex : node.childIndexes) {
     recursivelyDrawNodes(mvp, nodeChildIndex, model);

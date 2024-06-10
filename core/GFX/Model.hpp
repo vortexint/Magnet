@@ -26,6 +26,8 @@
 // TODO: Implement more of PBR data
 // https://gltf-viewer-tutorial.gitlab.io/physically-based-materials/ PBR
 // Implementation https://github.com/Nadrin/PBR/tree/master
+// Animation
+// https://www.youtube.com/watch?v=da6d28IylL8
 
 /*
 Make sure to always test OrientationTest.glb whenever you make modifications to
@@ -100,6 +102,7 @@ struct ModelAnimation {
     int node;
     ChannelPath path;
   };
+  // Contains the keyframes in the animation and what the animation targets
   struct Channel {
     int sampler;
     Target target;
@@ -107,6 +110,8 @@ struct ModelAnimation {
 
   std::string name;
   std::vector<Sampler> samplers;
+
+
   std::vector<Channel> channels;
 };
 
@@ -125,9 +130,12 @@ struct Model {
 };
 
 struct AnimationState {
-  TRS trs;
+  TRS trs = {};
+  int parent = -1;
 };
 struct ModelAnimationState {
+  ModelAnimationState() = default;
+  ModelAnimationState(const Model&);
   // Maps a nodeIndex to it's animation state
   std::unordered_map<int, AnimationState> states;
 };
@@ -151,22 +159,31 @@ class TempModelRenderer {
   unsigned shader;
   unsigned whiteTexture;
 
-  void recursivelyDrawNodes(const mat4 mvp, int nodeIndex,
-                            Magnet::Model& model);
-
+  void recursivelyDrawNodes(const mat4 mvp, int nodeIndex, Model& model);
+  void calculateAndSetJointTransforms(std::span<GlmObj<mat4>> jointTransforms,
+                                     const Model& model,
+                                     const ModelAnimationState& animationState);
+  void calculateAndSetJointTransforms(std::span<GlmObj<mat4>> jointTransforms,
+                                      const Model& model,
+                                      const ModelAnimationState& animationState,
+                                      mat4 transform, int nodeIndex);
  public:
   TempCamera camera;
 
-  struct ModelAndTransform {
+  struct ModelData {
     Model model;
+    ModelAnimationState animation;
     TRS trs;
 
-    ModelAndTransform(Model);
+    void setState(const std::string& name);
+    void update(float);
+
+    ModelData(Model);
   };
 
   float width = 800.f, height = 600.f;
 
-  std::vector<ModelAndTransform> models;
+  std::vector<ModelData> models;
 
   TempModelRenderer();
   ~TempModelRenderer();

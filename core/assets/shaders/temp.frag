@@ -2,6 +2,7 @@
 in vec3 normal;
 in vec3 position;
 in vec2 texcoord;
+flat in int error;
 
 uniform sampler2D baseColorTexture;
 uniform vec4 baseColorFactor;
@@ -41,5 +42,9 @@ vec4 SRGBtoLINEAR(vec4 srgbIn) {
 out vec4 color;
 void main() {
 	// DEBUG Make sure to swap the texture with baseColorTexture 
-	color = SRGBtoLINEAR(texture(baseColorTexture, texcoord) * baseColorFactor);
+	if (error == 0) {
+		color = SRGBtoLINEAR(texture(baseColorTexture, texcoord) * baseColorFactor);
+	} else {
+		color = vec4(1,0,0,0);
+	}
 }

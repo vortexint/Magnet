@@ -100,12 +100,17 @@ function(magnet_package TARGET ASSET_DIR ARCHIVE_NAME)
     OUTPUT_VARIABLE KEY
     OUTPUT_STRIP_TRAILING_WHITESPACE
   )
+  #message(FATAL_ERROR ${ARCHIVE_PATH})
+  #file(GLOB_RECURSE ARCHIVE_DEPENDENCIES ${ARCHIVE_PATH})
+  #message(FATAL_ERROR ${ARCHIVE_DEPENDENCIES})
 
   add_custom_command(TARGET ${TARGET} PRE_BUILD
     COMMAND tar -cvf ${ARCHIVE_PATH} -C ${ASSET_DIR} .
 
     # COMMAND tar cvf - ${ASSET_DIR} | openssl enc -chacha20 -K ${KEY} > ${ARCHIVE_PATH}
     COMMENT "Created \"${ARCHIVE_PATH}\" with key \"${KEY}\""
+    BYPRODUCTS ${ARCHIVE_NAME}.magnet
+    DEPENDS ${ARCHIVE_PATH}
   )
 
   target_compile_definitions(${TARGET} PRIVATE ARCH_${ARCHIVE_NAME}="${ARCHIVE_NAME}.magnet" ARCH_${ARCHIVE_NAME}_KEY="${KEY}")

@@ -2,6 +2,7 @@
 
 #include <utility>
 #include <array>
+#include <type_traits>
 
 #include <cglm/cglm.h>
 
@@ -31,10 +32,21 @@ struct TRS {
   versor rotation = {0.f, 0.f, 0.f, 1.f};
   vec3 scale = {1.f, 1.f, 1.f};
 
-  void toMat4(mat4);
+  void toMat4(mat4) const;
 };
+
 
 void GET_FORWARD(vec3);
 void GET_UP(vec3);
 void GET_RIGHT(vec3);
+
+
+template <typename T>
+struct GlmObj {
+  T val;
+
+  T& operator*() { return val; }
+  const T& operator*() const { return val; }
+};
+
 }
