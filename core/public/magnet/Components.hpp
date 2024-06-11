@@ -32,10 +32,11 @@ struct Transform {
   vec3   position{0.0f, 0.0f, 0.0f};
   versor rotation{0.0f, 0.0f, 0.0f, 1.0f};
   vec3   scale{1.0f, 1.0f, 1.0f};
+  
+  
+  bool operator==(const Transform&) const = default;
 };
 
-bool operator==(const Transform&, const Transform&);
-bool operator!=(const Transform&, const Transform&);
 
 /* RENDERING */
 
@@ -84,10 +85,9 @@ struct Environment {
 struct Cone {
   float angleDeg = 0.f;
   float outerGain = 0.f;
-  
+
+  bool operator==(const Cone&) const = default;
 };
-bool operator==(const Cone&, const Cone&);
-bool operator!=(const Cone&, const Cone&);
 
 
 
@@ -98,10 +98,9 @@ struct Filter {
   float gain = 1.f;
   float gainHighFrequency = 1.f;
   float gainLowFrequency = 1.f;
-};
-bool operator==(const Filter&, const Filter&);
-bool operator!=(const Filter&, const Filter&);
 
+  bool operator==(const Filter&) const = default;
+};
 
 enum class AudioTag { VOICE, SOUND_EFFECTS, MUSIC, NONE };
 std::optional<AudioTag> from_string(const std::string&);
@@ -112,8 +111,6 @@ std::span<const AudioTag> allAudioTags();
 enum class AudioPlayState { REQUESTED_PLAY, PLAYING, STOPPED };
 
 class AudioSource {
-  friend bool operator==(const AudioSource&, const AudioSource&);
-  friend bool operator!=(const AudioSource&, const AudioSource&);
   friend class Magnet::AudioManager;
   friend class Magnet::ALBackend;
 
@@ -134,11 +131,10 @@ public:
 
   void playSound(const char* trackName, bool mIsSpatial = true);
   void stop();
+
+  
+  bool operator==(const AudioSource&) const = default;
 };
-
-bool operator==(const AudioSource&, const AudioSource&);
-bool operator!=(const AudioSource&, const AudioSource&);
-
 
 /* PHYSICS */
 
