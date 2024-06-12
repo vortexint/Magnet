@@ -42,7 +42,7 @@ void Texture::load(Mimetype mimetype, const uint8_t* inputData, size_t size) {
     return;
   }
 }
-
+/*
 void Model::load(Mimetype mimetype, const uint8_t* inputData, size_t size) {
   tinygltf::TinyGLTF loader;
   std::string err, warn;
@@ -50,7 +50,8 @@ void Model::load(Mimetype mimetype, const uint8_t* inputData, size_t size) {
   bool ret = false;
 
   if (mimetype == Mimetype::GLB) {
-    ret = loader.LoadBinaryFromMemory(&model, &err, &warn, inputData, size);
+    // TODO: Replace this
+    //ret = loader.LoadBinaryFromMemory(&model, &err, &warn, inputData, size);
   } else if (mimetype == Mimetype::GLTF) {
     // TODO: this
   }
@@ -64,7 +65,7 @@ void Model::load(Mimetype mimetype, const uint8_t* inputData, size_t size) {
     spdlog::warn("Model warning: {}", warn);
   }
 }
-
+*/
 void Audio::load(Mimetype mimetype, const uint8_t* inputData, size_t size) {
 }
 
@@ -74,12 +75,13 @@ Texture::~Texture() {
   free(data);
   // glDeleteTextures(1, &id);
 }
-
+/*
 Model::~Model() {
   // glDeleteVertexArrays(1, &vao);
   // glDeleteBuffers(1, &vbo);
   // glDeleteBuffers(1, &ebo);
 }
+*/
 Audio::~Audio() {
 }
 

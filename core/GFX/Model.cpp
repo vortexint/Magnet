@@ -1,3 +1,8 @@
+
+#include <memory>
+#include <string>
+#include <exception>
+
 #include <cglm/mat4.h>
 #include <glad/glad.h>
 #include <spdlog/spdlog.h>
@@ -6,8 +11,6 @@
 #include <magnet/Library.hpp>
 #include <magnet/Shaders.hpp>
 #include <magnet/Geometry.hpp>
-#include <memory>
-#include <string>
 
 // Usefull tools:
 // Use glTF: Import from GLB command to convert a glb file to gltf for debugging
@@ -78,9 +81,10 @@ int glModeCount(int mode, size_t bufferSize) {
 }
 bool validIndex(int index, size_t size) { return (0 <= index && index < size); }
 
-void createMesh(Model& magnetModel, const tinygltf::Model& model,
+void Model::createMesh(const tinygltf::Model& model,
                 const tinygltf::Mesh& mesh, int meshIndex) {
-  std::vector<Model::MeshPrimitive> primitives;
+  Model& magnetModel = *this;
+  std::vector<MeshPrimitive> primitives;
 
   for (size_t i = 0; i < mesh.primitives.size(); ++i) {
     const tinygltf::Primitive& primitive = mesh.primitives[i];
@@ -272,7 +276,7 @@ void createMesh(Model& magnetModel, const tinygltf::Model& model,
       }
     }
 
-    Model::MeshPrimitive meshPrimitive{std::move(vbos),      vao,
+    MeshPrimitive meshPrimitive{std::move(vbos),      vao,
                                        drawElements,         drawArrays,
                                        {1.f, 1.f, 1.f, 1.f}, std::nullopt};
 
@@ -338,27 +342,29 @@ void createMesh(Model& magnetModel, const tinygltf::Model& model,
     glBindBuffer(GL_ARRAY_BUFFER, 0);
   }
 
-  magnetModel.meshes.insert({meshIndex, Model::Mesh{primitives}});
+  magnetModel.meshes.insert({meshIndex, Mesh{primitives}});
 }
 
-void traverseNodes(Model& magnetModel, tinygltf::Model& model,
+void Model::traverseNodes(tinygltf::Model& model,
                    tinygltf::Node& node, int nodeIndex) {
+  Model& magnetModel = *this;
+
   if (0 <= node.mesh && node.mesh < model.meshes.size()) {
-    createMesh(magnetModel, model, model.meshes[node.mesh], node.mesh);
+    createMesh(model, model.meshes[node.mesh], node.mesh);
   } else if (node.mesh != -1) {  // tinygltf uses -1 a flag for none
     spdlog::error("Invalid mesh index {}", node.mesh);
   }
 
   for (auto childNodeIndex : node.children) {
     if (0 <= childNodeIndex && childNodeIndex < model.nodes.size()) {
-      traverseNodes(magnetModel, model, model.nodes[childNodeIndex],
+      traverseNodes(model, model.nodes[childNodeIndex],
                     childNodeIndex);
     } else {
       spdlog::error("Model Error: Invalid node index {}", childNodeIndex);
     }
   }
 
-  Model::Node magnetNode{node.mesh, node.children};
+  Node magnetNode{node.mesh, node.children};
   if (node.matrix.size() == 16) {
     // node.matrix column major order
     mat4 mat = {
@@ -413,7 +419,9 @@ struct TextureOptions {
 };
 // TODO: Go through all model.xxx[index] and add a check to make sure that index
 // is valid
-void loadTextures(Model& magnetModel, const tinygltf::Model& model) {
+void Model::loadTextures(const tinygltf::Model& model) {
+  Model& magnetModel = *this;
+
   for (size_t i = 0; i < model.textures.size(); ++i) {
     const auto& texture = model.textures[i];
     const auto& image = model.images[texture.source];
@@ -509,6 +517,34 @@ void loadTextures(Model& magnetModel, const tinygltf::Model& model) {
     }
   }
 }
+void Model::load(Library::Mimetype, const uint8_t* inputData, size_t size) {
+  tinygltf::TinyGLTF loader;
+
+  std::string err;
+  std::string warn;
+
+  std::span<const uint8_t> bytes(inputData, size);
+
+  tinygltf::Model model;
+
+  if (!loader.LoadBinaryFromMemory(&model, &err, &warn, bytes.data(),
+                                   bytes.size())) {
+    if (!warn.empty()) {
+      spdlog::warn("{}", warn);
+    }
+    if (!err.empty()) {
+      spdlog::error("{}", err);
+    }
+    spdlog::error(
+      "Tinygltf could not load binary file. File should end with glb.");
+
+    throw std::runtime_error(
+      "Tinygltf could not load binary file. File should end with glb.");
+  }
+
+  
+}
+Model::~Model() { this->destroy(); }
 std::optional<Model> Model::create(std::span<const uint8_t> bytes) {
   tinygltf::TinyGLTF loader;
 
@@ -539,7 +575,7 @@ std::optional<Model> Model::create(std::span<const uint8_t> bytes) {
 
   Magnet::Model magnetModel;
 
-  loadTextures(magnetModel, model);
+  magnetModel.loadTextures(model);
 
   if (model.scenes.size() == 0) {
     spdlog::warn("Loaded model has no scenes");
@@ -559,7 +595,7 @@ std::optional<Model> Model::create(std::span<const uint8_t> bytes) {
     for (auto& nodeIndex : model.scenes[sceneIndex].nodes) {
       assert(0 <= nodeIndex && nodeIndex < model.nodes.size());
 
-      traverseNodes(magnetModel, model, model.nodes[nodeIndex], nodeIndex);
+      magnetModel.traverseNodes(model, model.nodes[nodeIndex], nodeIndex);
       magnetModel.parentNodeIndices.push_back(nodeIndex);
     }
   }

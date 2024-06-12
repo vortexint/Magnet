@@ -55,6 +55,7 @@ struct Texture : public Asset {
   void load(Mimetype mimetype, const uint8_t* inputData, size_t size) override;
 };
 
+/*
 struct Model : public Asset {
  public:
   tinygltf::Model model;
@@ -62,6 +63,7 @@ struct Model : public Asset {
   ~Model();
   void load(Mimetype mimetype, const uint8_t* inputData, size_t size) override;
 };
+*/
 
 struct Audio : public Asset {
  public:
@@ -70,6 +72,7 @@ struct Audio : public Asset {
   ~Audio();
   void load(Mimetype mimetype, const uint8_t* inputData, size_t size) override;
 };
+
 
 using ID = uint16_t;
 constexpr size_t MaxAssets = 1024;

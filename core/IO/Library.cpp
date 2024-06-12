@@ -4,8 +4,11 @@
 #include <magnet/Library.hpp>
 
 #include "FallbackAssets.hpp"
+#include "Model.hpp"
 
 namespace Magnet::Library {
+
+AssetStatus Asset::getStatus() const { return status; }
 
 std::bitset<MaxAssets> assetSlots;
 std::array<AssetHolder, MaxAssets> assets;
@@ -55,7 +58,8 @@ ID enqueueLoad(Mimetype mimetype, std::vector<uint8_t> data) {
     case Mimetype::GLB:
     case Mimetype::GLTF:
       holder.type = AssetType::Model;
-      holder.asset = std::make_unique<Model>();
+      // DEBUG: Replace this with the actual model
+      //holder.asset = std::make_unique<Magnet::Model>();
       break;
     case Mimetype::OGG:
     case Mimetype::WAV:
@@ -69,16 +73,14 @@ ID enqueueLoad(Mimetype mimetype, std::vector<uint8_t> data) {
   assets[newID] = std::move(holder);
 
   assets[newID].status = AssetStatus::Loading;
-  assets[newID].loadFuture =
-    std::async(std::launch::async, [data = std::move(data), newID, mimetype]() {
-      try {
-        assets[newID].asset->load(mimetype, data.data(), data.size());
-        assets[newID].status = AssetStatus::Loaded;
-      } catch (const std::exception& e) {
-        assets[newID].status = AssetStatus::Error;
-        spdlog::error("Failed to load asset: {}", e.what());
-      }
-    });
+  try {
+    assets[newID].asset->load(mimetype, data.data(), data.size());
+    assets[newID].status = AssetStatus::Loaded;
+  } catch (const std::exception& e) {
+    assets[newID].status = AssetStatus::Error;
+    spdlog::error("Failed to load asset: {}", e.what());
+  }
+
 
   return newID;
 }
