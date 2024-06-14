@@ -542,7 +542,32 @@ void Model::load(Library::Mimetype, const uint8_t* inputData, size_t size) {
       "Tinygltf could not load binary file. File should end with glb.");
   }
 
-  
+  auto& magnetModel = *this;
+
+  magnetModel.loadTextures(model);
+
+  if (model.scenes.size() == 0) {
+    spdlog::warn("Loaded model has no scenes");
+  }
+
+  std::vector<int> scenes;
+  if (0 <= model.defaultScene && model.defaultScene < model.scenes.size()) {
+    scenes.push_back(model.defaultScene);
+  } else {
+    // Some gltf files don't specify a default scene
+    // in that case we render them all
+    for (int i = 0; i < model.scenes.size(); ++i) {
+      scenes.push_back(i);
+    }
+  }
+  for (auto& sceneIndex : scenes) {
+    for (auto& nodeIndex : model.scenes[sceneIndex].nodes) {
+      assert(0 <= nodeIndex && nodeIndex < model.nodes.size());
+
+      magnetModel.traverseNodes(model, model.nodes[nodeIndex], nodeIndex);
+      magnetModel.parentNodeIndices.push_back(nodeIndex);
+    }
+  }
 }
 Model::~Model() { this->destroy(); }
 std::optional<Model> Model::create(std::span<const uint8_t> bytes) {
@@ -621,7 +646,7 @@ void Model::destroy() {
   }
 }
 
-TempModelRenderer::ModelAndTransform::ModelAndTransform(Model model) {
+TempModelRenderer::ModelAndTransform::ModelAndTransform(Library::ID model) {
   this->model = model;
 }
 
@@ -637,9 +662,11 @@ TempModelRenderer::TempModelRenderer()
 }
 
 TempModelRenderer::~TempModelRenderer() {
+  /*
   for (auto& model : models) {
     model.model.destroy();
   }
+  */
   glDeleteTextures(1, &whiteTexture);
 }
 unsigned TempModelRenderer::generateWhiteTexture() {
@@ -735,9 +762,15 @@ void TempModelRenderer::draw() {
     glm_mat4_mul(view, mvp, mvp);
     glm_mat4_mul(projection, mvp, mvp);
 
-    for (auto& model : models) {
-      for (auto nodeIndex : model.model.parentNodeIndices) {
-        recursivelyDrawNodes(mvp, nodeIndex, model.model);
+    for (auto& modelAndTransform : models) {
+      
+      if (Model* model =
+            Library::getAssetWithType<Model>(modelAndTransform.model)) {
+        for (auto nodeIndex : model->parentNodeIndices) {
+          recursivelyDrawNodes(mvp, nodeIndex, *model);
+        }
+      } else {
+        assert(false);
       }
     }
     glUseProgram(0);

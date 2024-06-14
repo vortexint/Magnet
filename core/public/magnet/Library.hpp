@@ -89,7 +89,15 @@ ID enqueueLoad(Mimetype mimetype, ArchiveManager& archiveMgr,
                const std::string& filename);
 
 bool isAssetLoaded(ID id);
+
 Asset* getAsset(ID id);
+
+template <typename T>
+T* getAssetWithType(ID id) {
+  return dynamic_cast<T*>(getAsset(id));
+}
+
+
 void removeAsset(ID);
 
 }  // namespace Magnet::Library

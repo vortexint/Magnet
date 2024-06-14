@@ -58,8 +58,7 @@ ID enqueueLoad(Mimetype mimetype, std::vector<uint8_t> data) {
     case Mimetype::GLB:
     case Mimetype::GLTF:
       holder.type = AssetType::Model;
-      // DEBUG: Replace this with the actual model
-      //holder.asset = std::make_unique<Magnet::Model>();
+      holder.asset = std::make_unique<Model>();
       break;
     case Mimetype::OGG:
     case Mimetype::WAV:

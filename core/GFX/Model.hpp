@@ -115,12 +115,12 @@ public:
   TempCamera camera;
 
   struct ModelAndTransform {
-    Model model;
+    Library::ID model;
     vec3 pos = {0.f, 1.5f, -4.f};
     vec3 scale = {1.f, 1.f, 1.f};
     versor rot = {0.f, 0.f, 0.f, 1.0f};
 
-    ModelAndTransform(Model);
+    ModelAndTransform(Library::ID model);
   };
 
   float width = 800.f, height = 600.f;
