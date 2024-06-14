@@ -116,8 +116,8 @@ class App : public Magnet::Context, public Magnet::Input::Observer {
 
     buffer.clear();
     archiveMgr.loadFile("sphere.glb", buffer);
-    auto modelExample = Model::create(buffer).value();
-    TempModelRenderer::get().models.push_back(modelExample);
+    Library::ID modelId = Library::enqueueLoad(Library::Mimetype::GLB, buffer);
+    TempModelRenderer::get().models.push_back(modelId);
     TempModelRenderer::get().camera.pos[2] = 12;
 
     {
